@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'reset_password.dart';
 
 class EmailVerificationPage extends StatefulWidget {
   const EmailVerificationPage({super.key});
@@ -16,6 +17,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   bool _canResend = false;
   Timer? _timer;
 
+  bool _showOtpDialog = false; // Flag to show OTP
+
   @override
   void initState() {
     super.initState();
@@ -23,29 +26,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     _startTimer();
   }
 
-  // Generate random 4-digit OTP
   void _generateOtp() {
     final random = Random();
     _generatedOtp = (1000 + random.nextInt(9000)).toString();
-    debugPrint('Generated OTP (simulated email): $_generatedOtp');
+    debugPrint('Generated OTP: $_generatedOtp');
 
-    // Show OTP in dialog safely
-    final currentContext = context;
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (!mounted) return;
-      showDialog(
-        context: currentContext,
-        builder: (_) => AlertDialog(
-          title: const Text('OTP Sent'),
-          content: Text('Your OTP is $_generatedOtp'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(currentContext),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+    // Instead of showing dialog async, set a flag to show it in build
+    setState(() {
+      _showOtpDialog = true;
     });
   }
 
@@ -56,7 +44,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
-
       if (_secondsRemaining > 0) {
         setState(() => _secondsRemaining--);
       } else {
@@ -94,7 +81,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   void _verifyOTP() {
     String enteredOtp = _getOTP();
-
     if (enteredOtp.length != 4) {
       _showSnack('Please enter all 4 digits');
       return;
@@ -103,7 +89,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     if (enteredOtp == _generatedOtp) {
       _showSnack('Email verified successfully!');
       Future.delayed(const Duration(seconds: 1), () {
-        _popNavigation();
+        if (mounted) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const ResetPasswordPage()));
+        }
       });
     } else {
       _showSnack('Invalid OTP. Please try again.');
@@ -129,189 +117,216 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  void _popNavigation() {
-    if (mounted) {
-      Navigator.pop(context);
-    }
-  }
-
   @override
   void dispose() {
     _timer?.cancel();
     super.dispose();
   }
 
-  // ===================== UI =====================
+  // ================= UI =====================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            // Header
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: _popNavigation,
-                  ),
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        'OTP',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 48),
-                ],
-              ),
-            ),
-            // Main content
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
+            Column(
+              children: [
+                // Header
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
                     children: [
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Email verification',
-                        style:
-                            TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        onPressed: () => Navigator.pop(context),
                       ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Enter the verification code we send you on:\nDalehic ****@gmail.com',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      const Expanded(
+                        child: Center(
+                          child: Text(
+                            'OTP',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          ),
+                        ),
                       ),
-                      const SizedBox(height: 32),
-                      // OTP boxes
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          4,
-                          (index) => Container(
-                            width: 56,
-                            height: 56,
-                            margin:
-                                const EdgeInsets.symmetric(horizontal: 8),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Colors.grey.shade300, width: 2),
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.grey.shade50,
-                            ),
-                            child: Center(
-                              child: Text(
-                                _otpDigits[index],
-                                style: const TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
+                      const SizedBox(width: 48),
+                    ],
+                  ),
+                ),
+                // Main content
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 24),
+                          const Text(
+                            'Email verification',
+                            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Enter the verification code we send you on:\nDalehic ****@gmail.com',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                          const SizedBox(height: 32),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              4,
+                              (index) => Container(
+                                width: 56,
+                                height: 56,
+                                margin: const EdgeInsets.symmetric(horizontal: 8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey.shade300, width: 2),
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.grey.shade50,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    _otpDigits[index],
+                                    style: const TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      // Resend link
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Didn't receive code? ",
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                "Didn't receive code? ",
+                                style: TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                              GestureDetector(
+                                onTap: _canResend ? _resendOTP : null,
+                                child: Text(
+                                  'Resend',
+                                  style: TextStyle(
+                                    color: _canResend ? const Color(0xFFFF8C00) : Colors.grey,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          GestureDetector(
-                            onTap: _canResend ? _resendOTP : null,
-                            child: Text(
-                              'Resend',
-                              style: TextStyle(
-                                color: _canResend
-                                    ? const Color(0xFFFF8C00)
-                                    : Colors.grey,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.schedule, color: Colors.grey, size: 20),
+                              const SizedBox(width: 8),
+                              Text(
+                                _formatTime(_secondsRemaining),
+                                style: const TextStyle(color: Colors.grey, fontSize: 14),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFFF8C00),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              onPressed: _verifyOTP,
+                              child: const Text(
+                                'Continue',
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white),
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      // Timer
+                    ),
+                  ),
+                ),
+                // Keypad
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      _keypadRow(['1', '2', '3'], ['ABC', 'DEF', null]),
+                      _keypadRow(['4', '5', '6'], ['GHI', 'JKL', 'MNO']),
+                      _keypadRow(['7', '8', '9'], ['PQRS', 'TUV', 'WXYZ']),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          const Icon(Icons.schedule,
-                              color: Colors.grey, size: 20),
-                          const SizedBox(width: 8),
-                          Text(
-                            _formatTime(_secondsRemaining),
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 14),
-                          ),
+                          _buildKeypadButton('0'),
+                          _buildBackspaceButton(),
                         ],
-                      ),
-                      const SizedBox(height: 32),
-                      // Continue button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF8C00),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          onPressed: _verifyOTP,
-                          child: const Text(
-                            'Continue',
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white),
-                          ),
-                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
-            // Keypad
-            Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _keypadRow(['1', '2', '3'], ['ABC', 'DEF']),
-                  _keypadRow(['4', '5', '6'], ['GHI', 'JKL', 'MNO']),
-                  _keypadRow(['7', '8', '9'], ['PQRS', 'TUV', 'WXYZ']),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildKeypadButton('0'),
-                      _buildBackspaceButton(),
-                    ],
+            // OTP dialog overlay (warning-free)
+            if (_showOtpDialog)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black45,
+                  child: Center(
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Text(
+                              'OTP Sent',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Your OTP is $_generatedOtp',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () {
+                                setState(() {
+                                  _showOtpDialog = false;
+                                });
+                              },
+                              child: const Text('OK'),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ],
+                ),
               ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Row _keypadRow(List<String> numbers, [List<String>? letters]) {
+  Row _keypadRow(List<String> numbers, [List<String?>? letters]) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children:
-          List.generate(numbers.length, (i) => _buildKeypadButton(numbers[i], letters?[i])),
+      children: List.generate(numbers.length, (i) {
+        String? letter;
+        if (letters != null && i < letters.length) letter = letters[i];
+        return _buildKeypadButton(numbers[i], letter);
+      }),
     );
   }
 
@@ -331,8 +346,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           children: [
             Text(number, style: const TextStyle(fontSize: 20)),
             if (letters != null)
-              Text(letters,
-                  style: const TextStyle(fontSize: 10, color: Colors.grey)),
+              Text(letters, style: const TextStyle(fontSize: 10, color: Colors.grey)),
           ],
         ),
       ),
