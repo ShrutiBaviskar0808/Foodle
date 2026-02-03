@@ -38,9 +38,13 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   }
 
   void _onKeyPressed(String value) {
+    print('Key pressed: $value');
     for (int i = 0; i < 4; i++) {
       if (_otpDigits[i].isEmpty) {
-        setState(() => _otpDigits[i] = value);
+        setState(() {
+          _otpDigits[i] = value;
+          print('OTP updated: ${_otpDigits.join()}');
+        });
         break;
       }
     }
@@ -160,13 +164,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                             height: 56,
                             margin: const EdgeInsets.symmetric(horizontal: 8),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
+                              border: Border.all(color: Colors.grey.shade300, width: 2),
                               borderRadius: BorderRadius.circular(8),
+                              color: Colors.grey.shade50,
                             ),
                             child: Center(
                               child: Text(
                                 _otpDigits[index],
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
                               ),
                             ),
                           ),
