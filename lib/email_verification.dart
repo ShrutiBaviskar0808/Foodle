@@ -8,7 +8,7 @@ class EmailVerificationPage extends StatefulWidget {
 }
 
 class _EmailVerificationPageState extends State<EmailVerificationPage> {
-  final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
+  final List<String> _otpDigits = ['', '', '', ''];
   late int _secondsRemaining = 540; // 9 minutes in seconds
   bool _canResend = false;
 
@@ -39,8 +39,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   void _onKeyPressed(String value) {
     for (int i = 0; i < 4; i++) {
-      if (_controllers[i].text.isEmpty) {
-        setState(() => _controllers[i].text = value);
+      if (_otpDigits[i].isEmpty) {
+        setState(() => _otpDigits[i] = value);
         break;
       }
     }
@@ -48,15 +48,15 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   void _onBackspace() {
     for (int i = 3; i >= 0; i--) {
-      if (_controllers[i].text.isNotEmpty) {
-        setState(() => _controllers[i].text = '');
+      if (_otpDigits[i].isNotEmpty) {
+        setState(() => _otpDigits[i] = '');
         break;
       }
     }
   }
 
   String _getOTP() {
-    return _controllers.map((c) => c.text).join();
+    return _otpDigits.join();
   }
 
   void _verifyOTP() {
@@ -85,8 +85,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   }
 
   void _clearOTP() {
-    for (var controller in _controllers) {
-      controller.clear();
+    for (int i = 0; i < 4; i++) {
+      _otpDigits[i] = '';
     }
     setState(() {});
   }
@@ -165,7 +165,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                             ),
                             child: Center(
                               child: Text(
-                                _controllers[index].text,
+                                _otpDigits[index],
                                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -328,9 +328,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   @override
   void dispose() {
-    for (var controller in _controllers) {
-      controller.dispose();
-    }
     super.dispose();
   }
 }
