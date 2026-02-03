@@ -10,6 +10,7 @@ class EmailVerificationPage extends StatefulWidget {
 class _EmailVerificationPageState extends State<EmailVerificationPage> {
   final List<TextEditingController> _controllers = List.generate(4, (_) => TextEditingController());
   late int _secondsRemaining = 540; // 9 minutes in seconds
+  bool _canResend = false;
 
   @override
   void initState() {
@@ -18,10 +19,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   }
 
   void _startTimer() {
+    _secondsRemaining = 540;
+    _canResend = false;
     Future.delayed(const Duration(seconds: 1), () {
       if (_secondsRemaining > 0 && mounted) {
         setState(() => _secondsRemaining--);
         _startTimer();
+      } else if (_secondsRemaining == 0 && mounted) {
+        setState(() => _canResend = true);
       }
     });
   }
@@ -47,6 +52,53 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
         setState(() => _controllers[i].text = '');
         break;
       }
+    }
+  }
+
+  String _getOTP() {
+    return _controllers.map((c) => c.text).join();
+  }
+
+  void _verifyOTP() {
+    String otp = _getOTP();
+    if (otp.length != 4) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter all 4 digits')),
+      );
+      return;
+    }
+
+    // Simulate OTP verification (replace with actual API call)
+    if (otp == '1234') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email verified successfully!')),
+      );
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pop(context);
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid OTP. Please try again.')),
+      );
+      _clearOTP();
+    }
+  }
+
+  void _clearOTP() {
+    for (var controller in _controllers) {
+      controller.clear();
+    }
+    setState(() {});
+  }
+
+  void _resendOTP() {
+    if (_canResend) {
+      // Simulate API call to resend OTP
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('OTP resent successfully!')),
+      );
+      _clearOTP();
+      _startTimer();
     }
   }
 
@@ -130,12 +182,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                             style: TextStyle(color: Colors.grey, fontSize: 14),
                           ),
                           GestureDetector(
-                            onTap: () {
-                              // Handle resend
-                            },
-                            child: const Text(
+                            onTap: _canResend ? _resendOTP : null,
+                            child: Text(
                               'Resend',
-                              style: TextStyle(color: Color(0xFFFF8C00), fontSize: 14, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                color: _canResend ? const Color(0xFFFF8C00) : Colors.grey,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -165,7 +219,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                               borderRadius: BorderRadius.circular(30),
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: _verifyOTP,
                           child: const Text(
                             'Continue',
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),

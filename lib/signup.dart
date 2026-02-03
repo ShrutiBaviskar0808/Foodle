@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'login.dart';
+import 'email_verification.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -106,7 +107,21 @@ class _SignupPageState extends State<SignupPage> {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
-                  onPressed: _agree ? () {} : null,
+                  onPressed: _agree
+                      ? () {
+                          if (_emailCtrl.text.isNotEmpty &&
+                              _userCtrl.text.isNotEmpty &&
+                              _passCtrl.text.isNotEmpty) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const EmailVerificationPage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Please fill all fields')),
+                            );
+                          }
+                        }
+                      : null,
                   child: const Text('Register', style: TextStyle(fontSize: 16)),
                 ),
               ),
