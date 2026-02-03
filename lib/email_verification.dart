@@ -10,7 +10,7 @@ class EmailVerificationPage extends StatefulWidget {
 }
 
 class _EmailVerificationPageState extends State<EmailVerificationPage> {
-  final List<String> _otpDigits = ['', '', '', ''];
+  late List<String> _otpDigits;
 
   int _secondsRemaining = 540;
   bool _canResend = false;
@@ -21,6 +21,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   @override
   void initState() {
     super.initState();
+    _otpDigits = ['', '', '', ''];
     _generateOtp();
     _startTimer();
   }
@@ -62,10 +63,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
 
   // ⌨️ Keypad input
   void _onKeyPressed(String value) {
+    if (_otpDigits.length < 4) return;
     if (_otpDigits.every((d) => d.isNotEmpty)) return;
 
     for (int i = 0; i < 4; i++) {
-      if (_otpDigits[i].isEmpty) {
+      if (i < _otpDigits.length && _otpDigits[i].isEmpty) {
         setState(() {
           _otpDigits[i] = value;
         });
@@ -75,8 +77,10 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   }
 
   void _onBackspace() {
+    if (_otpDigits.length < 4) return;
+    
     for (int i = 3; i >= 0; i--) {
-      if (_otpDigits[i].isNotEmpty) {
+      if (i < _otpDigits.length && _otpDigits[i].isNotEmpty) {
         setState(() => _otpDigits[i] = '');
         break;
       }
@@ -198,7 +202,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                             ),
                             child: Center(
                               child: Text(
-                                _otpDigits[index],
+                                (index < _otpDigits.length) ? _otpDigits[index] : '',
                                 style: const TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
