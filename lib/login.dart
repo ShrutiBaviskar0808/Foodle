@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'signup.dart';
+import 'forgot_password.dart';
 import 'email_verification.dart';
 
 class LoginPage extends StatefulWidget {
@@ -81,7 +82,9 @@ class _LoginPageState extends State<LoginPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ForgotPasswordPage()));
+                  },
                   child: const Text('Forgot password?', style: TextStyle(color: brandColor)),
                 ),
               ),
