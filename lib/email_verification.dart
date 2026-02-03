@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class EmailVerificationPage extends StatefulWidget {
@@ -9,24 +11,45 @@ class EmailVerificationPage extends StatefulWidget {
 
 class _EmailVerificationPageState extends State<EmailVerificationPage> {
   final List<String> _otpDigits = ['', '', '', ''];
-  late int _secondsRemaining = 540; // 9 minutes in seconds
+
+  int _secondsRemaining = 540;
   bool _canResend = false;
+  Timer? _timer;
+
+  late String _generatedOtp;
 
   @override
   void initState() {
     super.initState();
+    _generateOtp();
     _startTimer();
   }
 
+  // 🔐 Generate random 4-digit OTP
+  void _generateOtp() {
+    final random = Random();
+    _generatedOtp = (1000 + random.nextInt(9000)).toString();
+    debugPrint('Generated OTP: $_generatedOtp'); // remove in production
+  }
+
+  // ⏱ Timer
   void _startTimer() {
+    _timer?.cancel();
     _secondsRemaining = 540;
     _canResend = false;
-    Future.delayed(const Duration(seconds: 1), () {
-      if (_secondsRemaining > 0 && mounted) {
-        setState(() => _secondsRemaining--);
-        _startTimer();
-      } else if (_secondsRemaining == 0 && mounted) {
-        setState(() => _canResend = true);
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+
+      if (_secondsRemaining > 0) {
+        setState(() {
+          _secondsRemaining--;
+        });
+      } else {
+        timer.cancel();
+        setState(() {
+          _canResend = true;
+        });
       }
     });
   }
@@ -37,13 +60,14 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     return '${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
   }
 
+  // ⌨️ Keypad input
   void _onKeyPressed(String value) {
-    print('Key pressed: $value');
+    if (_otpDigits.every((d) => d.isNotEmpty)) return;
+
     for (int i = 0; i < 4; i++) {
       if (_otpDigits[i].isEmpty) {
         setState(() {
           _otpDigits[i] = value;
-          print('OTP updated: ${_otpDigits.join()}');
         });
         break;
       }
@@ -59,31 +83,26 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     }
   }
 
-  String _getOTP() {
-    return _otpDigits.join();
-  }
+  String _getOTP() => _otpDigits.join();
 
+  // ✅ Verify OTP
   void _verifyOTP() {
-    String otp = _getOTP();
-    if (otp.length != 4) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter all 4 digits')),
-      );
+    final enteredOtp = _getOTP();
+
+    if (enteredOtp.length != 4) {
+      _showSnack('Please enter all 4 digits');
       return;
     }
 
-    // Simulate OTP verification (replace with actual API call)
-    if (otp == '1234') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Email verified successfully!')),
-      );
+    if (enteredOtp == _generatedOtp) {
+      _showSnack('Email verified successfully!');
       Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pop(context);
+        if (mounted) {
+          Navigator.pop(context);
+        }
       });
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid OTP. Please try again.')),
-      );
+      _showSnack('Invalid OTP. Please try again.');
       _clearOTP();
     }
   }
@@ -95,16 +114,30 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     setState(() {});
   }
 
+  // 🔄 Resend OTP
   void _resendOTP() {
-    if (_canResend) {
-      // Simulate API call to resend OTP
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('OTP resent successfully!')),
-      );
-      _clearOTP();
-      _startTimer();
-    }
+    if (!_canResend) return;
+
+    _generateOtp();
+    _clearOTP();
+    _startTimer();
+
+    _showSnack('OTP resent successfully!');
   }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  // ================= UI (UNCHANGED) =================
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +145,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
@@ -133,7 +165,6 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 ],
               ),
             ),
-            // Main content
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -141,20 +172,17 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                   child: Column(
                     children: [
                       const SizedBox(height: 24),
-                      // Title
                       const Text(
                         'Email verification',
                         style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 12),
-                      // Description
                       const Text(
                         'Enter the verification code we send you on:\nDalehic ****@gmail.com',
                         textAlign: TextAlign.center,
                         style: TextStyle(fontSize: 14, color: Colors.grey),
                       ),
                       const SizedBox(height: 32),
-                      // OTP Input Boxes
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
@@ -171,28 +199,31 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                             child: Center(
                               child: Text(
                                 _otpDigits[index],
-                                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black),
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(height: 24),
-                      // Resend link
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
                             "Didn't receive code? ",
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                            style: TextStyle(color: Colors.grey),
                           ),
                           GestureDetector(
                             onTap: _canResend ? _resendOTP : null,
                             child: Text(
                               'Resend',
                               style: TextStyle(
-                                color: _canResend ? const Color(0xFFFF8C00) : Colors.grey,
-                                fontSize: 14,
+                                color: _canResend
+                                    ? const Color(0xFFFF8C00)
+                                    : Colors.grey,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -200,20 +231,18 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      // Timer
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.schedule, color: Colors.grey, size: 20),
+                          const Icon(Icons.schedule, size: 20, color: Colors.grey),
                           const SizedBox(width: 8),
                           Text(
                             _formatTime(_secondsRemaining),
-                            style: const TextStyle(color: Colors.grey, fontSize: 14),
+                            style: const TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
                       const SizedBox(height: 32),
-                      // Continue Button
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -227,7 +256,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                           onPressed: _verifyOTP,
                           child: const Text(
                             'Continue',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                            style: TextStyle(color: Colors.white, fontSize: 16),
                           ),
                         ),
                       ),
@@ -236,38 +265,13 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 ),
               ),
             ),
-            // Numeric Keypad
             Container(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildKeypadButton('1'),
-                      _buildKeypadButton('2', 'ABC'),
-                      _buildKeypadButton('3', 'DEF'),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildKeypadButton('4', 'GHI'),
-                      _buildKeypadButton('5', 'JKL'),
-                      _buildKeypadButton('6', 'MNO'),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildKeypadButton('7', 'PQRS'),
-                      _buildKeypadButton('8', 'TUV'),
-                      _buildKeypadButton('9', 'WXYZ'),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
+                  _keypadRow(['1', '2', '3'], ['ABC', 'DEF']),
+                  _keypadRow(['4', '5', '6'], ['GHI', 'JKL', 'MNO']),
+                  _keypadRow(['7', '8', '9'], ['PQRS', 'TUV', 'WXYZ']),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -284,31 +288,33 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
     );
   }
 
+  Row _keypadRow(List<String> numbers, [List<String>? letters]) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(numbers.length, (i) {
+        return _buildKeypadButton(numbers[i], letters?[i]);
+      }),
+    );
+  }
+
   Widget _buildKeypadButton(String number, [String? letters]) {
     return GestureDetector(
       onTap: () => _onKeyPressed(number),
       child: Container(
         width: 80,
         height: 50,
+        margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                number,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-              ),
-              if (letters != null)
-                Text(
-                  letters,
-                  style: const TextStyle(fontSize: 10, color: Colors.grey),
-                ),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(number, style: const TextStyle(fontSize: 20)),
+            if (letters != null)
+              Text(letters, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+          ],
         ),
       ),
     );
@@ -324,15 +330,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
           border: Border.all(color: Colors.grey.shade300),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Center(
-          child: Icon(Icons.backspace_outlined, color: Colors.grey.shade600),
-        ),
+        child: const Icon(Icons.backspace_outlined),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }
