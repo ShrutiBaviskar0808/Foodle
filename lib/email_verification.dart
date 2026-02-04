@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'reset_password.dart';
+import 'home.dart';
 
 class EmailVerificationPage extends StatefulWidget {
   const EmailVerificationPage({super.key});
@@ -90,7 +90,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       _showSnack('Email verified successfully!');
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const ResetPasswordPage()));
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
         }
       });
     } else {
