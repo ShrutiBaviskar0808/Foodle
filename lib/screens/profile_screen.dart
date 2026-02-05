@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../forgot_password.dart';
 import '../reset_password.dart';
 import 'user_profile_screen.dart';
+import 'personal_data_screen.dart';
+import 'add_account_screen.dart';
+import 'request_deletion_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -38,6 +41,18 @@ class ProfileScreen extends StatelessWidget {
               ),
               _buildMenuItem(
                 context,
+                'Personal Data',
+                Icons.data_usage,
+                () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PersonalDataScreen())),
+              ),
+              _buildMenuItem(
+                context,
+                'Add Another Account',
+                Icons.add_circle_outline,
+                () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AddAccountScreen())),
+              ),
+              _buildMenuItem(
+                context,
                 'Reset Password',
                 Icons.lock_reset,
                 () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ResetPasswordPage())),
@@ -47,6 +62,18 @@ class ProfileScreen extends StatelessWidget {
                 'Forgot Password',
                 Icons.help_outline,
                 () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ForgotPasswordPage())),
+              ),
+              _buildMenuItem(
+                context,
+                'Request Account Deletion',
+                Icons.delete_forever,
+                () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestDeletionScreen())),
+              ),
+              _buildMenuItem(
+                context,
+                'Sign Out',
+                Icons.logout,
+                () => _signOut(context),
               ),
             ],
           ),
@@ -65,6 +92,29 @@ class ProfileScreen extends StatelessWidget {
         onTap: onTap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         tileColor: Colors.grey[50],
+      ),
+    );
+  }
+
+  void _signOut(BuildContext context) async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+            },
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
