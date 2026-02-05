@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login.dart';
 import 'signup.dart';
-import 'home.dart';
+import 'main_navigation.dart';
 import 'email_verification.dart';
 import 'otp_verification.dart';
 import 'forgot_password.dart';
@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
         '/onboarding': (context) => const OnboardingPage(),
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
-        '/home': (context) => const HomePage(),
+        '/home': (context) => const MainNavigation(),
         '/email_verification': (context) => const EmailVerificationPage(),
         '/otp': (context) => const OTPVerificationPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
