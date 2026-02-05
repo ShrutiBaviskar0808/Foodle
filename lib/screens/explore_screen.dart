@@ -24,6 +24,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
         title: const Text('Allergies'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SafeArea(
         child: Column(

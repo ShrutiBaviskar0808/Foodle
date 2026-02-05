@@ -48,6 +48,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: const Text('Food Preferences'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SafeArea(
         child: ListView(
