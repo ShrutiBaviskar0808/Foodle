@@ -145,7 +145,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         child: Center(
                           child: Text(
                             'OTP',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),

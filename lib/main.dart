@@ -4,6 +4,8 @@ import 'signup.dart';
 import 'home.dart';
 import 'email_verification.dart';
 import 'otp_verification.dart';
+import 'forgot_password.dart';
+import 'reset_password.dart';
 import 'server_test.dart';
 import 'debug_page.dart';
 
@@ -30,6 +32,8 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/email_verification': (context) => const EmailVerificationPage(),
         '/otp': (context) => const OTPVerificationPage(),
+        '/forgot-password': (context) => const ForgotPasswordPage(),
+        '/reset-password': (context) => const ResetPasswordPage(),
         '/test': (context) => const ServerTestPage(),
         '/debug': (context) => const DebugPage(),
       },

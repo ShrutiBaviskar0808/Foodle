@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $servername = "localhost";
     $username = "root";
     $password = "";
-    $dbname = "foodle"; // Change this to your actual database name
+    $dbname = "food_app"; // Correct database name
     
     try {
         $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
@@ -27,18 +27,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         
         // Check if user exists
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, name, email, password, is_verified FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
         
         if ($user) {
-            // Verify password (check both hashed and plain text for compatibility)
-            if (password_verify($password_input, $user['password']) || $user['password'] === $password_input) {
-                // Login successful - go directly to home (no OTP for login)
+            // Check password (both hashed and plain text)
+            $password_match = false;
+            
+            // Try password_verify first (for hashed passwords)
+            if (password_verify($password_input, $user['password'])) {
+                $password_match = true;
+            }
+            // Try direct comparison (for plain text passwords)
+            else if ($user['password'] === $password_input) {
+                $password_match = true;
+            }
+            
+            if ($password_match) {
+                // Login successful
                 echo json_encode([
                     'success' => true,
                     'message' => 'Login successful',
-                    'user_id' => $user['id']
+                    'user_id' => $user['id'],
+                    'user_name' => $user['name']
                 ]);
             } else {
                 echo json_encode(['success' => false, 'message' => 'Invalid password']);

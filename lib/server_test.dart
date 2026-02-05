@@ -36,19 +36,48 @@ class _ServerTestPageState extends State<ServerTestPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Server Test')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: SafeArea(
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: _testConnection,
-              child: const Text('Test Server Connection'),
+            // Custom app bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Server Test',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
+            // Content
             Expanded(
-              child: SingleChildScrollView(
-                child: Text(_result),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: _testConnection,
+                      child: const Text('Test Server Connection'),
+                    ),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Text(_result),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
