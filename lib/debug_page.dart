@@ -136,16 +136,38 @@ class _DebugPageState extends State<DebugPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Debug & Troubleshoot'),
-        backgroundColor: const Color(0xFFFF8C00),
-        foregroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Custom app bar
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              color: const Color(0xFFFF8C00),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'Debug & Troubleshoot',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48),
+                ],
+              ),
+            ),
+            // Content
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -225,6 +247,10 @@ class _DebugPageState extends State<DebugPage> {
                     Text('FOR EMULATOR:', style: TextStyle(fontWeight: FontWeight.bold)),
                     Text('• Use 10.0.2.2 as IP address'),
                     Text('• Make sure XAMPP is running'),
+                  ],
+                ),
+              ),
+            ),
                   ],
                 ),
               ),
