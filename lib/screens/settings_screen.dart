@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'privacy_policy_screen.dart';
+import 'terms_conditions_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -79,8 +81,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSectionHeader('OTHER'),
             const SizedBox(height: 10),
             
-            _buildNavigationTile('Privacy Policy', () {}),
-            _buildNavigationTile('Terms and Conditions', () {}),
+            _buildNavigationTile('Privacy Policy', () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()));
+            }),
+            _buildNavigationTile('Terms and Conditions', () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsConditionsScreen()));
+            }),
           ],
         ),
       ),
