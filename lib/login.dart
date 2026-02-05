@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'config.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +14,7 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   Future<void> _login() async {
     if (_emailController.text.trim().isEmpty || _passwordController.text.isEmpty) {
@@ -31,53 +31,138 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
       final response = await http.post(
-        Uri.parse(AppConfig.loginEndpoint),
-        headers: AppConfig.jsonHeaders,
+        Uri.parse('http://192.168.137.1/login.php'),
+        headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text.trim(),
           'password': _passwordController.text,
         }),
-      ).timeout(AppConfig.requestTimeout);
+      ).timeout(const Duration(seconds: 10));
 
       if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
 
       if (response.statusCode == 200) {
         try {
           final result = json.decode(response.body);
           
-          // Handle different response formats
-          bool success = result['success'] == true || result['success'] == 'true';
-          String message = result['message'] ?? result['error'] ?? '';
-          
-          if (success) {
+          if (result['success'] == true) {
+            // User exists and password is correct - go to home
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Login successful!')),
+              const SnackBar(
+                content: Text('Login successful!'),
+                backgroundColor: Colors.green,
+              ),
             );
             Navigator.pushReplacementNamed(context, '/home');
           } else {
-            // Show specific error message from server
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message.isEmpty ? 'Login failed' : message)),
-            );
+            // Check if it's a "user not found" error
+            String message = result['message'] ?? result['error'] ?? 'Login failed';
+            
+            if (message.toLowerCase().contains('not found') || 
+                message.toLowerCase().contains('does not exist') ||
+                message.toLowerCase().contains('user not registered')) {
+              // User doesn't exist - show register message
+              _showRegisterDialog();
+            } else {
+              // Other error (wrong password, etc.)
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           }
         } catch (jsonError) {
-          // If response is not JSON, show raw response
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Server error: ${response.body}')),
+            SnackBar(
+              content: Text('Server error: ${response.body}'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Server error: ${response.statusCode}')),
+          SnackBar(
+            content: Text('Server error: ${response.statusCode}'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Connection failed: ${e.toString()}')),
-      );
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        
+        if (e is TimeoutException) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Connection timeout. Please check your internet connection.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Connection failed: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
+  }
+
+  void _showRegisterDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text(
+            'Account Not Found',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'This email is not registered. Please register yourself to create a new account.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, '/signup');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text(
+                'Register Now',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -120,6 +205,7 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 8),
               TextField(
                 controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
                   hintText: 'Enter Email',
                   hintStyle: const TextStyle(color: Colors.grey),
@@ -199,7 +285,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _login,
+                  onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFF8C00),
                     shape: RoundedRectangleBorder(
@@ -207,14 +293,16 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Sign In',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Sign In',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 32),
