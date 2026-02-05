@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'login.dart';
+import 'signup.dart';
+import 'home.dart';
+import 'email_verification.dart';
+import 'otp_verification.dart';
+import 'server_test.dart';
+import 'debug_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +22,17 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF8C00)),
       ),
-      home: const OnboardingPage(),
+      initialRoute: '/onboarding',
+      routes: {
+        '/onboarding': (context) => const OnboardingPage(),
+        '/login': (context) => const LoginPage(),
+        '/signup': (context) => const SignupPage(),
+        '/home': (context) => const HomePage(),
+        '/email_verification': (context) => const EmailVerificationPage(),
+        '/otp': (context) => const OTPVerificationPage(),
+        '/test': (context) => const ServerTestPage(),
+        '/debug': (context) => const DebugPage(),
+      },
     );
   }
 }
@@ -59,16 +75,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
         _currentIndex++;
       });
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-      );
+      Navigator.of(context).pushReplacementNamed('/login');
     }
   }
 
   void _skipPage() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-    );
+    Navigator.of(context).pushReplacementNamed('/login');
   }
 
   @override
