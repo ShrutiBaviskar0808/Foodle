@@ -69,7 +69,7 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.137.1/signup.php'),
+        Uri.parse('http://192.168.137.1/signup_debug.php'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'name': _nameController.text.trim(),
