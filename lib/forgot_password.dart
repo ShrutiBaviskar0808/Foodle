@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'email_verification.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
@@ -24,9 +23,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       return;
     }
 
-    // Simulate sending reset code and navigate to verification
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reset code sent (simulated)')));
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const EmailVerificationPage()));
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid email address')));
+      return;
+    }
+
+    // Simulate sending reset code and navigate to reset password
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Reset code sent to your email')));
+    Navigator.pushNamed(context, '/reset-password');
   }
 
   @override
