@@ -44,37 +44,34 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   Widget build(BuildContext context) {
     const brandColor = Color(0xFFFD8C00);
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Reset Password'),
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Expanded(
-                    child: Center(
-                      child: Text('Reset Password', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-                  const SizedBox(width: 48),
-                ],
+              const SizedBox(height: 20),
+              const Text(
+                'Create New Password',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
-              const Text('Reset Password', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               const Text(
                 'Your new password must be different from the previously used password',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
+              const SizedBox(height: 30),
 
-              const SizedBox(height: 24),
-              const Text('New Password'),
+              const Text('New Password', style: TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               TextField(
                 controller: _newCtrl,
@@ -82,8 +79,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 decoration: InputDecoration(
                   hintText: 'Enter new password',
                   filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  fillColor: Colors.grey[50],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.orange),
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureNew ? Icons.visibility_off : Icons.visibility),
                     onPressed: () => setState(() => _obscureNew = !_obscureNew),
@@ -92,10 +100,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 8),
-              const Text('Must be at least 8 character', style: TextStyle(color: Colors.grey)),
+              const Text('Must be at least 8 characters', style: TextStyle(color: Colors.grey, fontSize: 12)),
 
-              const SizedBox(height: 16),
-              const Text('Confirm Password'),
+              const SizedBox(height: 20),
+              const Text('Confirm Password', style: TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 8),
               TextField(
                 controller: _confirmCtrl,
@@ -103,8 +111,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 decoration: InputDecoration(
                   hintText: 'Confirm password',
                   filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  fillColor: Colors.grey[50],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.orange),
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility),
                     onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
@@ -113,19 +132,19 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 8),
-              const Text('Both password must match', style: TextStyle(color: Colors.grey)),
+              const Text('Both passwords must match', style: TextStyle(color: Colors.grey, fontSize: 12)),
 
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: brandColor,
+                    backgroundColor: _isValid ? brandColor : Colors.grey,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: _isValid ? _verifyAccount : null,
-                  child: const Text('Verify Account', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: const Text('Reset Password', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ),
             ],
