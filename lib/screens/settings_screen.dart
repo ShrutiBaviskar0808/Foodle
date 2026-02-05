@@ -9,11 +9,9 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool darkMode = false;
-  bool notifications = true;
-  bool dietaryReminders = true;
-  String preferredCuisine = 'Italian';
-  double spiceLevel = 3.0;
+  bool pushNotifications = false;
+  bool location = true;
+  String selectedLanguage = 'English';
 
   @override
   void initState() {
@@ -24,28 +22,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      darkMode = prefs.getBool('dark_mode') ?? false;
-      notifications = prefs.getBool('notifications') ?? true;
-      dietaryReminders = prefs.getBool('dietary_reminders') ?? true;
-      preferredCuisine = prefs.getString('preferred_cuisine') ?? 'Italian';
-      spiceLevel = prefs.getDouble('spice_level') ?? 3.0;
+      pushNotifications = prefs.getBool('push_notifications') ?? false;
+      location = prefs.getBool('location') ?? true;
+      selectedLanguage = prefs.getString('language') ?? 'English';
     });
   }
 
   Future<void> _saveSettings() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('dark_mode', darkMode);
-    await prefs.setBool('notifications', notifications);
-    await prefs.setBool('dietary_reminders', dietaryReminders);
-    await prefs.setString('preferred_cuisine', preferredCuisine);
-    await prefs.setDouble('spice_level', spiceLevel);
+    await prefs.setBool('push_notifications', pushNotifications);
+    await prefs.setBool('location', location);
+    await prefs.setString('language', selectedLanguage);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Food Preferences'),
+        title: const Text('Settings'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         leading: IconButton(
@@ -57,33 +51,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            _buildSectionHeader('🍽️ Dining Preferences'),
-            _buildCuisineSelector(),
-            _buildSpiceLevelSlider(),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
+            _buildSectionHeader('PROFILE'),
+            const SizedBox(height: 10),
             
-            _buildSectionHeader('🔔 Notifications'),
-            _buildSwitchTile('Meal Reminders', notifications, (value) {
-              setState(() => notifications = value);
-              _saveSettings();
-            }),
-            _buildSwitchTile('Dietary Alerts', dietaryReminders, (value) {
-              setState(() => dietaryReminders = value);
-              _saveSettings();
-            }),
-            const SizedBox(height: 30),
+            _buildSwitchTile(
+              'Push Notification',
+              pushNotifications,
+              (value) {
+                setState(() => pushNotifications = value);
+                _saveSettings();
+              },
+            ),
             
-            _buildSectionHeader('🎨 Appearance'),
-            _buildSwitchTile('Dark Mode', darkMode, (value) {
-              setState(() => darkMode = value);
-              _saveSettings();
-            }),
-            const SizedBox(height: 30),
+            _buildSwitchTile(
+              'Location',
+              location,
+              (value) {
+                setState(() => location = value);
+                _saveSettings();
+              },
+            ),
             
-            _buildSectionHeader('📊 Food Stats'),
-            _buildStatCard('Meals Planned', '47'),
-            _buildStatCard('Allergies Tracked', '6'),
-            _buildStatCard('Favorite Places', '12'),
+            _buildLanguageTile(),
+            
+            const SizedBox(height: 30),
+            _buildSectionHeader('OTHER'),
+            const SizedBox(height: 10),
+            
+            _buildNavigationTile('Privacy Policy', () {}),
+            _buildNavigationTile('Terms and Conditions', () {}),
           ],
         ),
       ),
@@ -92,105 +89,111 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
+      padding: const EdgeInsets.only(left: 5, bottom: 10),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
-      ),
-    );
-  }
-
-  Widget _buildCuisineSelector() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Preferred Cuisine', style: TextStyle(fontWeight: FontWeight.w500)),
-            const SizedBox(height: 10),
-            DropdownButton<String>(
-              value: preferredCuisine,
-              isExpanded: true,
-              items: ['Italian', 'Chinese', 'Mexican', 'Indian', 'Japanese', 'American']
-                  .map((cuisine) => DropdownMenuItem(value: cuisine, child: Text('🍴 $cuisine')))
-                  .toList(),
-              onChanged: (value) {
-                setState(() => preferredCuisine = value!);
-                _saveSettings();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSpiceLevelSlider() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Spice Tolerance: ${_getSpiceEmoji(spiceLevel)}', 
-                 style: const TextStyle(fontWeight: FontWeight.w500)),
-            Slider(
-              value: spiceLevel,
-              min: 1,
-              max: 5,
-              divisions: 4,
-              thumbColor: Colors.orange,
-              activeColor: Colors.orange,
-              onChanged: (value) {
-                setState(() => spiceLevel = value);
-                _saveSettings();
-              },
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text('😌 Mild', style: TextStyle(fontSize: 12)),
-                Text('🔥 Extreme', style: TextStyle(fontSize: 12)),
-              ],
-            ),
-          ],
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: Colors.grey[600],
+          letterSpacing: 0.5,
         ),
       ),
     );
   }
 
   Widget _buildSwitchTile(String title, bool value, Function(bool) onChanged) {
-    return Card(
-      child: SwitchListTile(
-        title: Text(title),
-        value: value,
-        thumbColor: WidgetStateProperty.all(Colors.orange),
-        onChanged: onChanged,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 5),
+      child: ListTile(
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+        ),
+        trailing: Switch(
+          value: value,
+          onChanged: onChanged,
+          thumbColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.orange;
+            }
+            return Colors.grey[400];
+          }),
+          trackColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.orange.withValues(alpha: 0.3);
+            }
+            return Colors.grey[300];
+          }),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 5),
       ),
     );
   }
 
-  Widget _buildStatCard(String label, String value) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildLanguageTile() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 5),
+      child: ListTile(
+        title: const Text(
+          'Language',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-            Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange)),
+            Text(
+              selectedLanguage,
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
           ],
+        ),
+        onTap: () => _showLanguageDialog(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 5),
+      ),
+    );
+  }
+
+  Widget _buildNavigationTile(String title, VoidCallback onTap) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 5),
+      child: ListTile(
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
+        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 5),
+      ),
+    );
+  }
+
+  void _showLanguageDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Language'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: ['English', 'Spanish', 'French', 'German'].map((language) {
+            return ListTile(
+              title: Text(language),
+              leading: Icon(
+                selectedLanguage == language ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                color: selectedLanguage == language ? Colors.orange : Colors.grey,
+              ),
+              onTap: () {
+                setState(() => selectedLanguage = language);
+                _saveSettings();
+                Navigator.pop(context);
+              },
+            );
+          }).toList(),
         ),
       ),
     );
-  }
-
-  String _getSpiceEmoji(double level) {
-    if (level <= 1.5) return '😌 Mild';
-    if (level <= 2.5) return '🌶️ Medium';
-    if (level <= 3.5) return '🔥 Hot';
-    if (level <= 4.5) return '🌋 Very Hot';
-    return '💀 Extreme';
   }
 }
