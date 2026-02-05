@@ -33,8 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT)]);
         $userId = $pdo->lastInsertId();
         
-        // Generate OTP
-        $otp = rand(100000, 999999);
+        // Generate 6-digit OTP
+        $otp = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
         
         // Insert OTP into verify_otp table
         $stmt = $pdo->prepare("INSERT INTO verify_otp (user_id, email, otp) VALUES (?, ?, ?)");
