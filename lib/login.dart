@@ -39,14 +39,6 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    final passwordError = _validatePassword(_passwordController.text);
-    if (passwordError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(passwordError)),
-      );
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
@@ -286,7 +278,9 @@ class _LoginPageState extends State<LoginPage> {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/forgot-password');
+                  },
                   child: const Text(
                     'Forgot password?',
                     style: TextStyle(
