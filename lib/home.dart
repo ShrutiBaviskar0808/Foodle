@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'screens/family_screen.dart';
+import 'screens/favorite_places_screen.dart';
+import 'screens/friends_screen.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -9,7 +12,7 @@ class HomePage extends StatelessWidget {
       child: Column(
       children: [
         Container(
-          height: 280,
+          height: 200,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -71,7 +74,7 @@ class HomePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Family', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () {}, child: const Text('View All >', style: TextStyle(color: Colors.orange))),
+                    TextButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen())), child: const Text('View All >', style: TextStyle(color: Colors.orange))),
                   ],
                 ),
                 const SizedBox(height: 15),
@@ -89,7 +92,7 @@ class HomePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Favorite Places', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () {}, child: const Text('View All >', style: TextStyle(color: Colors.orange))),
+                    TextButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen())), child: const Text('View All >', style: TextStyle(color: Colors.orange))),
                   ],
                 ),
                 const SizedBox(height: 15),
@@ -111,7 +114,7 @@ class HomePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Friends', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () {}, child: const Text('View All >', style: TextStyle(color: Colors.orange))),
+                    TextButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen())), child: const Text('View All >', style: TextStyle(color: Colors.orange))),
                   ],
                 ),
                 const SizedBox(height: 15),
