@@ -54,7 +54,7 @@ class ARIdentificationScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Column(
@@ -83,7 +83,7 @@ class ARIdentificationScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
+                color: Colors.white.withValues(alpha: 0.95),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -146,7 +146,7 @@ class ARIdentificationScreen extends StatelessWidget {
               children: [
                 _buildARControl(Icons.flash_off, 'Flash'),
                 _buildARControl(Icons.center_focus_strong, 'Focus'),
-                _buildARControl(Icons.3d_rotation, 'AR Mode'),
+                _buildARControl(Icons.threed_rotation, 'AR Mode'),
                 _buildARControl(Icons.camera_alt, 'Capture'),
               ],
             ),
@@ -163,7 +163,7 @@ class ARIdentificationScreen extends StatelessWidget {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(25),
           ),
           child: Icon(icon, color: Colors.white, size: 24),
@@ -393,7 +393,7 @@ class GeologicalMapScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                     spreadRadius: 1,
                     blurRadius: 4,
                   ),
@@ -497,7 +497,7 @@ class GeologicalMapScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
+                color: Colors.grey.withValues(alpha: 0.3),
                 spreadRadius: 1,
                 blurRadius: 2,
               ),
@@ -730,10 +730,10 @@ class RockHuntingScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -749,7 +749,7 @@ class RockHuntingScreen extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Icon(Icons.emoji_events, color: color, size: 24),
@@ -801,7 +801,7 @@ class RockHuntingScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
