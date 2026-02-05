@@ -51,10 +51,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       ),
                       title: Text(allergy['name']),
                       subtitle: Text('Severity: ${allergy['severity']}'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteAllergy(index),
-                      ),
+                      onTap: () => _showEditDeleteDialog(index),
                     ),
                   );
                 },
@@ -68,6 +65,86 @@ class _ExploreScreenState extends State<ExploreScreen> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add, color: Colors.white),
       ),
+    );
+  }
+
+  void _showEditDeleteDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(allergies[index]['name']),
+        content: const Text('What would you like to do?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _editAllergy(index);
+            },
+            child: const Text('Edit'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteAllergy(index);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editAllergy(int index) {
+    String name = allergies[index]['name'];
+    String severity = allergies[index]['severity'];
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Allergy'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: const InputDecoration(labelText: 'Allergy Name'),
+                controller: TextEditingController(text: name),
+                onChanged: (value) => name = value,
+              ),
+              const SizedBox(height: 15),
+              DropdownButtonFormField<String>(
+                initialValue: severity,
+                decoration: const InputDecoration(labelText: 'Severity'),
+                items: ['Low', 'Medium', 'High'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (value) => severity = value!,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Color color = severity == 'High' ? Colors.red : 
+                            severity == 'Medium' ? Colors.orange : Colors.yellow[700]!;
+                setState(() {
+                  allergies[index]['name'] = name;
+                  allergies[index]['severity'] = severity;
+                  allergies[index]['color'] = color;
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 

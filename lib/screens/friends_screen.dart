@@ -44,10 +44,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       ),
                       title: Text(friend['name']),
                       subtitle: Text(friend['preferences']),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _deleteFriend(index),
-                      ),
+                      onTap: () => _showEditDeleteDialog(index),
                     ),
                   );
                 },
@@ -61,6 +58,76 @@ class _FriendsScreenState extends State<FriendsScreen> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add, color: Colors.white),
       ),
+    );
+  }
+
+  void _showEditDeleteDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(friends[index]['name']),
+        content: const Text('What would you like to do?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _editFriend(index);
+            },
+            child: const Text('Edit'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteFriend(index);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editFriend(int index) {
+    String name = friends[index]['name'];
+    String preferences = friends[index]['preferences'];
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Friend'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: const InputDecoration(labelText: 'Friend Name'),
+                controller: TextEditingController(text: name),
+                onChanged: (value) => name = value,
+              ),
+              TextField(
+                decoration: const InputDecoration(labelText: 'Food Preferences'),
+                controller: TextEditingController(text: preferences),
+                onChanged: (value) => preferences = value,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  friends[index]['name'] = name;
+                  friends[index]['preferences'] = preferences;
+                });
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
     );
   }
 
