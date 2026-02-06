@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'add_place_screen.dart';
 
 class FavoritePlacesScreen extends StatefulWidget {
@@ -10,13 +12,30 @@ class FavoritePlacesScreen extends StatefulWidget {
 }
 
 class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
-  List<Map<String, dynamic>> places = [
-    {'name': 'Costas Inn', 'color': Colors.green, 'cuisine': 'Seafood'},
-    {'name': "Angie's", 'color': Colors.blue, 'cuisine': 'American'},
-    {'name': "Koco's Pub", 'color': Colors.yellow[700], 'cuisine': 'Bar & Grill'},
-    {'name': 'BK Lobster', 'color': Colors.brown, 'cuisine': 'Seafood'},
-    {'name': 'Oyster', 'color': Colors.orange, 'cuisine': 'Seafood'},
-  ];
+  List<Map<String, dynamic>> places = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPlaces();
+  }
+
+  Future<void> _loadPlaces() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? placesJson = prefs.getString('favorite_places');
+    if (placesJson != null) {
+      final List<dynamic> decoded = json.decode(placesJson);
+      setState(() {
+        places = decoded.map((item) => Map<String, dynamic>.from(item)).toList();
+      });
+    }
+  }
+
+  Future<void> _savePlaces() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String encoded = json.encode(places);
+    await prefs.setString('favorite_places', encoded);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +107,7 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
           places[result['index']] = result['data'];
         });
       }
+      await _savePlaces();
     }
   }
 
@@ -102,6 +122,7 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
       setState(() {
         places.add(result['data']);
       });
+      await _savePlaces();
     }
   }
 
