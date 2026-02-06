@@ -190,11 +190,12 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
             Center(
               child: GestureDetector(
                 onTap: _showImageSourceDialog,
@@ -329,6 +330,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
