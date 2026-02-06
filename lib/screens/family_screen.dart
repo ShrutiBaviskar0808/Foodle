@@ -22,7 +22,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
 
   Future<void> _loadFamilyMembers() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? membersJson = prefs.getString('family_members');
+    final String? membersJson = prefs.getString('all_members');
     if (membersJson != null) {
       final List<dynamic> decoded = json.decode(membersJson);
       setState(() {
@@ -52,7 +52,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
     for (var familyMember in familyMembers) {
       final index = allMembers.indexWhere((m) => 
         m['name'] == familyMember['name'] && 
-        m['email'] == familyMember['email']);
+        m['dob'] == familyMember['dob']);
       if (index != -1) {
         allMembers[index] = familyMember;
       } else {
@@ -62,9 +62,6 @@ class _FamilyScreenState extends State<FamilyScreen> {
     // Save all members
     final String encoded = json.encode(allMembers);
     await prefs.setString('all_members', encoded);
-    // Also save family members separately for quick access
-    final String familyEncoded = json.encode(familyMembers);
-    await prefs.setString('family_members', familyEncoded);
   }
 
   @override
@@ -239,6 +236,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
         familyMembers[result['index']] = result['data'];
       });
       await _saveFamilyMembers();
+      await _loadFamilyMembers();
     }
   }
 
@@ -252,6 +250,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
         familyMembers.add(result['data']);
       });
       await _saveFamilyMembers();
+      await _loadFamilyMembers();
     }
   }
 

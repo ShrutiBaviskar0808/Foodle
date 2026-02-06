@@ -67,7 +67,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Friends'),
+        title: const Text('My Circle'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
