@@ -18,20 +18,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $data = json_decode($json, true);
         
         $food_id = $data['food_id'] ?? '';
-        $store_name = $data['store_name'] ?? '';
-        $food_item = $data['food_item'] ?? '';
-        $preferences = $data['preferences'] ?? '';
-        $mood = $data['mood'] ?? '';
+        $food_name = $data['food_name'] ?? '';
         $notes = $data['notes'] ?? '';
-        $image_path = $data['image_path'] ?? '';
+        $visibility = $data['visibility'] ?? 'private';
         
         if (empty($food_id)) {
             echo json_encode(['success' => false, 'message' => 'Food ID required']);
             exit;
         }
         
-        $stmt = $pdo->prepare("UPDATE foods SET store_name = ?, food_item = ?, preferences = ?, mood = ?, notes = ?, image_path = ? WHERE id = ?");
-        $stmt->execute([$store_name, $food_item, $preferences, $mood, $notes, $image_path, $food_id]);
+        $stmt = $pdo->prepare("UPDATE foods SET food_name = ?, notes = ?, visibility = ? WHERE id = ?");
+        $stmt->execute([$food_name, $notes, $visibility, $food_id]);
         
         echo json_encode(['success' => true, 'message' => 'Food updated successfully']);
         

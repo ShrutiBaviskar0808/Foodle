@@ -17,19 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
         
-        $member_id = $data['member_id'] ?? '';
-        $user_id = $data['user_id'] ?? '';
+        $food_id = $data['food_id'] ?? '';
         
-        if (empty($member_id) || empty($user_id)) {
-            echo json_encode(['success' => false, 'message' => 'Member ID and user ID required']);
+        if (empty($food_id)) {
+            echo json_encode(['success' => false, 'message' => 'Food ID required']);
             exit;
         }
         
-        $stmt = $pdo->prepare("SELECT * FROM foods WHERE member_id = ? AND created_by_user_id = ? ORDER BY created_at DESC");
-        $stmt->execute([$member_id, $user_id]);
-        $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare("DELETE FROM foods WHERE id = ?");
+        $stmt->execute([$food_id]);
         
-        echo json_encode(['success' => true, 'foods' => $foods]);
+        echo json_encode(['success' => true, 'message' => 'Food deleted successfully']);
         
     } catch(PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);

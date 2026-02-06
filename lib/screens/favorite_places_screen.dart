@@ -73,15 +73,15 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
                       leading: CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                        backgroundImage: place['imagePath'] != null
-                            ? FileImage(File(place['imagePath']))
+                        backgroundImage: (place['image_path'] != null && place['image_path'].toString().isNotEmpty)
+                            ? FileImage(File(place['image_path']))
                             : null,
-                        child: place['imagePath'] == null
+                        child: (place['image_path'] == null || place['image_path'].toString().isEmpty)
                             ? const Icon(Icons.restaurant, color: Colors.orange)
                             : null,
                       ),
-                      title: Text(place['storeName'] ?? place['name'] ?? 'Unknown'),
-                      subtitle: Text(place['foodItem'] ?? place['cuisine'] ?? ''),
+                      title: Text(place['store_name'] ?? 'Unknown'),
+                      subtitle: Text(place['food_item'] ?? ''),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () => _showEditDeleteDialog(index),
                     ),

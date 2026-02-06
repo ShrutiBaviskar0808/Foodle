@@ -9,10 +9,10 @@ class AppConfig {
   static const String signupEndpoint = '$baseUrl/test_signup.php';
   static const String verifyOtpEndpoint = '$baseUrl/test_verify_otp.php';
   static const String testEndpoint = '$baseUrl/test.php';
-  static const String addFoodEndpoint = '$baseUrl/add_food.php';
-  static const String getFoodsEndpoint = '$baseUrl/get_foods.php';
-  static const String updateFoodEndpoint = '$baseUrl/update_food.php';
-  static const String deleteFoodEndpoint = '$baseUrl/delete_food.php';
+  static const String addFoodEndpoint = '$baseUrl/add_favorite_food.php';
+  static const String getFoodsEndpoint = '$baseUrl/get_favorite_foods.php';
+  static const String updateFoodEndpoint = '$baseUrl/update_favorite_food.php';
+  static const String deleteFoodEndpoint = '$baseUrl/delete_favorite_food.php';
   
   // Request timeout
   static const Duration requestTimeout = Duration(seconds: 15);

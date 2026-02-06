@@ -17,21 +17,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
         
-        $user_id = $data['user_id'] ?? '';
-        $store_name = $data['store_name'] ?? '';
-        $food_item = $data['food_item'] ?? '';
-        $preferences = $data['preferences'] ?? '';
-        $mood = $data['mood'] ?? '';
+        $member_id = $data['member_id'] ?? '';
+        $food_name = $data['food_name'] ?? '';
         $notes = $data['notes'] ?? '';
-        $image_path = $data['image_path'] ?? '';
+        $visibility = $data['visibility'] ?? 'private';
+        $user_id = $data['user_id'] ?? '';
         
-        if (empty($user_id) || empty($store_name)) {
-            echo json_encode(['success' => false, 'message' => 'User ID and store name required']);
+        if (empty($member_id) || empty($food_name) || empty($user_id)) {
+            echo json_encode(['success' => false, 'message' => 'Member ID, food name, and user ID required']);
             exit;
         }
         
-        $stmt = $pdo->prepare("INSERT INTO foods (user_id, store_name, food_item, preferences, mood, notes, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$user_id, $store_name, $food_item, $preferences, $mood, $notes, $image_path]);
+        $stmt = $pdo->prepare("INSERT INTO foods (member_id, food_name, notes, visibility, created_by_user_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
+        $stmt->execute([$member_id, $food_name, $notes, $visibility, $user_id]);
         
         echo json_encode(['success' => true, 'message' => 'Food added successfully', 'food_id' => $pdo->lastInsertId()]);
         

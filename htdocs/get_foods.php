@@ -17,16 +17,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
         
-        $member_id = $data['member_id'] ?? '';
         $user_id = $data['user_id'] ?? '';
         
-        if (empty($member_id) || empty($user_id)) {
-            echo json_encode(['success' => false, 'message' => 'Member ID and user ID required']);
+        if (empty($user_id)) {
+            echo json_encode(['success' => false, 'message' => 'User ID required']);
             exit;
         }
         
-        $stmt = $pdo->prepare("SELECT * FROM foods WHERE member_id = ? AND created_by_user_id = ? ORDER BY created_at DESC");
-        $stmt->execute([$member_id, $user_id]);
+        $stmt = $pdo->prepare("SELECT * FROM foods WHERE user_id = ? ORDER BY created_at DESC");
+        $stmt->execute([$user_id]);
         $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         echo json_encode(['success' => true, 'foods' => $foods]);
