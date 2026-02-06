@@ -118,7 +118,7 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('${AppConfig.baseUrl}/verify_otp_database.php'),
+        Uri.parse('${AppConfig.baseUrl}/verify_otp.php'),
         headers: AppConfig.jsonHeaders,
         body: json.encode({
           'email': _emailController.text.trim(),
