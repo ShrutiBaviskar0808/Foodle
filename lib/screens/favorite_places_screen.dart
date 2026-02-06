@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import '../config.dart';
 import 'add_place_screen.dart';
 
 class FavoritePlacesScreen extends StatefulWidget {
@@ -22,20 +24,31 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
 
   Future<void> _loadPlaces() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? placesJson = prefs.getString('favorite_places');
-    if (placesJson != null) {
-      final List<dynamic> decoded = json.decode(placesJson);
-      setState(() {
-        places = decoded.map((item) => Map<String, dynamic>.from(item)).toList();
-      });
+    final userId = prefs.getInt('user_id');
+    
+    if (userId == null) {
+      return;
+    }
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getFoodsEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final data = json.decode(response.body);
+      if (data['success']) {
+        setState(() {
+          places = (data['foods'] as List).map((item) => Map<String, dynamic>.from(item)).toList();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading places: $e');
     }
   }
 
-  Future<void> _savePlaces() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String encoded = json.encode(places);
-    await prefs.setString('favorite_places', encoded);
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,16 +111,7 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
       ),
     );
     if (result != null) {
-      if (result['delete'] == true) {
-        setState(() {
-          places.removeAt(result['index']);
-        });
-      } else {
-        setState(() {
-          places[result['index']] = result['data'];
-        });
-      }
-      await _savePlaces();
+      await _loadPlaces();
     }
   }
 
@@ -118,11 +122,8 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
       context,
       MaterialPageRoute(builder: (context) => const AddPlaceScreen()),
     );
-    if (result != null && result['data'] != null) {
-      setState(() {
-        places.add(result['data']);
-      });
-      await _savePlaces();
+    if (result != null) {
+      await _loadPlaces();
     }
   }
 

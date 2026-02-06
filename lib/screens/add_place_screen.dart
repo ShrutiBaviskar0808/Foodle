@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'dart:convert';
+import '../config.dart';
 
 class AddPlaceScreen extends StatefulWidget {
   final Map<String, dynamic>? place;
@@ -21,17 +25,20 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final _notesController = TextEditingController();
   
   String? _imagePath;
+  int? _foodId;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.place != null) {
-      _storeNameController.text = widget.place!['storeName'] ?? '';
-      _foodItemController.text = widget.place!['foodItem'] ?? '';
+      _foodId = widget.place!['id'];
+      _storeNameController.text = widget.place!['store_name'] ?? widget.place!['storeName'] ?? '';
+      _foodItemController.text = widget.place!['food_item'] ?? widget.place!['foodItem'] ?? '';
       _preferencesController.text = widget.place!['preferences'] ?? '';
       _moodController.text = widget.place!['mood'] ?? '';
       _notesController.text = widget.place!['notes'] ?? '';
-      _imagePath = widget.place!['imagePath'];
+      _imagePath = widget.place!['image_path'] ?? widget.place!['imagePath'];
     }
   }
 
@@ -80,22 +87,111 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     );
   }
 
-  void _savePlace() {
+  void _savePlace() async {
     if (_formKey.currentState!.validate()) {
-      final placeData = {
-        'storeName': _storeNameController.text,
-        'foodItem': _foodItemController.text,
-        'preferences': _preferencesController.text,
-        'mood': _moodController.text,
-        'notes': _notesController.text,
-        'imagePath': _imagePath,
-      };
-      Navigator.pop(context, {'data': placeData, 'index': widget.index});
+      setState(() => _isLoading = true);
+      
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+      
+      if (userId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not logged in')),
+        );
+        setState(() => _isLoading = false);
+        return;
+      }
+      
+      try {
+        final data = {
+          'user_id': userId,
+          'store_name': _storeNameController.text,
+          'food_item': _foodItemController.text,
+          'preferences': _preferencesController.text,
+          'mood': _moodController.text,
+          'notes': _notesController.text,
+          'image_path': _imagePath ?? '',
+        };
+        
+        final response = _foodId == null
+            ? await http.post(
+                Uri.parse(AppConfig.addFoodEndpoint),
+                headers: AppConfig.jsonHeaders,
+                body: json.encode(data),
+              ).timeout(AppConfig.requestTimeout)
+            : await http.post(
+                Uri.parse(AppConfig.updateFoodEndpoint),
+                headers: AppConfig.jsonHeaders,
+                body: json.encode({...data, 'food_id': _foodId}),
+              ).timeout(AppConfig.requestTimeout);
+        
+        final result = json.decode(response.body);
+        
+        if (result['success']) {
+          Navigator.pop(context, {'success': true});
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result['message'] ?? 'Failed to save')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      } finally {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  void _deletePlace() {
-    Navigator.pop(context, {'delete': true, 'index': widget.index});
+  void _deletePlace() async {
+    if (_foodId == null) return;
+    
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Place'),
+        content: const Text('Are you sure you want to delete this place?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirm != true) return;
+    
+    setState(() => _isLoading = true);
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.deleteFoodEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'food_id': _foodId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final result = json.decode(response.body);
+      
+      if (result['success']) {
+        Navigator.pop(context, {'success': true});
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Failed to delete')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -175,12 +271,14 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
               SizedBox(
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _savePlace,
+                  onPressed: _isLoading ? null : _savePlace,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text('Save', style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Save', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ),
               if (widget.place != null) ...[
@@ -188,7 +286,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                 SizedBox(
                   height: 50,
                   child: OutlinedButton(
-                    onPressed: _deletePlace,
+                    onPressed: _isLoading ? null : _deletePlace,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
