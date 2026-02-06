@@ -13,12 +13,17 @@ class StoneDetailScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         title: Text(stoneName),
         elevation: 0,
+        actions: [
+          IconButton(icon: const Icon(Icons.bookmark_border), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.share), onPressed: () {}),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Stone Image
             Container(
               width: double.infinity,
               height: 250,
@@ -26,68 +31,62 @@ class StoneDetailScreen extends StatelessWidget {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
-                Icons.landscape,
-                size: 80,
-                color: Colors.grey.shade400,
-              ),
+              child: Icon(Icons.landscape, size: 80, color: Colors.grey.shade400),
             ),
             const SizedBox(height: 20),
+            
+            // Stone Name & Alternate Names
             Text(
               stoneName,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.brown,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Description',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.brown),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Detailed information about this stone will appear here.',
-              style: TextStyle(fontSize: 15, height: 1.5, color: Colors.black87),
+            Text(
+              'Also known as: Granitic Rock, Granitoid',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Key Properties',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            _buildProperty('Type', 'Igneous Rock'),
-            _buildProperty('Color', 'Varies'),
-            _buildProperty('Hardness', '6-7 (Mohs scale)'),
+            
+            // Type and Classification
+            _buildSection('Type & Classification', 'Igneous Rock - Intrusive (Plutonic)'),
+            
+            // Chemical Composition
+            _buildSection('Chemical Composition', 'Quartz (20-60%), Alkali Feldspar (10-65%), Plagioclase Feldspar (10-65%), Mica and Amphibole minerals'),
+            
+            // Formation Process
+            _buildSection('Formation Process', 'Forms from the slow crystallization of magma deep beneath Earth\'s surface. The slow cooling allows large crystals to develop, giving granite its characteristic coarse-grained texture.'),
+            
+            // Hardness
+            _buildSection('Hardness (Mohs Scale)', '6-7 - Hard and durable, resistant to scratching'),
+            
+            // Luster & Texture
+            _buildSection('Luster & Texture', 'Vitreous to dull luster. Coarse-grained (phaneritic) texture with visible crystals ranging from 1mm to several centimeters.'),
+            
+            // Where Found
+            _buildSection('Where It Is Found', 'Abundant worldwide. Major deposits in Brazil, India, China, USA (especially New England), Canada, Norway, and Scotland. Forms the foundation of continental crust.'),
+            
+            // Interesting Facts
+            _buildSection('Interesting Facts', '• Granite is one of the oldest rocks on Earth\n• Used in construction for over 4,000 years\n• The word "granite" comes from Latin "granum" meaning grain\n• Makes up a large part of Earth\'s continental crust\n• Can contain small amounts of radioactive elements'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildProperty(String label, String value) {
+  Widget _buildSection(String title, String content) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Row(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey,
-              ),
-            ),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 15, color: Colors.black87),
-            ),
+          const SizedBox(height: 8),
+          Text(
+            content,
+            style: const TextStyle(fontSize: 15, height: 1.6, color: Colors.black87),
           ),
         ],
       ),
