@@ -95,10 +95,12 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       final userId = prefs.getInt('user_id');
       
       if (userId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('User not logged in')),
-        );
-        setState(() => _isLoading = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User not logged in')),
+          );
+          setState(() => _isLoading = false);
+        }
         return;
       }
       
@@ -127,6 +129,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         
         final result = json.decode(response.body);
         
+        if (!mounted) return;
+        
         if (result['success']) {
           Navigator.pop(context, {'success': true});
         } else {
@@ -135,11 +139,13 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           );
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
       } finally {
-        setState(() => _isLoading = false);
+        if (mounted) setState(() => _isLoading = false);
       }
     }
   }
@@ -178,6 +184,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       
       final result = json.decode(response.body);
       
+      if (!mounted) return;
+      
       if (result['success']) {
         Navigator.pop(context, {'success': true});
       } else {
@@ -186,11 +194,13 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
