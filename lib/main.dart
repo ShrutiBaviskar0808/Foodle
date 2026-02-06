@@ -3,6 +3,7 @@ import 'camera_screens.dart';
 import 'stone_database_screen.dart';
 import 'my_collection_screen.dart';
 import 'learn_guides_screen.dart';
+import 'settings_about_screen.dart';
 
 void main() {
   runApp(const RockStoneIdentifierApp());
@@ -103,7 +104,7 @@ class _HomePageState extends State<HomePage> {
     const CameraScreen(),
     const MyCollectionScreen(),
     const LearnGuidesScreen(),
-    const ProfileScreen(),
+    const SettingsAboutScreen(),
   ];
 
   @override
@@ -125,7 +126,7 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Identify'),
           BottomNavigationBarItem(icon: Icon(Icons.collections), label: 'Collection'),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Learn'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'More'),
         ],
       ),
     );
@@ -319,25 +320,3 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text('Profile'),
-        elevation: 0,
-      ),
-      body: const Center(
-        child: Text(
-          'Profile Screen\n(Coming Soon)',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-}
