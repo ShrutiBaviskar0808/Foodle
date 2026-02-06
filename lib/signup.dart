@@ -118,6 +118,10 @@ class _SignupPageState extends State<SignupPage> {
     }
 
     try {
+      debugPrint('=== Verifying OTP ===');
+      debugPrint('Email: ${_emailController.text.trim()}');
+      debugPrint('OTP: ${_otpController.text.trim()}');
+      
       final response = await http.post(
         Uri.parse('${AppConfig.baseUrl}/verify_otp.php'),
         headers: AppConfig.jsonHeaders,
@@ -134,16 +138,10 @@ class _SignupPageState extends State<SignupPage> {
         final result = json.decode(response.body);
         
         debugPrint('Success value: ${result['success']}');
-        debugPrint('Success type: ${result['success'].runtimeType}');
         
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result['message'] ?? 'Unknown response')),
-          );
-        }
-        
-        // Check for both boolean true and string "true"
-        if ((result['success'] == true || result['success'] == 'true') && mounted) {
+        if (result['success'] == true) {
+          debugPrint('OTP verified successfully, logging in...');
+          
           // Get user_id from database after verification
           final loginResponse = await http.post(
             Uri.parse('${AppConfig.baseUrl}/login.php'),
@@ -154,23 +152,48 @@ class _SignupPageState extends State<SignupPage> {
             }),
           ).timeout(AppConfig.requestTimeout);
           
+          debugPrint('Login response: ${loginResponse.body}');
+          
           if (loginResponse.statusCode == 200) {
             final loginResult = json.decode(loginResponse.body);
             if (loginResult['success'] == true) {
+              debugPrint('Login successful, saving user data...');
+              
               // Save user data to SharedPreferences
               final prefs = await SharedPreferences.getInstance();
               await prefs.setInt('user_id', loginResult['user_id']);
               await prefs.setString('user_name', loginResult['user_name'] ?? _nameController.text.trim());
               await prefs.setString('user_email', _emailController.text.trim());
+              
+              debugPrint('User data saved: user_id=${loginResult['user_id']}');
+              
+              if (!mounted) return;
+              
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Registration successful!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              
+              debugPrint('Navigating to home...');
+              Navigator.pushReplacementNamed(context, '/home');
+            } else {
+              debugPrint('Login failed: ${loginResult['message']}');
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Login failed: ${loginResult['message']}')),
+                );
+              }
             }
           }
-          
-          if (!mounted) return;
-          
-          debugPrint('Navigating to home...');
-          Navigator.pushReplacementNamed(context, '/home');
         } else {
-          debugPrint('Not navigating - success is: ${result['success']}');
+          debugPrint('OTP verification failed: ${result['message']}');
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result['message'] ?? 'Invalid OTP')),
+            );
+          }
         }
       }
     } catch (e) {
