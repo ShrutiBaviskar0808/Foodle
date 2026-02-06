@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'camera_screens.dart';
-import 'stone_database_screen.dart';
 import 'my_collection_screen.dart';
 import 'learn_guides_screen.dart';
 import 'settings_about_screen.dart';
