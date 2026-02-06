@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'camera_screens.dart';
 import 'stone_database_screen.dart';
 import 'my_collection_screen.dart';
+import 'learn_guides_screen.dart';
 
 void main() {
   runApp(const RockStoneIdentifierApp());
@@ -101,7 +102,7 @@ class _HomePageState extends State<HomePage> {
     const HomeScreen(),
     const CameraScreen(),
     const MyCollectionScreen(),
-    const LearnScreen(),
+    const LearnGuidesScreen(),
     const ProfileScreen(),
   ];
 
@@ -288,7 +289,7 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const LearnScreen()),
+                    MaterialPageRoute(builder: (context) => const LearnGuidesScreen()),
                   );
                 },
                 style: OutlinedButton.styleFrom(
@@ -312,29 +313,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class LearnScreen extends StatelessWidget {
-  const LearnScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text('Learn'),
-        elevation: 0,
-      ),
-      body: const Center(
-        child: Text(
-          'Learn Screen\n(Coming Soon)',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: Colors.grey),
         ),
       ),
     );
