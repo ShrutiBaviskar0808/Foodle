@@ -27,7 +27,8 @@ class _SaveToCollectionScreenState extends State<SaveToCollectionScreen> {
         title: const Text('Save to Collection'),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -166,6 +167,7 @@ class _SaveToCollectionScreenState extends State<SaveToCollectionScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

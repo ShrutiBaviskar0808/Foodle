@@ -13,7 +13,8 @@ class StoneDatabaseScreen extends StatelessWidget {
         title: const Text('Stone Database'),
         elevation: 0,
       ),
-      body: ListView(
+      body: SafeArea(
+        child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Search Bar
@@ -73,6 +74,7 @@ class StoneDatabaseScreen extends StatelessWidget {
           _buildStoneItem(context, 'Limestone', 'Sedimentary Rock'),
           _buildStoneItem(context, 'Amethyst', 'Crystal'),
         ],
+      ),
       ),
     );
   }

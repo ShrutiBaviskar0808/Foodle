@@ -17,13 +17,14 @@ class MyCollectionScreen extends StatelessWidget {
           IconButton(icon: const Icon(Icons.filter_list), onPressed: () {}),
         ],
       ),
-      body: GridView.builder(
+      body: SafeArea(
+        child: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 0.76,
+          childAspectRatio: 0.75,
         ),
         itemCount: 6,
         itemBuilder: (context, index) {
@@ -31,6 +32,7 @@ class MyCollectionScreen extends StatelessWidget {
           final types = ['Igneous Rock', 'Mineral', 'Metamorphic Rock', 'Igneous Rock', 'Sedimentary Rock', 'Crystal'];
           return _buildCollectionItem(context, stones[index], types[index]);
         },
+      ),
       ),
     );
   }
@@ -68,7 +70,7 @@ class MyCollectionScreen extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -81,14 +83,14 @@ class MyCollectionScreen extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     type,
                     style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       Icon(Icons.location_on, size: 14, color: Colors.brown.shade300),

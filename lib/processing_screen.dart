@@ -26,7 +26,8 @@ class _ProcessingScreenState extends State<ProcessingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
+      body: SafeArea(
+        child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -45,6 +46,7 @@ class _ProcessingScreenState extends State<ProcessingScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }

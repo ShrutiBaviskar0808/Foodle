@@ -13,7 +13,8 @@ class LearnGuidesScreen extends StatelessWidget {
         title: const Text('Learn & Guides'),
         elevation: 0,
       ),
-      body: ListView(
+      body: SafeArea(
+        child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _buildGuideCard(
@@ -57,6 +58,7 @@ class LearnGuidesScreen extends StatelessWidget {
             _getFunFactsGuide(),
           ),
         ],
+      ),
       ),
     );
   }

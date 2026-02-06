@@ -18,7 +18,8 @@ class ResultScreen extends StatelessWidget {
         title: const Text('Identification Result'),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -205,6 +206,7 @@ class ResultScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

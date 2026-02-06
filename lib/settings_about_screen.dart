@@ -13,7 +13,8 @@ class SettingsAboutScreen extends StatelessWidget {
         title: const Text('Settings & About'),
         elevation: 0,
       ),
-      body: ListView(
+      body: SafeArea(
+        child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // App Info Section
@@ -85,6 +86,7 @@ class SettingsAboutScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

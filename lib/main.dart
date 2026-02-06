@@ -14,7 +14,7 @@ class RockStoneIdentifierApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Rock Stone Identifier',
+      title: 'Rock / Stone Identifier',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
@@ -50,38 +50,40 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.brown.shade100,
-                borderRadius: BorderRadius.circular(50),
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.brown.shade100,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: const Icon(
+                  Icons.landscape,
+                  size: 50,
+                  color: Colors.brown,
+                ),
               ),
-              child: const Icon(
-                Icons.landscape,
-                size: 50,
+              const SizedBox(height: 20),
+              const Text(
+                'Rock Stone Identifier',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.brown,
+                ),
+              ),
+              const SizedBox(height: 40),
+              const CircularProgressIndicator(
                 color: Colors.brown,
+                strokeWidth: 2,
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Rock Stone Identifier',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.brown,
-              ),
-            ),
-            const SizedBox(height: 40),
-            const CircularProgressIndicator(
-              color: Colors.brown,
-              strokeWidth: 2,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -122,8 +124,14 @@ class _HomePageState extends State<HomePage> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Identify'),
-          BottomNavigationBarItem(icon: Icon(Icons.collections), label: 'Collection'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt),
+            label: 'Identify',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.collections),
+            label: 'Collection',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Learn'),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'More'),
         ],
@@ -142,10 +150,7 @@ class HomeScreen extends StatelessWidget {
         children: [
           // Full Screen Background Image
           Positioned.fill(
-            child: Image.asset(
-              'assets/images/home1.jpg',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/images/home1.jpg', fit: BoxFit.cover),
           ),
           // Gradient Overlay for better text visibility
           Positioned.fill(
@@ -249,14 +254,8 @@ class HomeScreen extends StatelessWidget {
                         letterSpacing: 8,
                         color: Colors.white,
                         shadows: [
-                          Shadow(
-                            color: Colors.amber.shade400,
-                            blurRadius: 20,
-                          ),
-                          Shadow(
-                            color: Colors.orange.shade600,
-                            blurRadius: 40,
-                          ),
+                          Shadow(color: Colors.amber.shade400, blurRadius: 20),
+                          Shadow(color: Colors.orange.shade600, blurRadius: 40),
                         ],
                       ),
                     ),
@@ -270,4 +269,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-

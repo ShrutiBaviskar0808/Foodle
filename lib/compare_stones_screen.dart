@@ -13,7 +13,8 @@ class CompareStonesScreen extends StatelessWidget {
         title: const Text('Compare Similar Stones'),
         elevation: 0,
       ),
-      body: ListView(
+      body: SafeArea(
+        child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
@@ -54,6 +55,7 @@ class CompareStonesScreen extends StatelessWidget {
             false,
           ),
         ],
+      ),
       ),
     );
   }

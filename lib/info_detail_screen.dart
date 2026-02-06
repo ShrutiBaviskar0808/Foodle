@@ -15,12 +15,14 @@ class InfoDetailScreen extends StatelessWidget {
         title: Text(title),
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Text(
           content,
           style: const TextStyle(fontSize: 15, height: 1.6, color: Colors.black87),
         ),
+      ),
       ),
     );
   }

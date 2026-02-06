@@ -18,7 +18,8 @@ class StoneDetailScreen extends StatelessWidget {
           IconButton(icon: const Icon(Icons.share), onPressed: () {}),
         ],
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(
+        child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,6 +70,7 @@ class StoneDetailScreen extends StatelessWidget {
             _buildSection('Interesting Facts', '• Granite is one of the oldest rocks on Earth\n• Used in construction for over 4,000 years\n• The word "granite" comes from Latin "granum" meaning grain\n• Makes up a large part of Earth\'s continental crust\n• Can contain small amounts of radioactive elements'),
           ],
         ),
+      ),
       ),
     );
   }
