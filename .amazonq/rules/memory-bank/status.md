@@ -230,3 +230,30 @@
 ### Code Location: `lib/save_to_collection_screen.dart` - SaveToCollectionScreen class
 
 ### Next: Ready for Part 7 implementation
+
+## Part 7: Compare Stones Screen - ✅ COMPLETED
+
+### Implementation Details:
+- **Your Stone Section**: Highlighted card with "Match" badge
+- **Similar Stones List**: 3 comparison stones (Diorite, Gabbro, Granodiorite)
+- **Side-by-Side Layout**: Stone image + name + key differences
+- **Interactive Cards**: Tap any stone to view detail screen
+- **Visual Hierarchy**: Your stone highlighted with brown border
+
+### Features:
+- Reduces misidentification risk
+- Educational comparison information
+- Key differences clearly displayed
+- Tap-to-view-details functionality
+- Clean card-based layout
+- Visual indicators for matched stone
+
+### Navigation:
+- Result Screen → Compare Stones Screen
+- Compare Screen → Stone Detail Screen (for any stone)
+
+### Code Locations:
+- `lib/compare_stones_screen.dart` - CompareStonesScreen class
+- `lib/stone_detail_screen.dart` - StoneDetailScreen class
+
+### Next: Ready for Part 8 implementation
