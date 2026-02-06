@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'add_place_screen.dart';
 
 class FavoritePlacesScreen extends StatefulWidget {
   const FavoritePlacesScreen({super.key});
@@ -37,11 +39,18 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
                     margin: const EdgeInsets.only(bottom: 15),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: place['color'].withValues(alpha: 0.2),
-                        child: Icon(Icons.restaurant, color: place['color']),
+                        radius: 30,
+                        backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                        backgroundImage: place['imagePath'] != null
+                            ? FileImage(File(place['imagePath']))
+                            : null,
+                        child: place['imagePath'] == null
+                            ? const Icon(Icons.restaurant, color: Colors.orange)
+                            : null,
                       ),
-                      title: Text(place['name']),
-                      subtitle: Text(place['cuisine']),
+                      title: Text(place['storeName'] ?? place['name'] ?? 'Unknown'),
+                      subtitle: Text(place['foodItem'] ?? place['cuisine'] ?? ''),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () => _showEditDeleteDialog(index),
                     ),
                   );
@@ -59,126 +68,42 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
     );
   }
 
-  void _showEditDeleteDialog(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(places[index]['name']),
-        content: const Text('What would you like to do?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _editPlace(index);
-            },
-            child: const Text('Edit'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _deletePlace(index);
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
+  void _showEditDeleteDialog(int index) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddPlaceScreen(
+          place: places[index],
+          index: index,
+        ),
       ),
     );
+    if (result != null) {
+      if (result['delete'] == true) {
+        setState(() {
+          places.removeAt(result['index']);
+        });
+      } else {
+        setState(() {
+          places[result['index']] = result['data'];
+        });
+      }
+    }
   }
 
-  void _editPlace(int index) {
-    String name = places[index]['name'];
-    String cuisine = places[index]['cuisine'];
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Place'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Restaurant Name'),
-                controller: TextEditingController(text: name),
-                onChanged: (value) => name = value,
-              ),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Cuisine Type'),
-                controller: TextEditingController(text: cuisine),
-                onChanged: (value) => cuisine = value,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  places[index]['name'] = name;
-                  places[index]['cuisine'] = cuisine;
-                });
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+
+
+  void _addPlace() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddPlaceScreen()),
     );
+    if (result != null && result['data'] != null) {
+      setState(() {
+        places.add(result['data']);
+      });
+    }
   }
 
-  void _addPlace() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        String name = '';
-        String cuisine = '';
-        return AlertDialog(
-          title: const Text('Add Favorite Place'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Restaurant Name'),
-                onChanged: (value) => name = value,
-              ),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Cuisine Type'),
-                onChanged: (value) => cuisine = value,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (name.isNotEmpty) {
-                  setState(() {
-                    places.add({
-                      'name': name,
-                      'color': Colors.orange,
-                      'cuisine': cuisine.isEmpty ? 'Restaurant' : cuisine,
-                    });
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  void _deletePlace(int index) {
-    setState(() {
-      places.removeAt(index);
-    });
-  }
 }

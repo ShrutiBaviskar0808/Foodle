@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
-class AddFoodScreen extends StatefulWidget {
-  final Map<String, dynamic>? food;
+class AddPlaceScreen extends StatefulWidget {
+  final Map<String, dynamic>? place;
   final int? index;
 
-  const AddFoodScreen({super.key, this.food, this.index});
+  const AddPlaceScreen({super.key, this.place, this.index});
 
   @override
-  State<AddFoodScreen> createState() => _AddFoodScreenState();
+  State<AddPlaceScreen> createState() => _AddPlaceScreenState();
 }
 
-class _AddFoodScreenState extends State<AddFoodScreen> {
+class _AddPlaceScreenState extends State<AddPlaceScreen> {
   final _formKey = GlobalKey<FormState>();
   final _storeNameController = TextEditingController();
   final _foodItemController = TextEditingController();
@@ -25,13 +25,13 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.food != null) {
-      _storeNameController.text = widget.food!['storeName'] ?? '';
-      _foodItemController.text = widget.food!['foodItem'] ?? '';
-      _preferencesController.text = widget.food!['preferences'] ?? '';
-      _moodController.text = widget.food!['mood'] ?? '';
-      _notesController.text = widget.food!['notes'] ?? '';
-      _imagePath = widget.food!['imagePath'];
+    if (widget.place != null) {
+      _storeNameController.text = widget.place!['storeName'] ?? '';
+      _foodItemController.text = widget.place!['foodItem'] ?? '';
+      _preferencesController.text = widget.place!['preferences'] ?? '';
+      _moodController.text = widget.place!['mood'] ?? '';
+      _notesController.text = widget.place!['notes'] ?? '';
+      _imagePath = widget.place!['imagePath'];
     }
   }
 
@@ -80,9 +80,9 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
     );
   }
 
-  void _saveFood() {
+  void _savePlace() {
     if (_formKey.currentState!.validate()) {
-      final foodData = {
+      final placeData = {
         'storeName': _storeNameController.text,
         'foodItem': _foodItemController.text,
         'preferences': _preferencesController.text,
@@ -90,11 +90,11 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
         'notes': _notesController.text,
         'imagePath': _imagePath,
       };
-      Navigator.pop(context, {'data': foodData, 'index': widget.index});
+      Navigator.pop(context, {'data': placeData, 'index': widget.index});
     }
   }
 
-  void _deleteFood() {
+  void _deletePlace() {
     Navigator.pop(context, {'delete': true, 'index': widget.index});
   }
 
@@ -102,7 +102,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.food == null ? 'Add Favorite Food' : 'Edit Favorite Food'),
+        title: Text(widget.place == null ? 'Add Favorite Place' : 'Edit Favorite Place'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
@@ -175,7 +175,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
               SizedBox(
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _saveFood,
+                  onPressed: _savePlace,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -183,12 +183,12 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
                   child: const Text('Save', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ),
-              if (widget.food != null) ...[
+              if (widget.place != null) ...[
                 const SizedBox(height: 15),
                 SizedBox(
                   height: 50,
                   child: OutlinedButton(
-                    onPressed: _deleteFood,
+                    onPressed: _deletePlace,
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
