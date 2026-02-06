@@ -204,3 +204,29 @@
 ### Code Location: `lib/result_screen.dart` - ResultScreen class
 
 ### Next: Ready for Part 6 implementation
+
+## Part 6: Save to Collection Screen - ✅ COMPLETED
+
+### Implementation Details:
+- **Stone Image Preview**: 200px height placeholder at top
+- **Auto-filled Stone Name**: "Granite" in read-only field
+- **Optional User Notes**: Multi-line text field (4 lines)
+- **Optional Location Tag**: Text field with location icon
+- **Save Button**: Primary brown button with success feedback
+- **Success Message**: Green snackbar confirmation
+
+### Features:
+- Clean form layout with proper spacing
+- Optional fields for personalization
+- Success feedback on save
+- Auto-navigation back after save
+- Encourages long-term app usage
+- Proper text field styling with focus states
+
+### Navigation:
+- Result Screen → Save to Collection Screen
+- Save button shows success message and returns
+
+### Code Location: `lib/save_to_collection_screen.dart` - SaveToCollectionScreen class
+
+### Next: Ready for Part 7 implementation

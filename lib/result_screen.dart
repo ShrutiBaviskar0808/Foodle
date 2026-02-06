@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'save_to_collection_screen.dart';
+import 'compare_stones_screen.dart';
 
 class ResultScreen extends StatelessWidget {
   const ResultScreen({super.key});
@@ -173,7 +174,14 @@ class ResultScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 56,
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CompareStonesScreen(),
+                      ),
+                    );
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.brown,
                     side: const BorderSide(color: Colors.brown, width: 2),
