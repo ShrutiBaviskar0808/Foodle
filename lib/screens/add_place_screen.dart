@@ -94,15 +94,22 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
       
+      debugPrint('=== DEBUG: Checking user_id ===');
+      debugPrint('user_id from SharedPreferences: $userId');
+      debugPrint('All keys in SharedPreferences: ${prefs.getKeys()}');
+      
       if (userId == null) {
+        debugPrint('ERROR: user_id is null!');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User not logged in')),
+            const SnackBar(content: Text('User not logged in. Please login again.')),
           );
           setState(() => _isLoading = false);
         }
         return;
       }
+      
+      debugPrint('user_id found: $userId');
       
       try {
         final data = {
@@ -114,6 +121,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           'notes': _notesController.text,
           'image_path': _imagePath ?? '',
         };
+        
+        debugPrint('Sending data: $data');
         
         final response = _foodId == null
             ? await http.post(
@@ -127,6 +136,8 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
                 body: json.encode({...data, 'food_id': _foodId}),
               ).timeout(AppConfig.requestTimeout);
         
+        debugPrint('Response: ${response.body}');
+        
         final result = json.decode(response.body);
         
         if (!mounted) return;
@@ -139,6 +150,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           );
         }
       } catch (e) {
+        debugPrint('ERROR: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error: $e')),
