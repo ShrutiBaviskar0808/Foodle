@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'config.dart';
 
@@ -143,6 +144,29 @@ class _SignupPageState extends State<SignupPage> {
         
         // Check for both boolean true and string "true"
         if ((result['success'] == true || result['success'] == 'true') && mounted) {
+          // Get user_id from database after verification
+          final loginResponse = await http.post(
+            Uri.parse('${AppConfig.baseUrl}/login.php'),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({
+              'email': _emailController.text.trim(),
+              'password': _passwordController.text,
+            }),
+          ).timeout(AppConfig.requestTimeout);
+          
+          if (loginResponse.statusCode == 200) {
+            final loginResult = json.decode(loginResponse.body);
+            if (loginResult['success'] == true) {
+              // Save user data to SharedPreferences
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setInt('user_id', loginResult['user_id']);
+              await prefs.setString('user_name', loginResult['user_name'] ?? _nameController.text.trim());
+              await prefs.setString('user_email', _emailController.text.trim());
+            }
+          }
+          
+          if (!mounted) return;
+          
           debugPrint('Navigating to home...');
           Navigator.pushReplacementNamed(context, '/home');
         } else {
