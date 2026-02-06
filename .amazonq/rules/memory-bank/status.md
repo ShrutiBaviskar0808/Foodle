@@ -386,3 +386,38 @@
 ### Code Location: `lib/collection_detail_screen.dart` - CollectionDetailScreen class
 
 ### Next: Ready for Part 12 implementation
+
+## Part 12: Learn & Guides Screen - ✅ COMPLETED
+
+### Implementation Details:
+- **5 Educational Categories**:
+  1. How to Identify Stones - 8-step identification guide
+  2. Tips for Better Photos - 6 photography tips
+  3. Rocks vs Minerals - Key differences explained
+  4. Beginner Geology Lessons - 6 fundamental lessons
+  5. Fun Stone Facts - Amazing facts and records
+
+### Content Highlights:
+- **Identification Guide**: Color, texture, hardness, crystal structure, weight, luster, layers, acid test
+- **Photo Tips**: Lighting, focus, angles, background, camera settings
+- **Rocks vs Minerals**: Definitions, characteristics, rock types, simple analogies
+- **Geology Lessons**: Rock cycle, Earth's layers, plate tectonics, weathering, geological time
+- **Fun Facts**: Record holders, amazing facts, mineral marvels, geological wonders
+
+### Features:
+- Adds value beyond identification
+- Makes app suitable for students
+- Comprehensive educational content
+- Easy-to-read format
+- Color-coded category cards
+- Detailed guide screens
+
+### Navigation:
+- Home/Bottom Nav → Learn & Guides Screen
+- Learn Screen → Guide Detail Screen (for each category)
+
+### Code Locations:
+- `lib/learn_guides_screen.dart` - LearnGuidesScreen class
+- `lib/guide_detail_screen.dart` - GuideDetailScreen class
+
+### Next: Ready for Part 13 implementation
