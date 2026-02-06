@@ -55,7 +55,12 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: source);
+    final pickedFile = await picker.pickImage(
+      source: source,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 85,
+    );
     if (pickedFile != null) {
       setState(() {
         _imagePath = pickedFile.path;
