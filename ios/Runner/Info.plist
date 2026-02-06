@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access to identify rocks and stones</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs photo library access to identify rocks from your photos</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app needs microphone access for camera functionality</string>
 </dict>
 </plist>

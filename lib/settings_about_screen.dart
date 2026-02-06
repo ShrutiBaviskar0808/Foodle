@@ -15,83 +15,100 @@ class SettingsAboutScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // App Info Section
-          Center(
-            child: Column(
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.brown.shade100,
-                    borderRadius: BorderRadius.circular(40),
+          padding: const EdgeInsets.all(16),
+          children: [
+            // App Info Section
+            Center(
+              child: Column(
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.brown.shade100,
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: const Icon(
+                      Icons.landscape,
+                      size: 40,
+                      color: Colors.brown,
+                    ),
                   ),
-                  child: const Icon(Icons.landscape, size: 40, color: Colors.brown),
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Rock Stone Identifier',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Version 1.0.0',
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Rock Stone Identifier',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Version 1.0.0',
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 32),
-          
-          // Information Options
-          _buildOption(
-            context,
-            'About App',
-            Icons.info_outline,
-            () => _navigateToInfo(context, 'About App', _getAboutContent()),
-          ),
-          _buildOption(
-            context,
-            'How It Works',
-            Icons.help_outline,
-            () => _navigateToInfo(context, 'How It Works', _getHowItWorksContent()),
-          ),
-          _buildOption(
-            context,
-            'Privacy Policy',
-            Icons.privacy_tip_outlined,
-            () => _navigateToInfo(context, 'Privacy Policy', _getPrivacyContent()),
-          ),
-          _buildOption(
-            context,
-            'Help & FAQ',
-            Icons.question_answer_outlined,
-            () => _navigateToInfo(context, 'Help & FAQ', _getFAQContent()),
-          ),
-          _buildOption(
-            context,
-            'Send Feedback',
-            Icons.feedback_outlined,
-            () => _showFeedbackDialog(context),
-          ),
-          const SizedBox(height: 20),
-          
-          // Additional Info
-          Center(
-            child: Text(
-              'Made with ❤️ for geology enthusiasts',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+            const SizedBox(height: 32),
+
+            // Information Options
+            _buildOption(
+              context,
+              'About App',
+              Icons.info_outline,
+              () => _navigateToInfo(context, 'About App', _getAboutContent()),
             ),
-          ),
-        ],
-      ),
+            _buildOption(
+              context,
+              'How It Works',
+              Icons.help_outline,
+              () => _navigateToInfo(
+                context,
+                'How It Works',
+                _getHowItWorksContent(),
+              ),
+            ),
+            _buildOption(
+              context,
+              'Privacy Policy',
+              Icons.privacy_tip_outlined,
+              () => _navigateToInfo(
+                context,
+                'Privacy Policy',
+                _getPrivacyContent(),
+              ),
+            ),
+            _buildOption(
+              context,
+              'Help & FAQ',
+              Icons.question_answer_outlined,
+              () => _navigateToInfo(context, 'Help & FAQ', _getFAQContent()),
+            ),
+            _buildOption(
+              context,
+              'Send Feedback',
+              Icons.feedback_outlined,
+              () => _showFeedbackDialog(context),
+            ),
+            const SizedBox(height: 20),
+
+            // Additional Info
+            // Center(
+            //   child: Text(
+            //     'Made with ❤️ for geology enthusiasts',
+            //     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+            //   ),
+            // ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildOption(BuildContext context, String title, IconData icon, VoidCallback onTap) {
+  Widget _buildOption(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -109,10 +126,17 @@ class SettingsAboutScreen extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey.shade400,
+            ),
           ],
         ),
       ),
@@ -151,7 +175,10 @@ class SettingsAboutScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Thank you for your feedback!'), backgroundColor: Colors.green),
+                const SnackBar(
+                  content: Text('Thank you for your feedback!'),
+                  backgroundColor: Colors.green,
+                ),
               );
             },
             child: const Text('Send'),

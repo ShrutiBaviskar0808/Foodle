@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -8,7 +11,132 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+  CameraController? _controller;
+  List<CameraDescription>? _cameras;
   bool _flashOn = false;
+  bool _isInitialized = false;
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _requestPermissionsAndInitialize();
+  }
+
+  Future<void> _requestPermissionsAndInitialize() async {
+    final cameraStatus = await Permission.camera.request();
+    
+    if (cameraStatus.isGranted) {
+      await _initializeCamera();
+    } else if (cameraStatus.isDenied || cameraStatus.isPermanentlyDenied) {
+      if (mounted) {
+        _showPermissionDialog();
+      }
+    }
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Camera Permission Required'),
+        content: const Text('This app needs camera access to identify rocks and stones. Please grant camera permission in settings.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      _cameras = await availableCameras();
+      if (_cameras != null && _cameras!.isNotEmpty) {
+        _controller = CameraController(
+          _cameras![0],
+          ResolutionPreset.high,
+        );
+        await _controller!.initialize();
+        if (mounted) {
+          setState(() {
+            _isInitialized = true;
+          });
+        }
+      }
+    } catch (e) {
+      // Error initializing camera
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _takePicture() async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+    try {
+      await _controller!.takePicture();
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProcessingScreen()),
+        );
+      }
+    } catch (e) {
+      // Error taking picture
+    }
+  }
+
+  Future<void> _pickFromGallery() async {
+    final storageStatus = await Permission.photos.request();
+    
+    if (!storageStatus.isGranted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Photo library permission is required')),
+        );
+      }
+      return;
+    }
+    
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null && mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProcessingScreen()),
+        );
+      }
+    } catch (e) {
+      // Error picking image
+    }
+  }
+
+  Future<void> _toggleFlash() async {
+    if (_controller == null) return;
+    try {
+      setState(() {
+        _flashOn = !_flashOn;
+      });
+      await _controller!.setFlashMode(
+        _flashOn ? FlashMode.torch : FlashMode.off,
+      );
+    } catch (e) {
+      // Error toggling flash
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,19 +144,22 @@ class _CameraScreenState extends State<CameraScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Full-screen camera preview
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: Colors.grey.shade800,
-            child: const Center(
-              child: Icon(
-                Icons.camera_alt,
-                size: 100,
-                color: Colors.white54,
+          // Camera preview
+          if (_isInitialized && _controller != null)
+            SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: CameraPreview(_controller!),
+            )
+          else
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.grey.shade800,
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
               ),
             ),
-          ),
           
           // Top controls
           SafeArea(
@@ -42,18 +173,23 @@ class _CameraScreenState extends State<CameraScreen> {
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
                   ),
-                  // Flash toggle
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _flashOn = !_flashOn;
-                      });
-                    },
-                    icon: Icon(
-                      _flashOn ? Icons.flash_on : Icons.flash_off,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+                  Row(
+                    children: [
+                      // Gallery button
+                      IconButton(
+                        onPressed: _pickFromGallery,
+                        icon: const Icon(Icons.photo_library, color: Colors.white, size: 28),
+                      ),
+                      // Flash toggle
+                      IconButton(
+                        onPressed: _toggleFlash,
+                        icon: Icon(
+                          _flashOn ? Icons.flash_on : Icons.flash_off,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -91,13 +227,7 @@ class _CameraScreenState extends State<CameraScreen> {
             right: 0,
             child: Center(
               child: GestureDetector(
-                onTap: () {
-                  // Navigate to Processing Screen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ProcessingScreen()),
-                  );
-                },
+                onTap: _takePicture,
                 child: Container(
                   width: 80,
                   height: 80,
