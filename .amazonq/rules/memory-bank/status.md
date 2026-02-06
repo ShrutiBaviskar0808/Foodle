@@ -421,3 +421,48 @@
 - `lib/guide_detail_screen.dart` - GuideDetailScreen class
 
 ### Next: Ready for Part 13 implementation
+
+## Part 13: Settings/About Screen - ✅ COMPLETED
+
+### Implementation Details:
+- **App Information Section**: Logo, name, version display
+- **5 Main Options**:
+  1. About App - Mission, features, contact info
+  2. How It Works - Step-by-step process explanation
+  3. Privacy Policy - Data collection and usage
+  4. Help & FAQ - Common questions and answers
+  5. Send Feedback - Dialog for user feedback
+
+### Content Highlights:
+- **About**: Mission, key features, who we serve, contact details
+- **How It Works**: 5-step process, tips, technology, offline mode
+- **Privacy**: Data collection, usage, storage, security, user rights
+- **FAQ**: 20+ questions covering all app aspects
+- **Feedback**: Interactive dialog with text input
+
+### Features:
+- Builds trust and credibility
+- Comprehensive app information
+- Privacy transparency
+- User support and help
+- Feedback collection
+- Professional presentation
+- Easy navigation
+
+### User Actions:
+- View app information
+- Read privacy policy
+- Get help from FAQ
+- Send feedback
+- Contact support
+
+### Navigation:
+- Bottom Nav (More) → Settings/About Screen
+- Settings → Info Detail Screens
+- Feedback → Dialog popup
+
+### Code Locations:
+- `lib/settings_about_screen.dart` - SettingsAboutScreen class
+- `lib/info_detail_screen.dart` - InfoDetailScreen class
+
+### Next: All core screens completed! ✅
