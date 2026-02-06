@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $servername = "localhost";
     $username = "root";
     $password = "";
-    $dbname = "food_app";
+    $dbname = "foodle";
     
     try {
         $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);

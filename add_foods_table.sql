@@ -1,5 +1,5 @@
--- Add foods table to food_app database
-USE food_app;
+-- Add foods table to foodle database
+USE foodle;
 
 CREATE TABLE IF NOT EXISTS foods (
     id INT AUTO_INCREMENT PRIMARY KEY,

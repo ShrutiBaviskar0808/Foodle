@@ -16,7 +16,7 @@ if (empty($email) || empty($otp)) {
 
 // Database connection
 $host = 'localhost';
-$dbname = 'food_app';
+$dbname = 'foodle';
 $username = 'root';
 $db_password = '';
 
