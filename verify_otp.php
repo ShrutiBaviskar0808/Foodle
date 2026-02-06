@@ -9,6 +9,11 @@ $input = json_decode(file_get_contents('php://input'), true);
 $email = $input['email'] ?? '';
 $otp = $input['otp'] ?? '';
 
+if (empty($email) || empty($otp)) {
+    echo json_encode(['success' => false, 'message' => 'Email and OTP required']);
+    exit;
+}
+
 // Database connection
 $host = 'localhost';
 $dbname = 'food_app';
