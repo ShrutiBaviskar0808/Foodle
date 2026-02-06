@@ -23,7 +23,7 @@ class MyCollectionScreen extends StatelessWidget {
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 0.75,
+          childAspectRatio: 0.76,
         ),
         itemCount: 6,
         itemBuilder: (context, index) {
