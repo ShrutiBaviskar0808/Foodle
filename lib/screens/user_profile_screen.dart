@@ -88,6 +88,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Future<void> _logout(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Clear all user data including family members
+    await prefs.remove('family_members');
     await prefs.clear();
     if (context.mounted) {
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);

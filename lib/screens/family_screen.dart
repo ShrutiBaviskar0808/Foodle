@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'add_member_screen.dart';
 
 class FamilyScreen extends StatefulWidget {
@@ -11,6 +13,29 @@ class FamilyScreen extends StatefulWidget {
 
 class _FamilyScreenState extends State<FamilyScreen> {
   List<Map<String, dynamic>> familyMembers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFamilyMembers();
+  }
+
+  Future<void> _loadFamilyMembers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? membersJson = prefs.getString('family_members');
+    if (membersJson != null) {
+      final List<dynamic> decoded = json.decode(membersJson);
+      setState(() {
+        familyMembers = decoded.map((item) => Map<String, dynamic>.from(item)).toList();
+      });
+    }
+  }
+
+  Future<void> _saveFamilyMembers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String encoded = json.encode(familyMembers);
+    await prefs.setString('family_members', encoded);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +208,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
       setState(() {
         familyMembers[result['index']] = result['data'];
       });
+      await _saveFamilyMembers();
     }
   }
 
@@ -195,6 +221,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
       setState(() {
         familyMembers.add(result['data']);
       });
+      await _saveFamilyMembers();
     }
   }
 
@@ -202,5 +229,6 @@ class _FamilyScreenState extends State<FamilyScreen> {
     setState(() {
       familyMembers.removeAt(index);
     });
+    _saveFamilyMembers();
   }
 }
