@@ -145,13 +145,24 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Rock Stone Identifier'),
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Large Scan Stone Button
-            SizedBox(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              // Home Image
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/images/home1.jpg',
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 24),
+              
+              // Large Scan Stone Button
+              SizedBox(
               width: double.infinity,
               height: 80,
               child: ElevatedButton(
