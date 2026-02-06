@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:async';
 
@@ -56,6 +57,14 @@ class _LoginPageState extends State<LoginPage> {
           final result = json.decode(response.body);
           
           if (result['success'] == true) {
+            // Save user data to SharedPreferences
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setInt('user_id', result['user_id']);
+            await prefs.setString('user_name', result['user_name'] ?? '');
+            await prefs.setString('user_email', _emailController.text.trim());
+            
+            if (!mounted) return;
+            
             // User exists and password is correct - go to home
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
