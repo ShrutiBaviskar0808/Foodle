@@ -34,10 +34,6 @@ $stmt->execute([$email, $otp]);
 $result = $stmt->fetch();
 
 if ($result) {
-    // Update user as verified
-    $updateStmt = $pdo->prepare("UPDATE users SET email_verify = 1 WHERE id = ?");
-    $updateStmt->execute([$result['user_id']]);
-    
     // Delete the OTP record after successful verification
     $deleteStmt = $pdo->prepare("DELETE FROM verify_otp WHERE email = ? AND otp = ?");
     $deleteStmt->execute([$email, $otp]);

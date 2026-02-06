@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'config.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -17,7 +18,6 @@ class _SignupPageState extends State<SignupPage> {
   bool _showOtpField = false;
   bool _agreeToTerms = false;
   bool _obscurePassword = true;
-  int? _userId;
 
   String? _validateEmail(String email) {
     if (email.isEmpty) return 'Email is required';
@@ -69,14 +69,14 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.137.1/signup.php'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('${AppConfig.baseUrl}/signup.php'),
+        headers: AppConfig.jsonHeaders,
         body: json.encode({
           'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
           'password': _passwordController.text,
         }),
-      );
+      ).timeout(AppConfig.requestTimeout);
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
@@ -84,7 +84,6 @@ class _SignupPageState extends State<SignupPage> {
         if (result['success'] == true) {
           setState(() {
             _showOtpField = true;
-            _userId = int.tryParse(result['user_id'].toString()) ?? 123;
           });
           
           if (mounted) {
@@ -119,28 +118,39 @@ class _SignupPageState extends State<SignupPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.137.1/verify_otp.php'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('${AppConfig.baseUrl}/verify_otp_database.php'),
+        headers: AppConfig.jsonHeaders,
         body: json.encode({
-          'user_id': _userId,
+          'email': _emailController.text.trim(),
           'otp': _otpController.text.trim(),
         }),
-      );
+      ).timeout(AppConfig.requestTimeout);
+
+      debugPrint('Response status: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
         
+        debugPrint('Success value: ${result['success']}');
+        debugPrint('Success type: ${result['success'].runtimeType}');
+        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result['message'])),
+            SnackBar(content: Text(result['message'] ?? 'Unknown response')),
           );
         }
         
-        if (result['success'] == true && mounted) {
+        // Check for both boolean true and string "true"
+        if ((result['success'] == true || result['success'] == 'true') && mounted) {
+          debugPrint('Navigating to home...');
           Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          debugPrint('Not navigating - success is: ${result['success']}');
         }
       }
     } catch (e) {
+      debugPrint('Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e')),
@@ -332,7 +342,7 @@ class _SignupPageState extends State<SignupPage> {
                   controller: _otpController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    hintText: 'Enter 6-digit OTP',
+                    hintText: 'Enter 4-digit OTP',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),

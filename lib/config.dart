@@ -2,7 +2,7 @@ class AppConfig {
   // Server configuration - UPDATE THIS IP FOR PHYSICAL DEVICE
   // For emulator: use 10.0.2.2
   // For physical device: use your computer's IP address (e.g., 192.168.1.100)
-  static const String baseUrl = 'http://localhost:80'; // XAMPP default port
+  static const String baseUrl = 'http://192.168.137.1'; // Update with your computer's IP
   
   // API endpoints
   static const String loginEndpoint = '$baseUrl/login.php';

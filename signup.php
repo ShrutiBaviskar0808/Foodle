@@ -12,7 +12,7 @@ $password = $input['password'];
 
 // Database connection
 $host = 'localhost';
-$dbname = 'food_app';
+$dbname = 'foodle';
 $username = 'root';
 $db_password = '';
 
@@ -24,10 +24,14 @@ try {
     $otp = rand(100000, 999999);
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     
-    // Insert user with OTP
-    $stmt = $pdo->prepare("INSERT INTO users (name, email, password, otp, is_verified, created_at) VALUES (?, ?, ?, ?, 0, NOW())");
-    $stmt->execute([$name, $email, $hashedPassword, $otp]);
+    // Insert user without OTP
+    $stmt = $pdo->prepare("INSERT INTO users (name, email, password, created_at) VALUES (?, ?, ?, NOW())");
+    $stmt->execute([$name, $email, $hashedPassword]);
     $userId = $pdo->lastInsertId();
+    
+    // Insert OTP into verify_otp table
+    $otpStmt = $pdo->prepare("INSERT INTO verify_otp (user_id, email, otp) VALUES (?, ?, ?)");
+    $otpStmt->execute([$userId, $email, $otp]);
     
     echo json_encode([
         'success' => true,
