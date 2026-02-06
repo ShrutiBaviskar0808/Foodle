@@ -26,22 +26,52 @@ class _FamilyScreenState extends State<FamilyScreen> {
     if (membersJson != null) {
       final List<dynamic> decoded = json.decode(membersJson);
       setState(() {
-        familyMembers = decoded.map((item) => Map<String, dynamic>.from(item)).toList();
+        // Filter to show only Family relation members
+        familyMembers = decoded.map((item) {
+          final member = Map<String, dynamic>.from(item);
+          // Convert allergies list to List<String>
+          if (member['allergies'] != null) {
+            member['allergies'] = List<String>.from(member['allergies']);
+          }
+          return member;
+        }).where((member) => member['relation'] == 'Family').toList();
       });
     }
   }
 
   Future<void> _saveFamilyMembers() async {
     final prefs = await SharedPreferences.getInstance();
-    final String encoded = json.encode(familyMembers);
-    await prefs.setString('family_members', encoded);
+    // Load all members first
+    final String? allMembersJson = prefs.getString('all_members');
+    List<Map<String, dynamic>> allMembers = [];
+    if (allMembersJson != null) {
+      final List<dynamic> decoded = json.decode(allMembersJson);
+      allMembers = decoded.map((item) => Map<String, dynamic>.from(item)).toList();
+    }
+    // Update or add family members
+    for (var familyMember in familyMembers) {
+      final index = allMembers.indexWhere((m) => 
+        m['name'] == familyMember['name'] && 
+        m['email'] == familyMember['email']);
+      if (index != -1) {
+        allMembers[index] = familyMember;
+      } else {
+        allMembers.add(familyMember);
+      }
+    }
+    // Save all members
+    final String encoded = json.encode(allMembers);
+    await prefs.setString('all_members', encoded);
+    // Also save family members separately for quick access
+    final String familyEncoded = json.encode(familyMembers);
+    await prefs.setString('family_members', familyEncoded);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Family'),
+        title: const Text('My Foodles'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),

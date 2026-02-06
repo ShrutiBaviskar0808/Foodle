@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'add_member_screen.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -8,12 +12,56 @@ class FriendsScreen extends StatefulWidget {
 }
 
 class _FriendsScreenState extends State<FriendsScreen> {
-  List<Map<String, dynamic>> friends = [
-    {'name': 'Sunil', 'preferences': 'Spicy food lover'},
-    {'name': 'Brett C', 'preferences': 'Vegan diet'},
-    {'name': 'Joe D', 'preferences': 'No nuts allergy'},
-    {'name': 'Austin', 'preferences': 'Loves BBQ'},
-  ];
+  List<Map<String, dynamic>> friends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFriends();
+  }
+
+  Future<void> _loadFriends() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? membersJson = prefs.getString('all_members');
+    if (membersJson != null) {
+      final List<dynamic> decoded = json.decode(membersJson);
+      setState(() {
+        // Filter to show only non-Family relation members
+        friends = decoded.map((item) {
+          final member = Map<String, dynamic>.from(item);
+          if (member['allergies'] != null) {
+            member['allergies'] = List<String>.from(member['allergies']);
+          }
+          return member;
+        }).where((member) => member['relation'] != 'Family').toList();
+      });
+    }
+  }
+
+  Future<void> _saveFriends() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Load all members
+    final String? allMembersJson = prefs.getString('all_members');
+    List<Map<String, dynamic>> allMembers = [];
+    if (allMembersJson != null) {
+      final List<dynamic> decoded = json.decode(allMembersJson);
+      allMembers = decoded.map((item) => Map<String, dynamic>.from(item)).toList();
+    }
+    // Update or add friends
+    for (var friend in friends) {
+      final index = allMembers.indexWhere((m) => 
+        m['name'] == friend['name'] && 
+        m['dob'] == friend['dob']);
+      if (index != -1) {
+        allMembers[index] = friend;
+      } else {
+        allMembers.add(friend);
+      }
+    }
+    // Save all members
+    final String encoded = json.encode(allMembers);
+    await prefs.setString('all_members', encoded);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,15 +84,21 @@ class _FriendsScreenState extends State<FriendsScreen> {
                     margin: const EdgeInsets.only(bottom: 15),
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: Colors.grey[200],
-                        child: Text(
-                          friend['name'][0].toUpperCase(),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                        radius: 30,
+                        backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                        backgroundImage: friend['imagePath'] != null
+                            ? FileImage(File(friend['imagePath']))
+                            : null,
+                        child: friend['imagePath'] == null
+                            ? const Icon(Icons.person, color: Colors.orange)
+                            : null,
                       ),
                       title: Text(friend['name']),
-                      subtitle: Text(friend['preferences']),
-                      onTap: () => _showEditDeleteDialog(index),
+                      subtitle: Text(
+                        '${friend['relation'] ?? 'Unknown'} • Age: ${friend['age'] ?? 'N/A'}',
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () => _showMemberDetails(index),
                     ),
                   );
                 },
@@ -61,12 +115,48 @@ class _FriendsScreenState extends State<FriendsScreen> {
     );
   }
 
-  void _showEditDeleteDialog(int index) {
+  void _showMemberDetails(int index) async {
+    final friend = friends[index];
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(friends[index]['name']),
-        content: const Text('What would you like to do?'),
+        title: Text(friend['name']),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (friend['imagePath'] != null)
+                Center(
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: FileImage(File(friend['imagePath'])),
+                  ),
+                ),
+              const SizedBox(height: 15),
+              _buildDetailRow('Nickname', friend['nickname'] ?? 'N/A'),
+              _buildDetailRow('Date of Birth', friend['dob'] ?? 'N/A'),
+              _buildDetailRow('Age', '${friend['age'] ?? 'N/A'} years'),
+              _buildDetailRow('Relation', friend['relation'] ?? 'N/A'),
+              _buildDetailRow('Favorite Food', friend['foodName'] ?? 'N/A'),
+              const SizedBox(height: 10),
+              const Text('Allergies:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              if (friend['allergies'] != null && friend['allergies'].isNotEmpty)
+                Wrap(
+                  spacing: 5,
+                  children: (friend['allergies'] as List<String>)
+                      .map((allergy) => Chip(
+                            label: Text(allergy, style: const TextStyle(fontSize: 12)),
+                            backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                          ))
+                      .toList(),
+                )
+              else
+                const Text('None', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -74,6 +164,49 @@ class _FriendsScreenState extends State<FriendsScreen> {
               _editFriend(index);
             },
             child: const Text('Edit'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmDelete(index);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Member'),
+        content: const Text('Are you sure you want to delete this member?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
@@ -87,99 +220,43 @@ class _FriendsScreenState extends State<FriendsScreen> {
     );
   }
 
-  void _editFriend(int index) {
-    String name = friends[index]['name'];
-    String preferences = friends[index]['preferences'];
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Friend'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Friend Name'),
-                controller: TextEditingController(text: name),
-                onChanged: (value) => name = value,
-              ),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Food Preferences'),
-                controller: TextEditingController(text: preferences),
-                onChanged: (value) => preferences = value,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  friends[index]['name'] = name;
-                  friends[index]['preferences'] = preferences;
-                });
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+  void _editFriend(int index) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddMemberScreen(
+          member: friends[index],
+          index: index,
+        ),
+      ),
     );
+    if (result != null) {
+      setState(() {
+        friends[result['index']] = result['data'];
+      });
+      await _saveFriends();
+      await _loadFriends();
+    }
   }
 
-  void _addFriend() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        String name = '';
-        String preferences = '';
-        return AlertDialog(
-          title: const Text('Add Friend'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Friend Name'),
-                onChanged: (value) => name = value,
-              ),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Food Preferences'),
-                onChanged: (value) => preferences = value,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (name.isNotEmpty) {
-                  setState(() {
-                    friends.add({
-                      'name': name,
-                      'preferences': preferences.isEmpty ? 'No preferences set' : preferences,
-                    });
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
+  void _addFriend() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddMemberScreen()),
     );
+    if (result != null) {
+      setState(() {
+        friends.add(result['data']);
+      });
+      await _saveFriends();
+      await _loadFriends();
+    }
   }
 
   void _deleteFriend(int index) {
     setState(() {
       friends.removeAt(index);
     });
+    _saveFriends();
   }
 }
