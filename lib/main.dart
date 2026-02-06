@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'camera_screens.dart';
+import 'stone_database_screen.dart';
 
 void main() {
   runApp(const RockStoneIdentifierApp());
@@ -377,28 +378,6 @@ class ProfileScreen extends StatelessWidget {
       body: const Center(
         child: Text(
           'Profile Screen\n(Coming Soon)',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, color: Colors.grey),
-        ),
-      ),
-    );
-  }
-}
-class StoneDatabaseScreen extends StatelessWidget {
-  const StoneDatabaseScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text('Stone Database'),
-        elevation: 0,
-      ),
-      body: const Center(
-        child: Text(
-          'Stone Database Screen\n(Coming Soon)',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 18, color: Colors.grey),
         ),
