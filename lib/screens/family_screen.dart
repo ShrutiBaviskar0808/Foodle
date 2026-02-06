@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'add_member_screen.dart';
 
 class FamilyScreen extends StatefulWidget {
   const FamilyScreen({super.key});
@@ -8,12 +10,7 @@ class FamilyScreen extends StatefulWidget {
 }
 
 class _FamilyScreenState extends State<FamilyScreen> {
-  List<Map<String, dynamic>> familyMembers = [
-    {'name': 'The Boss', 'icon': Icons.person, 'preferences': 'Loves Italian food'},
-    {'name': 'My Love', 'icon': Icons.person, 'preferences': 'Vegetarian'},
-    {'name': 'Kimberly', 'icon': Icons.person, 'preferences': 'No seafood'},
-    {'name': 'Zoey', 'icon': Icons.child_care, 'preferences': 'Loves pizza'},
-  ];
+  List<Map<String, dynamic>> familyMembers = [];
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +33,21 @@ class _FamilyScreenState extends State<FamilyScreen> {
                     margin: const EdgeInsets.only(bottom: 15),
                     child: ListTile(
                       leading: CircleAvatar(
+                        radius: 30,
                         backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                        child: Icon(member['icon'], color: Colors.orange),
+                        backgroundImage: member['imagePath'] != null
+                            ? FileImage(File(member['imagePath']))
+                            : null,
+                        child: member['imagePath'] == null
+                            ? const Icon(Icons.person, color: Colors.orange)
+                            : null,
                       ),
                       title: Text(member['name']),
-                      subtitle: Text(member['preferences']),
-                      onTap: () => _showEditDeleteDialog(index),
+                      subtitle: Text(
+                        '${member['relation'] ?? 'Unknown'} • Age: ${member['age'] ?? 'N/A'}',
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () => _showMemberDetails(index),
                     ),
                   );
                 },
@@ -58,12 +64,48 @@ class _FamilyScreenState extends State<FamilyScreen> {
     );
   }
 
-  void _showEditDeleteDialog(int index) {
+  void _showMemberDetails(int index) async {
+    final member = familyMembers[index];
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(familyMembers[index]['name']),
-        content: const Text('What would you like to do?'),
+        title: Text(member['name']),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (member['imagePath'] != null)
+                Center(
+                  child: CircleAvatar(
+                    radius: 50,
+                    backgroundImage: FileImage(File(member['imagePath'])),
+                  ),
+                ),
+              const SizedBox(height: 15),
+              _buildDetailRow('Nickname', member['nickname'] ?? 'N/A'),
+              _buildDetailRow('Date of Birth', member['dob'] ?? 'N/A'),
+              _buildDetailRow('Age', '${member['age'] ?? 'N/A'} years'),
+              _buildDetailRow('Relation', member['relation'] ?? 'N/A'),
+              _buildDetailRow('Favorite Food', member['foodName'] ?? 'N/A'),
+              const SizedBox(height: 10),
+              const Text('Allergies:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              if (member['allergies'] != null && member['allergies'].isNotEmpty)
+                Wrap(
+                  spacing: 5,
+                  children: (member['allergies'] as List<String>)
+                      .map((allergy) => Chip(
+                            label: Text(allergy, style: const TextStyle(fontSize: 12)),
+                            backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                          ))
+                      .toList(),
+                )
+              else
+                const Text('None', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -71,6 +113,49 @@ class _FamilyScreenState extends State<FamilyScreen> {
               _editMember(index);
             },
             child: const Text('Edit'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmDelete(index);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          Expanded(child: Text(value)),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Member'),
+        content: const Text('Are you sure you want to delete this member?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
@@ -84,95 +169,33 @@ class _FamilyScreenState extends State<FamilyScreen> {
     );
   }
 
-  void _editMember(int index) {
-    String name = familyMembers[index]['name'];
-    String preferences = familyMembers[index]['preferences'];
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Edit Family Member'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Name'),
-                controller: TextEditingController(text: name),
-                onChanged: (value) => name = value,
-              ),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Food Preferences'),
-                controller: TextEditingController(text: preferences),
-                onChanged: (value) => preferences = value,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  familyMembers[index]['name'] = name;
-                  familyMembers[index]['preferences'] = preferences;
-                });
-                Navigator.pop(context);
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
+  void _editMember(int index) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddMemberScreen(
+          member: familyMembers[index],
+          index: index,
+        ),
+      ),
     );
+    if (result != null) {
+      setState(() {
+        familyMembers[result['index']] = result['data'];
+      });
+    }
   }
 
-  void _addMember() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        String name = '';
-        String preferences = '';
-        return AlertDialog(
-          title: const Text('Add Family Member'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Name'),
-                onChanged: (value) => name = value,
-              ),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Food Preferences'),
-                onChanged: (value) => preferences = value,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (name.isNotEmpty) {
-                  setState(() {
-                    familyMembers.add({
-                      'name': name,
-                      'icon': Icons.person,
-                      'preferences': preferences.isEmpty ? 'No preferences set' : preferences,
-                    });
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
+  void _addMember() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddMemberScreen()),
     );
+    if (result != null) {
+      setState(() {
+        familyMembers.add(result['data']);
+      });
+    }
   }
 
   void _deleteMember(int index) {
