@@ -1,73 +1,179 @@
 import 'package:flutter/material.dart';
 
-class CameraScreen extends StatelessWidget {
+class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
+
+  @override
+  State<CameraScreen> createState() => _CameraScreenState();
+}
+
+class _CameraScreenState extends State<CameraScreen> {
+  bool _flashOn = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: const Text('Camera', style: TextStyle(color: Colors.white)),
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.flash_off),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.flip_camera_ios),
-            onPressed: () {},
-          ),
-        ],
-      ),
       body: Stack(
         children: [
+          // Full-screen camera preview
           Container(
             width: double.infinity,
             height: double.infinity,
             color: Colors.grey.shade800,
             child: const Center(
-              child: Text(
-                'Camera Preview\n(Camera integration required)',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white, fontSize: 18),
+              child: Icon(
+                Icons.camera_alt,
+                size: 100,
+                color: Colors.white54,
               ),
             ),
           ),
+          
+          // Top controls
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Back button
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                  ),
+                  // Flash toggle
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _flashOn = !_flashOn;
+                      });
+                    },
+                    icon: Icon(
+                      _flashOn ? Icons.flash_on : Icons.flash_off,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // Instruction text
           Positioned(
-            bottom: 100,
+            top: 100,
             left: 0,
             right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GalleryScreen())),
-                  icon: const Icon(Icons.photo_library, color: Colors.white, size: 30),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 40),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Place the stone clearly in the frame',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ResultScreen())),
-                  child: Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(40),
-                      border: Border.all(color: Colors.brown, width: 4),
-                    ),
-                    child: const Icon(Icons.camera_alt, color: Colors.brown, size: 40),
+              ),
+            ),
+          ),
+          
+          // Bottom capture button
+          Positioned(
+            bottom: 40,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () {
+                  // Navigate to Processing Screen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProcessingScreen()),
+                  );
+                },
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.brown, width: 4),
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    color: Colors.brown,
+                    size: 40,
                   ),
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.settings, color: Colors.white, size: 30),
-                ),
-              ],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ProcessingScreen extends StatefulWidget {
+  const ProcessingScreen({super.key});
+
+  @override
+  State<ProcessingScreen> createState() => _ProcessingScreenState();
+}
+
+class _ProcessingScreenState extends State<ProcessingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Simulate processing for 2 seconds then navigate to result
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const ResultScreen()),
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              color: Colors.brown,
+              strokeWidth: 3,
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Analyzing Stone...',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.brown,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please wait',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
