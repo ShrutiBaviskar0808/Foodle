@@ -247,13 +247,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFamilyMember(String name, String? imagePath) {
+    final imageExists = imagePath != null && File(imagePath).existsSync();
     return Column(
       children: [
         CircleAvatar(
           radius: 30,
           backgroundColor: Colors.orange.withValues(alpha: 0.2),
-          backgroundImage: imagePath != null ? FileImage(File(imagePath)) : null,
-          child: imagePath == null ? const Icon(Icons.person, color: Colors.orange, size: 20) : null,
+          backgroundImage: imageExists ? FileImage(File(imagePath)) : null,
+          child: !imageExists ? const Icon(Icons.person, color: Colors.orange, size: 20) : null,
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -290,13 +291,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildFriend(String name, String? imagePath) {
+    final imageExists = imagePath != null && File(imagePath).existsSync();
     return Column(
       children: [
         CircleAvatar(
           radius: 30,
           backgroundColor: Colors.grey[200],
-          backgroundImage: imagePath != null ? FileImage(File(imagePath)) : null,
-          child: imagePath == null ? const Icon(Icons.person, color: Colors.grey, size: 20) : null,
+          backgroundImage: imageExists ? FileImage(File(imagePath)) : null,
+          child: !imageExists ? const Icon(Icons.person, color: Colors.grey, size: 20) : null,
         ),
         const SizedBox(height: 8),
         SizedBox(

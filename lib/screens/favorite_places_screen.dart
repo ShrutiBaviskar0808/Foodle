@@ -67,18 +67,19 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
                 itemCount: places.length,
                 itemBuilder: (context, index) {
                   final place = places[index];
+                  final imagePath = place['image_path'];
+                  final imageExists = imagePath != null && 
+                                     imagePath.toString().isNotEmpty && 
+                                     File(imagePath).existsSync();
+                  
                   return Card(
                     margin: const EdgeInsets.only(bottom: 15),
                     child: ListTile(
                       leading: CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                        backgroundImage: (place['image_path'] != null && place['image_path'].toString().isNotEmpty)
-                            ? FileImage(File(place['image_path']))
-                            : null,
-                        child: (place['image_path'] == null || place['image_path'].toString().isEmpty)
-                            ? const Icon(Icons.restaurant, color: Colors.orange)
-                            : null,
+                        backgroundImage: imageExists ? FileImage(File(imagePath)) : null,
+                        child: !imageExists ? const Icon(Icons.restaurant, color: Colors.orange) : null,
                       ),
                       title: Text(place['store_name'] ?? 'Unknown'),
                       subtitle: Text(place['food_item'] ?? ''),
