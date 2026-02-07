@@ -4,7 +4,7 @@ import 'home.dart';
 import 'screens/explore_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/add_dashboard_screen.dart';
+import 'screens/user_profile_dashboard.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -31,7 +31,7 @@ class _MainNavigationState extends State<MainNavigation> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddDashboardScreen()),
+            MaterialPageRoute(builder: (context) => const UserProfileDashboard()),
           );
         },
         backgroundColor: Colors.orange,
