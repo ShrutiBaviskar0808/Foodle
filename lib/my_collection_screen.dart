@@ -44,7 +44,7 @@ class MyCollectionScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CollectionDetailScreen(stoneName: name),
+            builder: (context) => CollectionDetailScreen(stoneName: name, imagePath: imagePath),
           ),
         );
       },

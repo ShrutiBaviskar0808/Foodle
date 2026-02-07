@@ -3,8 +3,9 @@ import 'stone_detail_screen.dart';
 
 class CollectionDetailScreen extends StatefulWidget {
   final String stoneName;
+  final String imagePath;
 
-  const CollectionDetailScreen({super.key, required this.stoneName});
+  const CollectionDetailScreen({super.key, required this.stoneName, required this.imagePath});
 
   @override
   State<CollectionDetailScreen> createState() => _CollectionDetailScreenState();
@@ -88,7 +89,16 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(Icons.landscape, size: 80, color: Colors.grey.shade400),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  widget.imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.landscape, size: 80, color: Colors.grey.shade400);
+                  },
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             
