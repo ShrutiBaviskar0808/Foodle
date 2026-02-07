@@ -7,90 +7,240 @@ class LearnGuidesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text('Learn & Guides'),
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildGuideCard(
-            context,
-            'How to Identify Stones',
-            'Learn the basics of stone identification',
-            Icons.search,
-            Colors.blue,
-            _getIdentificationGuide(),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 200,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              title: const Text('Learn & Explore', style: TextStyle(fontWeight: FontWeight.bold)),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.brown.shade700,
+                      Colors.brown.shade500,
+                      Colors.orange.shade400,
+                    ],
+                  ),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -50,
+                      top: -50,
+                      child: Icon(Icons.school, size: 200, color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                    Positioned(
+                      left: -30,
+                      bottom: -30,
+                      child: Icon(Icons.landscape, size: 150, color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
-          _buildGuideCard(
-            context,
-            'Tips for Better Photos',
-            'Capture clear images for accurate identification',
-            Icons.camera_alt,
-            Colors.green,
-            _getPhotoTipsGuide(),
-          ),
-          _buildGuideCard(
-            context,
-            'Rocks vs Minerals',
-            'Understand the key differences',
-            Icons.compare,
-            Colors.orange,
-            _getRocksMineralsGuide(),
-          ),
-          _buildGuideCard(
-            context,
-            'Beginner Geology Lessons',
-            'Start your geology journey here',
-            Icons.school,
-            Colors.purple,
-            _getGeologyLessonsGuide(),
-          ),
-          _buildGuideCard(
-            context,
-            'Fun Stone Facts',
-            'Fascinating facts about rocks and minerals',
-            Icons.lightbulb,
-            Colors.amber,
-            _getFunFactsGuide(),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Popular Guides',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.brown),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildFeaturedCard(
+                    context,
+                    'How to Identify Stones',
+                    'Master the art of stone identification',
+                    Icons.search,
+                    [Colors.blue.shade400, Colors.blue.shade700],
+                    _getIdentificationGuide(),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildSmallCard(
+                          context,
+                          'Photo Tips',
+                          Icons.camera_alt,
+                          [Colors.green.shade400, Colors.green.shade700],
+                          _getPhotoTipsGuide(),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildSmallCard(
+                          context,
+                          'Rocks vs Minerals',
+                          Icons.compare,
+                          [Colors.orange.shade400, Colors.orange.shade700],
+                          _getRocksMineralsGuide(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Learning Paths',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.brown),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildLearningPathCard(
+                    context,
+                    'Beginner Geology',
+                    'Start your journey',
+                    Icons.school,
+                    [Colors.purple.shade400, Colors.purple.shade700],
+                    _getGeologyLessonsGuide(),
+                    '6 Lessons',
+                  ),
+                  const SizedBox(height: 12),
+                  _buildLearningPathCard(
+                    context,
+                    'Fun Stone Facts',
+                    'Discover amazing facts',
+                    Icons.lightbulb,
+                    [Colors.amber.shade400, Colors.amber.shade700],
+                    _getFunFactsGuide(),
+                    '15+ Facts',
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
-      ),
       ),
     );
   }
 
-  Widget _buildGuideCard(BuildContext context, String title, String subtitle, IconData icon, Color color, String content) {
+  Widget _buildFeaturedCard(BuildContext context, String title, String subtitle, IconData icon, List<Color> colors, String content) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => GuideDetailScreen(title: title, content: content),
-          ),
-        );
-      },
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => GuideDetailScreen(title: title, content: content))),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        height: 180,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(color: colors[1].withValues(alpha: 0.4), blurRadius: 15, offset: const Offset(0, 8)),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -20,
+              top: -20,
+              child: Icon(icon, size: 150, color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 32),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.9)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSmallCard(BuildContext context, String title, IconData icon, List<Color> colors, String content) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => GuideDetailScreen(title: title, content: content))),
+      child: Container(
+        height: 140,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: colors[1].withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 5)),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -15,
+              bottom: -15,
+              child: Icon(icon, size: 80, color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(icon, color: Colors.white, size: 24),
+                  ),
+                  const Spacer(),
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    maxLines: 2,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLearningPathCard(BuildContext context, String title, String subtitle, IconData icon, List<Color> colors, String content, String badge) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => GuideDetailScreen(title: title, content: content))),
+      child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
+          gradient: LinearGradient(colors: colors, begin: Alignment.topLeft, end: Alignment.bottomRight),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: colors[1].withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 5)),
+          ],
         ),
         child: Row(
           children: [
             Container(
-              width: 60,
-              height: 60,
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 30),
+              child: Icon(icon, color: Colors.white, size: 32),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -99,17 +249,27 @@ class LearnGuidesScreen extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.9)),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                badge,
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+            ),
           ],
         ),
       ),
