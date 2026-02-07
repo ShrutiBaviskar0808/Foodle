@@ -101,9 +101,9 @@ class HomePage extends StatelessWidget {
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
-                      _buildRestaurant('Costas Inn', Colors.green),
-                      _buildRestaurant("Angie's", Colors.blue),
-                      _buildRestaurant("Koco's Pub", Colors.yellow[700]!),
+                      _buildRestaurant('Costas Inn', Colors.green, image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200'),
+                      _buildRestaurant("Angie's", Colors.blue, image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=200'),
+                      _buildRestaurant("Koco's Pub", Colors.yellow[700]!, image: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=200'),
                       _buildRestaurant('BK Lobster', Colors.brown),
                       _buildRestaurant('Oyster', Colors.orange),
                     ],
@@ -146,18 +146,55 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildRestaurant(String name, Color color) {
+  Widget _buildRestaurant(String name, Color color, {String? image}) {
     return Container(
       width: 100,
       margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.restaurant, color: color, size: 20),
-          const SizedBox(height: 8),
-          Text(name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color), textAlign: TextAlign.center),
-        ],
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: image != null
+            ? Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
+                    image,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Icon(Icons.restaurant, color: color, size: 30),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(child: CircularProgressIndicator(strokeWidth: 2, color: color));
+                    },
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.3),
+                    ),
+                    child: Center(
+                      child: Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.restaurant, color: color, size: 20),
+                  const SizedBox(height: 8),
+                  Text(name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color), textAlign: TextAlign.center),
+                ],
+              ),
       ),
     );
   }

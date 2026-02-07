@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'login.dart';
 import 'signup.dart';
 import 'main_navigation.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
       title: 'Foodle',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF8C00)),
+        textTheme: GoogleFonts.interTextTheme(),
       ),
       initialRoute: '/onboarding',
       routes: {
