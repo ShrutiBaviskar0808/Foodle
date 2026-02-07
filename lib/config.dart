@@ -17,6 +17,8 @@ class AppConfig {
   static const String getMembersEndpoint = '$baseUrl/get_members.php';
   static const String updateMemberEndpoint = '$baseUrl/update_member.php';
   static const String deleteMemberEndpoint = '$baseUrl/delete_member.php';
+  static const String getNotificationsEndpoint = '$baseUrl/get_notifications.php';
+  static const String markNotificationReadEndpoint = '$baseUrl/mark_notification_read.php';
   
   // Request timeout
   static const Duration requestTimeout = Duration(seconds: 15);
