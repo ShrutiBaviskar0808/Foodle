@@ -110,7 +110,7 @@ class StoneDatabaseScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StoneDetailScreen(stoneName: name),
+            builder: (context) => StoneDetailScreen(stoneName: name, imagePath: ''),
           ),
         );
       },
