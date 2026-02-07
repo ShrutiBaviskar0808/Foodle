@@ -20,7 +20,6 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
-    _requestPermissionsAndInitialize();
   }
 
   Future<void> _requestPermissionsAndInitialize() async {
@@ -85,7 +84,10 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _takePicture() async {
-    if (_controller == null || !_controller!.value.isInitialized) return;
+    if (_controller == null || !_controller!.value.isInitialized) {
+      await _requestPermissionsAndInitialize();
+      return;
+    }
     try {
       await _controller!.takePicture();
       if (mounted) {
@@ -100,17 +102,6 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _pickFromGallery() async {
-    final storageStatus = await Permission.photos.request();
-    
-    if (!storageStatus.isGranted) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Photo library permission is required')),
-        );
-      }
-      return;
-    }
-    
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null && mounted) {
