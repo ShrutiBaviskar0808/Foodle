@@ -204,7 +204,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => StoneDetailScreen(stoneName: widget.stoneName),
+                      builder: (context) => StoneDetailScreen(stoneName: widget.stoneName, imagePath: widget.imagePath),
                     ),
                   );
                 },

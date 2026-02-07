@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 class StoneDetailScreen extends StatelessWidget {
   final String stoneName;
+  final String imagePath;
   
-  const StoneDetailScreen({super.key, required this.stoneName});
+  const StoneDetailScreen({super.key, required this.stoneName, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +33,16 @@ class StoneDetailScreen extends StatelessWidget {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(Icons.landscape, size: 80, color: Colors.grey.shade400),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.landscape, size: 80, color: Colors.grey.shade400);
+                  },
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             
