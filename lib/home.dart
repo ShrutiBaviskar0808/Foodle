@@ -45,7 +45,6 @@ class _HomePageState extends State<HomePage> {
         familyMembers = decoded
             .map((item) => Map<String, dynamic>.from(item))
             .where((member) => member['relation'] == 'Family')
-            .take(4)
             .toList();
       });
     }
@@ -68,7 +67,6 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           places = (data['foods'] as List)
               .map((item) => Map<String, dynamic>.from(item))
-              .take(5)
               .toList();
         });
       }
@@ -86,7 +84,6 @@ class _HomePageState extends State<HomePage> {
         friends = decoded
             .map((item) => Map<String, dynamic>.from(item))
             .where((member) => member['relation'] != 'Family')
-            .take(4)
             .toList();
       });
     }
