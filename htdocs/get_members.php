@@ -17,15 +17,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $json = file_get_contents('php://input');
         $data = json_decode($json, true);
         
-        $user_id = $data['user_id'] ?? '';
+        $owner_user_id = $data['owner_user_id'] ?? '';
         
-        if (empty($user_id)) {
-            echo json_encode(['success' => false, 'message' => 'User ID required']);
+        if (empty($owner_user_id)) {
+            echo json_encode(['success' => false, 'message' => 'Owner user ID required']);
             exit;
         }
         
-        $stmt = $pdo->prepare("SELECT * FROM members WHERE user_id = ? ORDER BY created_at DESC");
-        $stmt->execute([$user_id]);
+        $stmt = $pdo->prepare("SELECT m.*, u.name as linked_user_name FROM members m LEFT JOIN users u ON m.linked_user_id = u.id WHERE m.owner_user_id = ? ORDER BY m.created_at DESC");
+        $stmt->execute([$owner_user_id]);
         $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         echo json_encode(['success' => true, 'members' => $members]);
