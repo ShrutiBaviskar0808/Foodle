@@ -30,14 +30,15 @@ class MyCollectionScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final stones = ['Granite', 'Quartz', 'Marble', 'Basalt', 'Limestone', 'Amethyst'];
           final types = ['Igneous Rock', 'Mineral', 'Metamorphic Rock', 'Igneous Rock', 'Sedimentary Rock', 'Crystal'];
-          return _buildCollectionItem(context, stones[index], types[index]);
+          final images = ['assets/images/granite.jpg', 'assets/images/quartz.jpg', 'assets/images/marble.jpg', 'assets/images/basalt.jpg', 'assets/images/limestone.jpg', 'assets/images/amethyst.jpg'];
+          return _buildCollectionItem(context, stones[index], types[index], images[index]);
         },
       ),
       ),
     );
   }
 
-  Widget _buildCollectionItem(BuildContext context, String name, String type) {
+  Widget _buildCollectionItem(BuildContext context, String name, String type, String imagePath) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -65,8 +66,21 @@ class MyCollectionScreen extends StatelessWidget {
                   topRight: Radius.circular(12),
                 ),
               ),
-              child: Center(
-                child: Icon(Icons.landscape, size: 50, color: Colors.grey.shade400),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(
+                      child: Icon(Icons.landscape, size: 50, color: Colors.grey.shade400),
+                    );
+                  },
+                ),
               ),
             ),
             Padding(
