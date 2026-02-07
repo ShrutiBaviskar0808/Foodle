@@ -20,6 +20,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   void initState() {
     super.initState();
+    _requestPermissionsAndInitialize();
   }
 
   Future<void> _requestPermissionsAndInitialize() async {
@@ -84,10 +85,7 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _takePicture() async {
-    if (_controller == null || !_controller!.value.isInitialized) {
-      await _requestPermissionsAndInitialize();
-      return;
-    }
+    if (_controller == null || !_controller!.value.isInitialized) return;
     try {
       await _controller!.takePicture();
       if (mounted) {
