@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'camera_screens.dart';
 import 'my_collection_screen.dart';
 import 'learn_guides_screen.dart';
@@ -19,6 +20,7 @@ class RockStoneIdentifierApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
         useMaterial3: true,
+        textTheme: GoogleFonts.poppinsTextTheme(),
       ),
       home: const SplashScreen(),
     );
