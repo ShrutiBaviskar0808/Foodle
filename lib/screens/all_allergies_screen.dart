@@ -56,10 +56,17 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
         title: const Text('All Allergies'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: () => _showAddAllergyDialog(context),
+            icon: const Icon(Icons.add),
+          ),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: GridView.builder(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
             childAspectRatio: 2.5,
@@ -105,7 +112,40 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
               ),
             );
           },
+          ),
         ),
+      ),
+    );
+  }
+
+  void _showAddAllergyDialog(BuildContext context) {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Custom Allergy'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(labelText: 'Allergy Name'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                setState(() {
+                  allAllergies.add(controller.text);
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
       ),
     );
   }

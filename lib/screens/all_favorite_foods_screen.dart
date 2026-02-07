@@ -35,7 +35,7 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
     {'name': 'Chicken Tikka Masala', 'restaurant': 'Indian Palace', 'calories': '620', 'image': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=100'},
     {'name': 'Lobster Roll', 'restaurant': 'Seafood Shack', 'calories': '480', 'image': 'https://images.unsplash.com/photo-1619895092538-128341789043?w=100'},
     {'name': 'Chicken Parmesan', 'restaurant': 'Olive Garden', 'calories': '890', 'image': 'https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=100'},
-    {'name': 'Pulled Pork Sandwich', 'restaurant': 'BBQ Joint', 'calories': '670', 'image': 'https://images.unsplash.com/photo-1619740455993-9e4e0f5e3b6e?w=100'},
+    {'name': 'Pulled Pork Sandwich', 'restaurant': 'BBQ Joint', 'calories': '670', 'image': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=100'},
     {'name': 'Shrimp Scampi', 'restaurant': 'Red Lobster', 'calories': '560', 'image': 'https://images.unsplash.com/photo-1633504581786-316c8002b1b9?w=100'},
     {'name': 'Beef Tacos', 'restaurant': 'Taco Bell', 'calories': '340', 'image': 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=100'},
     {'name': 'Chicken Fried Rice', 'restaurant': 'Panda Express', 'calories': '520', 'image': 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=100'},
@@ -44,11 +44,11 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
     {'name': 'Beef Stir Fry', 'restaurant': 'Panda Express', 'calories': '580', 'image': 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=100'},
     {'name': 'Clam Chowder', 'restaurant': 'Red Lobster', 'calories': '380', 'image': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=100'},
     {'name': 'Chicken Nachos', 'restaurant': 'Taco Bell', 'calories': '820', 'image': 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=100'},
-    {'name': 'Teriyaki Chicken', 'restaurant': 'Panda Express', 'calories': '490', 'image': 'https://images.unsplash.com/photo-1630409346730-1dbb91f2e6e4?w=100'},
+    {'name': 'Teriyaki Chicken', 'restaurant': 'Panda Express', 'calories': '490', 'image': 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=100'},
     {'name': 'Meatball Sub', 'restaurant': 'Subway', 'calories': '680', 'image': 'https://images.unsplash.com/photo-1607532941433-304659e8198a?w=100'},
     {'name': 'Chicken Caesar Wrap', 'restaurant': 'Panera Bread', 'calories': '520', 'image': 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=100'},
     {'name': 'Beef Enchiladas', 'restaurant': 'Chilis', 'calories': '760', 'image': 'https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=100'},
-    {'name': 'Shrimp Tacos', 'restaurant': 'Taco Bell', 'calories': '420', 'image': 'https://images.unsplash.com/photo-1624300603167-1c5d9c5bbe3d?w=100'},
+    {'name': 'Shrimp Tacos', 'restaurant': 'Taco Bell', 'calories': '420', 'image': 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=100'},
     {'name': 'Chicken Alfredo', 'restaurant': 'Olive Garden', 'calories': '920', 'image': 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=100'},
     {'name': 'Veggie Pizza', 'restaurant': 'Pizza Hut', 'calories': '640', 'image': 'https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=100'},
     {'name': 'Chicken Tenders', 'restaurant': 'Raising Canes', 'calories': '580', 'image': 'https://images.unsplash.com/photo-1562967914-608f82629710?w=100'},
@@ -98,11 +98,18 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
         title: const Text('All Favorite Foods'),
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: () => _showAddFoodDialog(context),
+            icon: const Icon(Icons.add),
+          ),
+        ],
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: allFoods.length,
-        itemBuilder: (context, index) {
+      body: SafeArea(
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: allFoods.length,
+          itemBuilder: (context, index) {
           final food = allFoods[index];
           final isSelected = selectedFoods.contains(food['name']);
           return Container(
@@ -149,6 +156,60 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
             ),
           );
         },
+        ),
+      ),
+    );
+  }
+
+  void _showAddFoodDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final restaurantController = TextEditingController();
+    final caloriesController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Custom Food'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: 'Food Name'),
+            ),
+            TextField(
+              controller: restaurantController,
+              decoration: const InputDecoration(labelText: 'Restaurant/Place'),
+            ),
+            TextField(
+              controller: caloriesController,
+              decoration: const InputDecoration(labelText: 'Calories'),
+              keyboardType: TextInputType.number,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (nameController.text.isNotEmpty) {
+                setState(() {
+                  allFoods.add({
+                    'name': nameController.text,
+                    'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                    'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                    'image': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100',
+                  });
+                });
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
       ),
     );
   }

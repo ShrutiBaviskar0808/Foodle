@@ -108,13 +108,18 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Allergies', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  TextButton(
-                    onPressed: () async {
-                      await Navigator.push(context, MaterialPageRoute(builder: (context) => const AllAllergiesScreen()));
-                      _loadData();
-                    },
-                    child: const Text('View All', style: TextStyle(color: Colors.orange)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Allergies', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      TextButton(
+                        onPressed: () async {
+                          await Navigator.push(context, MaterialPageRoute(builder: (context) => const AllAllergiesScreen()));
+                          _loadData();
+                        },
+                        child: const Text('View All', style: TextStyle(color: Colors.orange)),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   Wrap(
