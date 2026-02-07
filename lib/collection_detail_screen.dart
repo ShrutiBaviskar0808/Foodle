@@ -16,6 +16,18 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
   final TextEditingController _locationController = TextEditingController(text: 'Rocky Mountains, Colorado');
   bool _isEditing = false;
 
+  String _getStoneType(String stoneName) {
+    final types = {
+      'Granite': 'Igneous Rock',
+      'Quartz': 'Mineral',
+      'Marble': 'Metamorphic Rock',
+      'Basalt': 'Igneous Rock',
+      'Limestone': 'Sedimentary Rock',
+      'Amethyst': 'Crystal',
+    };
+    return types[stoneName] ?? 'Rock';
+  }
+
   @override
   void dispose() {
     _notesController.dispose();
@@ -116,9 +128,9 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 color: Colors.brown.shade100,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                'Igneous Rock',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.brown),
+              child: Text(
+                _getStoneType(widget.stoneName),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.brown),
               ),
             ),
             const SizedBox(height: 20),
