@@ -13,6 +13,10 @@ class AppConfig {
   static const String getFoodsEndpoint = '$baseUrl/get_favorite_foods.php';
   static const String updateFoodEndpoint = '$baseUrl/update_favorite_food.php';
   static const String deleteFoodEndpoint = '$baseUrl/delete_favorite_food.php';
+  static const String addMemberEndpoint = '$baseUrl/add_member.php';
+  static const String getMembersEndpoint = '$baseUrl/get_members.php';
+  static const String updateMemberEndpoint = '$baseUrl/update_member.php';
+  static const String deleteMemberEndpoint = '$baseUrl/delete_member.php';
   
   // Request timeout
   static const Duration requestTimeout = Duration(seconds: 15);
