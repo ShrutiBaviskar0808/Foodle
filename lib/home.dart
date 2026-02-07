@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'screens/family_screen.dart';
 import 'screens/favorite_places_screen.dart';
 import 'screens/friends_screen.dart';
+import 'screens/user_dashboard_screen.dart';
 import 'config.dart';
 
 class HomePage extends StatefulWidget {
@@ -127,7 +128,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           const Icon(Icons.menu, color: Colors.white, size: 24),
                           const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300)),
-                          CircleAvatar(radius: 22, backgroundImage: NetworkImage('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100')),
+                          GestureDetector(
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen())),
+                            child: CircleAvatar(radius: 22, backgroundImage: NetworkImage('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100')),
+                          ),
                         ],
                       ),
                     ),
