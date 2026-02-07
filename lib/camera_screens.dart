@@ -374,112 +374,113 @@ class ResultScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              height: 250,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(imagePath),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.landscape, color: Colors.brown, size: 100);
-                  },
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 250,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(imagePath),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.landscape, color: Colors.brown, size: 100);
+                    },
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green.shade200),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.check_circle, color: Colors.green.shade600),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Identified: ${stoneData.name}',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green.shade700,
+              const SizedBox(height: 20),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green.shade600),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Identified: ${stoneData.name}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade700,
+                          ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Confidence: ${stoneData.confidence}%',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.green.shade600,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Confidence: ${stoneData.confidence}%',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.green.shade600,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Rock Information',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildInfoCard('Type', stoneData.type),
+              _buildInfoCard('Formation', stoneData.formation),
+              _buildInfoCard('Composition', stoneData.composition),
+              _buildInfoCard('Hardness', stoneData.hardness),
+              _buildInfoCard('Color', stoneData.color),
+              _buildInfoCard('Uses', stoneData.uses),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DetailedInfoScreen(imagePath: imagePath, stoneData: stoneData))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.brown,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Rock Information',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildInfoCard('Type', stoneData.type),
-            _buildInfoCard('Formation', stoneData.formation),
-            _buildInfoCard('Composition', stoneData.composition),
-            _buildInfoCard('Hardness', stoneData.hardness),
-            _buildInfoCard('Color', stoneData.color),
-            _buildInfoCard('Uses', stoneData.uses),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DetailedInfoScreen(imagePath: imagePath, stoneData: stoneData))),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.brown,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  child: const Text('View Detailed Information', style: TextStyle(fontSize: 16)),
                 ),
-                child: const Text('View Detailed Information', style: TextStyle(fontSize: 16)),
               ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.brown,
-                  side: const BorderSide(color: Colors.brown),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {},
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.brown,
+                    side: const BorderSide(color: Colors.brown),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  child: const Text('Save to Collection', style: TextStyle(fontSize: 16)),
                 ),
-                child: const Text('Save to Collection', style: TextStyle(fontSize: 16)),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -544,50 +545,51 @@ class DetailedInfoScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(
-                  File(imagePath),
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.landscape, color: Colors.brown, size: 80);
-                  },
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(imagePath),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.landscape, color: Colors.brown, size: 80);
+                    },
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              stoneData.name,
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+              const SizedBox(height: 20),
+              Text(
+                stoneData.name,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              stoneData.type,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Colors.brown,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 8),
+              Text(
+                stoneData.type,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.brown,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            _buildSection('Overview', stoneData.formation),
-            _buildSection('Composition', stoneData.composition),
-            _buildSection('Physical Properties', 'Hardness: ${stoneData.hardness}\nColor: ${stoneData.color}'),
-            _buildSection('Uses', stoneData.uses),
-          ],
+              const SizedBox(height: 20),
+              _buildSection('Overview', stoneData.formation),
+              _buildSection('Composition', stoneData.composition),
+              _buildSection('Physical Properties', 'Hardness: ${stoneData.hardness}\nColor: ${stoneData.color}'),
+              _buildSection('Uses', stoneData.uses),
+            ],
+          ),
         ),
       ),
     );
