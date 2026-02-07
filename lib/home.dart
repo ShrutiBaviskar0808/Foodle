@@ -7,6 +7,7 @@ import 'screens/family_screen.dart';
 import 'screens/favorite_places_screen.dart';
 import 'screens/friends_screen.dart';
 import 'screens/user_dashboard_screen.dart';
+import 'screens/meal_planner_screen.dart';
 import 'config.dart';
 
 class HomePage extends StatefulWidget {

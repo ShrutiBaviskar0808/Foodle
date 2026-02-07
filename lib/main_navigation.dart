@@ -5,6 +5,7 @@ import 'screens/explore_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/user_profile_dashboard.dart';
+import 'screens/meal_planner_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -18,7 +19,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _screens = [
     const HomePage(),
-    const ExploreScreen(),
+    const MealPlannerScreen(),
     const ProfileScreen(),
     const SettingsScreen(),
   ];
