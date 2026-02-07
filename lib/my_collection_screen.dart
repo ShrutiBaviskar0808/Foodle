@@ -75,6 +75,7 @@ class MyCollectionScreen extends StatelessWidget {
                   imagePath,
                   fit: BoxFit.cover,
                   width: double.infinity,
+                  cacheWidth: 300,
                   errorBuilder: (context, error, stackTrace) {
                     return Center(
                       child: Icon(Icons.landscape, size: 50, color: Colors.grey.shade400),
