@@ -1,10 +1,94 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'screens/family_screen.dart';
 import 'screens/favorite_places_screen.dart';
 import 'screens/friends_screen.dart';
+import 'config.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<Map<String, dynamic>> familyMembers = [];
+  List<Map<String, dynamic>> places = [];
+  List<Map<String, dynamic>> friends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await Future.wait([
+      _loadFamilyMembers(),
+      _loadPlaces(),
+      _loadFriends(),
+    ]);
+  }
+
+  Future<void> _loadFamilyMembers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? membersJson = prefs.getString('all_members');
+    if (membersJson != null) {
+      final List<dynamic> decoded = json.decode(membersJson);
+      setState(() {
+        familyMembers = decoded
+            .map((item) => Map<String, dynamic>.from(item))
+            .where((member) => member['relation'] == 'Family')
+            .take(4)
+            .toList();
+      });
+    }
+  }
+
+  Future<void> _loadPlaces() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getFoodsEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final data = json.decode(response.body);
+      if (data['success']) {
+        setState(() {
+          places = (data['foods'] as List)
+              .map((item) => Map<String, dynamic>.from(item))
+              .take(5)
+              .toList();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading places: $e');
+    }
+  }
+
+  Future<void> _loadFriends() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? membersJson = prefs.getString('all_members');
+    if (membersJson != null) {
+      final List<dynamic> decoded = json.decode(membersJson);
+      setState(() {
+        friends = decoded
+            .map((item) => Map<String, dynamic>.from(item))
+            .where((member) => member['relation'] != 'Family')
+            .take(4)
+            .toList();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,59 +158,81 @@ class HomePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Family', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen())), child: const Text('View All >', style: TextStyle(color: Colors.orange))),
+                    TextButton(
+                      onPressed: () async {
+                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen()));
+                        _loadFamilyMembers();
+                      },
+                      child: const Text('View All >', style: TextStyle(color: Colors.orange)),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildFamilyMember('The Boss', Icons.person),
-                    _buildFamilyMember('My Love', Icons.person),
-                    _buildFamilyMember('Kimberly', Icons.person),
-                    _buildFamilyMember('Zoey', Icons.child_care),
-                  ],
-                ),
+                familyMembers.isEmpty
+                    ? const Center(child: Text('No family members added yet', style: TextStyle(color: Colors.grey)))
+                    : SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: familyMembers.map((member) => Padding(
+                            padding: const EdgeInsets.only(right: 15),
+                            child: _buildFamilyMember(member['name'], member['imagePath']),
+                          )).toList(),
+                        ),
+                      ),
                 const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Favorite Places', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen())), child: const Text('View All >', style: TextStyle(color: Colors.orange))),
+                    TextButton(
+                      onPressed: () async {
+                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen()));
+                        _loadPlaces();
+                      },
+                      child: const Text('View All >', style: TextStyle(color: Colors.orange)),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 15),
                 SizedBox(
                   height: 120,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      _buildRestaurant('Costas Inn', Colors.green, image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200'),
-                      _buildRestaurant("Angie's", Colors.blue, image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=200'),
-                      _buildRestaurant("Koco's Pub", Colors.yellow[700]!, image: 'https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=200'),
-                      _buildRestaurant('BK Lobster', Colors.brown),
-                      _buildRestaurant('Oyster', Colors.orange),
-                    ],
-                  ),
+                  child: places.isEmpty
+                      ? const Center(child: Text('No favorite places added yet', style: TextStyle(color: Colors.grey)))
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: places.length,
+                          itemBuilder: (context, index) {
+                            final colors = [Colors.green, Colors.blue, Colors.orange, Colors.brown, Colors.purple];
+                            return _buildRestaurant(places[index]['store_name'], colors[index % colors.length]);
+                          },
+                        ),
                 ),
                 const SizedBox(height: 30),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Friends', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen())), child: const Text('View All >', style: TextStyle(color: Colors.orange))),
+                    TextButton(
+                      onPressed: () async {
+                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen()));
+                        _loadFriends();
+                      },
+                      child: const Text('View All >', style: TextStyle(color: Colors.orange)),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 15),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildFriend('Sunil'),
-                    _buildFriend('Brett C'),
-                    _buildFriend('Joe D'),
-                    _buildFriend('Austin'),
-                  ],
-                ),
+                friends.isEmpty
+                    ? const Center(child: Text('No friends added yet', style: TextStyle(color: Colors.grey)))
+                    : SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: friends.map((friend) => Padding(
+                            padding: const EdgeInsets.only(right: 15),
+                            child: _buildFriend(friend['name'], friend['imagePath']),
+                          )).toList(),
+                        ),
+                      ),
               ],
             ),
           ),
@@ -136,17 +242,31 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildFamilyMember(String name, IconData icon) {
+  Widget _buildFamilyMember(String name, String? imagePath) {
     return Column(
       children: [
-        CircleAvatar(radius: 30, backgroundColor: Colors.orange.withValues(alpha: 0.2), child: Icon(icon, color: Colors.orange, size: 20)),
+        CircleAvatar(
+          radius: 30,
+          backgroundColor: Colors.orange.withValues(alpha: 0.2),
+          backgroundImage: imagePath != null ? FileImage(File(imagePath)) : null,
+          child: imagePath == null ? const Icon(Icons.person, color: Colors.orange, size: 20) : null,
+        ),
         const SizedBox(height: 8),
-        Text(name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        SizedBox(
+          width: 60,
+          child: Text(
+            name,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildRestaurant(String name, Color color, {String? image}) {
+  Widget _buildRestaurant(String name, Color color) {
     return Container(
       width: 100,
       margin: const EdgeInsets.only(right: 12),
@@ -154,57 +274,37 @@ class HomePage extends StatelessWidget {
         color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: image != null
-            ? Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Icon(Icons.restaurant, color: color, size: 30),
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(child: CircularProgressIndicator(strokeWidth: 2, color: color));
-                    },
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                    ),
-                    child: Center(
-                      child: Text(
-                        name,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.restaurant, color: color, size: 20),
-                  const SizedBox(height: 8),
-                  Text(name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color), textAlign: TextAlign.center),
-                ],
-              ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.restaurant, color: color, size: 20),
+          const SizedBox(height: 8),
+          Text(name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color), textAlign: TextAlign.center),
+        ],
       ),
     );
   }
 
-  Widget _buildFriend(String name) {
+  Widget _buildFriend(String name, String? imagePath) {
     return Column(
       children: [
-        CircleAvatar(radius: 30, backgroundColor: Colors.grey[200], child: const Icon(Icons.person, color: Colors.grey, size: 20)),
+        CircleAvatar(
+          radius: 30,
+          backgroundColor: Colors.grey[200],
+          backgroundImage: imagePath != null ? FileImage(File(imagePath)) : null,
+          child: imagePath == null ? const Icon(Icons.person, color: Colors.grey, size: 20) : null,
+        ),
         const SizedBox(height: 8),
-        Text(name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        SizedBox(
+          width: 60,
+          child: Text(
+            name,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
