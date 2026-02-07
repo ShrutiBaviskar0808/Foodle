@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
+import 'dart:math';
+import 'stone_data.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -87,11 +90,11 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void> _takePicture() async {
     if (_controller == null || !_controller!.value.isInitialized) return;
     try {
-      await _controller!.takePicture();
+      final XFile image = await _controller!.takePicture();
       if (mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProcessingScreen()),
+          MaterialPageRoute(builder: (context) => ProcessingScreen(imagePath: image.path)),
         );
       }
     } catch (e) {
@@ -105,7 +108,7 @@ class _CameraScreenState extends State<CameraScreen> {
       if (image != null && mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProcessingScreen()),
+          MaterialPageRoute(builder: (context) => ProcessingScreen(imagePath: image.path)),
         );
       }
     } catch (e) {
@@ -241,7 +244,8 @@ class _CameraScreenState extends State<CameraScreen> {
 }
 
 class ProcessingScreen extends StatefulWidget {
-  const ProcessingScreen({super.key});
+  final String imagePath;
+  const ProcessingScreen({super.key, required this.imagePath});
 
   @override
   State<ProcessingScreen> createState() => _ProcessingScreenState();
@@ -254,9 +258,16 @@ class _ProcessingScreenState extends State<ProcessingScreen> {
     // Simulate processing for 2 seconds then navigate to result
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
+        final random = Random();
+        final randomStone = stoneDatabase[random.nextInt(stoneDatabase.length)];
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const ResultScreen()),
+          MaterialPageRoute(
+            builder: (context) => ResultScreen(
+              imagePath: widget.imagePath,
+              stoneData: randomStone,
+            ),
+          ),
         );
       }
     });
@@ -319,7 +330,19 @@ class GalleryScreen extends StatelessWidget {
         itemCount: 12,
         itemBuilder: (context, index) {
           return GestureDetector(
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const ResultScreen())),
+            onTap: () {
+              final random = Random();
+              final randomStone = stoneDatabase[random.nextInt(stoneDatabase.length)];
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ResultScreen(
+                    imagePath: '',
+                    stoneData: randomStone,
+                  ),
+                ),
+              );
+            },
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.grey.shade200,
@@ -335,7 +358,9 @@ class GalleryScreen extends StatelessWidget {
 }
 
 class ResultScreen extends StatelessWidget {
-  const ResultScreen({super.key});
+  final String imagePath;
+  final StoneData stoneData;
+  const ResultScreen({super.key, required this.imagePath, required this.stoneData});
 
   @override
   Widget build(BuildContext context) {
@@ -367,7 +392,16 @@ class ResultScreen extends StatelessWidget {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.landscape, color: Colors.brown, size: 100),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(imagePath),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.landscape, color: Colors.brown, size: 100);
+                  },
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             Container(
@@ -386,7 +420,7 @@ class ResultScreen extends StatelessWidget {
                       Icon(Icons.check_circle, color: Colors.green.shade600),
                       const SizedBox(width: 8),
                       Text(
-                        'Identified: Granite',
+                        'Identified: ${stoneData.name}',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -397,7 +431,7 @@ class ResultScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Confidence: 94%',
+                    'Confidence: ${stoneData.confidence}%',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.green.shade600,
@@ -416,17 +450,17 @@ class ResultScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildInfoCard('Type', 'Igneous Rock'),
-            _buildInfoCard('Formation', 'Intrusive igneous rock formed from slowly cooling magma'),
-            _buildInfoCard('Composition', 'Quartz, Feldspar, Mica'),
-            _buildInfoCard('Hardness', '6-7 on Mohs scale'),
-            _buildInfoCard('Color', 'Pink, gray, white, or black'),
-            _buildInfoCard('Uses', 'Construction, monuments, countertops'),
+            _buildInfoCard('Type', stoneData.type),
+            _buildInfoCard('Formation', stoneData.formation),
+            _buildInfoCard('Composition', stoneData.composition),
+            _buildInfoCard('Hardness', stoneData.hardness),
+            _buildInfoCard('Color', stoneData.color),
+            _buildInfoCard('Uses', stoneData.uses),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DetailedInfoScreen())),
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DetailedInfoScreen(imagePath: imagePath, stoneData: stoneData))),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.brown,
                   foregroundColor: Colors.white,
@@ -503,7 +537,9 @@ class ResultScreen extends StatelessWidget {
 }
 
 class DetailedInfoScreen extends StatelessWidget {
-  const DetailedInfoScreen({super.key});
+  final String imagePath;
+  final StoneData stoneData;
+  const DetailedInfoScreen({super.key, required this.imagePath, required this.stoneData});
 
   @override
   Widget build(BuildContext context) {
@@ -525,34 +561,40 @@ class DetailedInfoScreen extends StatelessWidget {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.landscape, color: Colors.brown, size: 80),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  File(imagePath),
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.landscape, color: Colors.brown, size: 80);
+                  },
+                ),
+              ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Granite',
-              style: TextStyle(
+            Text(
+              stoneData.name,
+              style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Igneous Rock',
-              style: TextStyle(
+            Text(
+              stoneData.type,
+              style: const TextStyle(
                 fontSize: 18,
                 color: Colors.brown,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 20),
-            _buildSection('Overview', 'Granite is a coarse-grained intrusive igneous rock composed of quartz, alkali feldspar, and plagioclase. It forms from the slow crystallization of magma below Earth\'s surface.'),
-            _buildSection('Formation Process', 'Granite forms when magma cools slowly deep within the Earth\'s crust, allowing large crystals to develop. This process can take millions of years.'),
-            _buildSection('Physical Properties', '• Hardness: 6-7 on Mohs scale\n• Density: 2.6-2.7 g/cm³\n• Texture: Coarse-grained\n• Structure: Massive, granular'),
-            _buildSection('Mineral Composition', '• Quartz (20-60%)\n• Feldspar (10-65%)\n• Mica (5-15%)\n• Hornblende (occasional)'),
-            _buildSection('Varieties', '• Pink Granite\n• Gray Granite\n• White Granite\n• Black Granite'),
-            _buildSection('Uses', '• Building construction\n• Monuments and memorials\n• Kitchen countertops\n• Flooring and tiles\n• Road construction'),
-            _buildSection('Locations', 'Granite is found worldwide, with major deposits in:\n• United States (New Hampshire, Georgia)\n• Brazil\n• India\n• China\n• Norway'),
+            _buildSection('Overview', stoneData.formation),
+            _buildSection('Composition', stoneData.composition),
+            _buildSection('Physical Properties', 'Hardness: ${stoneData.hardness}\nColor: ${stoneData.color}'),
+            _buildSection('Uses', stoneData.uses),
           ],
         ),
       ),
