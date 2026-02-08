@@ -1,11 +1,105 @@
 import 'package:flutter/material.dart';
 import 'collection_detail_screen.dart';
 
-class MyCollectionScreen extends StatelessWidget {
+class MyCollectionScreen extends StatefulWidget {
   const MyCollectionScreen({super.key});
 
   @override
+  State<MyCollectionScreen> createState() => _MyCollectionScreenState();
+}
+
+class _MyCollectionScreenState extends State<MyCollectionScreen> {
+  String _searchQuery = '';
+  String _selectedFilter = 'All';
+  
+  final List<Map<String, String>> _allStones = [
+    {'name': 'Granite', 'type': 'Igneous Rock', 'image': 'assets/images/granite.jpg'},
+    {'name': 'Quartz', 'type': 'Mineral', 'image': 'assets/images/quartz.jpg'},
+    {'name': 'Marble', 'type': 'Metamorphic Rock', 'image': 'assets/images/marble.jpg'},
+    {'name': 'Basalt', 'type': 'Igneous Rock', 'image': 'assets/images/basalt.jpg'},
+    {'name': 'Limestone', 'type': 'Sedimentary Rock', 'image': 'assets/images/limestone.jpg'},
+    {'name': 'Amethyst', 'type': 'Crystal', 'image': 'assets/images/amethyst.jpg'},
+  ];
+
+  List<Map<String, String>> get _filteredStones {
+    return _allStones.where((stone) {
+      final matchesSearch = stone['name']!.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesFilter = _selectedFilter == 'All' || stone['type'] == _selectedFilter;
+      return matchesSearch && matchesFilter;
+    }).toList();
+  }
+
+  void _showSearchDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Search Collection'),
+        content: TextField(
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Enter stone name...',
+            prefixIcon: Icon(Icons.search),
+          ),
+          onChanged: (value) {
+            setState(() {
+              _searchQuery = value;
+            });
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                _searchQuery = '';
+              });
+              Navigator.pop(context);
+            },
+            child: const Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFilterDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Filter by Type'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildFilterOption('All'),
+            _buildFilterOption('Igneous Rock'),
+            _buildFilterOption('Sedimentary Rock'),
+            _buildFilterOption('Metamorphic Rock'),
+            _buildFilterOption('Mineral'),
+            _buildFilterOption('Crystal'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterOption(String filter) {
+    return RadioListTile<String>(
+      title: Text(filter),
+      value: filter,
+      groupValue: _selectedFilter,
+      onChanged: (value) {
+        setState(() {
+          _selectedFilter = value!;
+        });
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final filteredStones = _filteredStones;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -13,27 +107,54 @@ class MyCollectionScreen extends StatelessWidget {
         title: const Text('My Collection'),
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.search), onPressed: () {}),
-          IconButton(icon: const Icon(Icons.filter_list), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.search), onPressed: _showSearchDialog),
+          IconButton(icon: const Icon(Icons.filter_list), onPressed: _showFilterDialog),
         ],
       ),
       body: SafeArea(
-        child: GridView.builder(
-        padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.75,
-        ),
-        itemCount: 6,
-        itemBuilder: (context, index) {
-          final stones = ['Granite', 'Quartz', 'Marble', 'Basalt', 'Limestone', 'Amethyst'];
-          final types = ['Igneous Rock', 'Mineral', 'Metamorphic Rock', 'Igneous Rock', 'Sedimentary Rock', 'Crystal'];
-          final images = ['assets/images/granite.jpg', 'assets/images/quartz.jpg', 'assets/images/marble.jpg', 'assets/images/basalt.jpg', 'assets/images/limestone.jpg', 'assets/images/amethyst.jpg'];
-          return _buildCollectionItem(context, stones[index], types[index], images[index]);
-        },
-      ),
+        child: filteredStones.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No stones found',
+                      style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _searchQuery = '';
+                          _selectedFilter = 'All';
+                        });
+                      },
+                      child: const Text('Clear filters'),
+                    ),
+                  ],
+                ),
+              )
+            : GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.75,
+                ),
+                itemCount: filteredStones.length,
+                itemBuilder: (context, index) {
+                  final stone = filteredStones[index];
+                  return _buildCollectionItem(
+                    context,
+                    stone['name']!,
+                    stone['type']!,
+                    stone['image']!,
+                  );
+                },
+              ),
       ),
     );
   }

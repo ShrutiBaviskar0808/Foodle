@@ -71,6 +71,7 @@ class _CameraScreenState extends State<CameraScreen> {
         _controller = CameraController(
           _cameras![0],
           ResolutionPreset.high,
+          enableAudio: false,
         );
         await _controller!.initialize();
         if (mounted) {
