@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'info_detail_screen.dart';
+import 'feedback_screen.dart';
 
 class SettingsAboutScreen extends StatelessWidget {
   const SettingsAboutScreen({super.key});
@@ -7,97 +8,114 @@ class SettingsAboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text('Settings & About'),
-        elevation: 0,
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            // App Info Section
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      color: Colors.brown.shade100,
-                      borderRadius: BorderRadius.circular(40),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Colors.brown.shade700, Colors.brown.shade500],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(40),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 15,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(Icons.landscape, size: 40, color: Colors.brown),
                     ),
-                    child: const Icon(
-                      Icons.landscape,
-                      size: 40,
-                      color: Colors.brown,
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Rock Stone Identifier',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'Version 1.0.0',
+                      style: TextStyle(fontSize: 12, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Rock Stone Identifier',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  child: ListView(
+                    padding: const EdgeInsets.all(20),
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 60,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      _buildOption(
+                        context,
+                        'About App',
+                        Icons.info_outline,
+                        Colors.blue,
+                        () => _navigateToInfo(context, 'About App', _getAboutContent()),
+                      ),
+                      _buildOption(
+                        context,
+                        'How It Works',
+                        Icons.help_outline,
+                        Colors.green,
+                        () => _navigateToInfo(context, 'How It Works', _getHowItWorksContent()),
+                      ),
+                      _buildOption(
+                        context,
+                        'Privacy Policy',
+                        Icons.privacy_tip_outlined,
+                        Colors.purple,
+                        () => _navigateToInfo(context, 'Privacy Policy', _getPrivacyContent()),
+                      ),
+                      _buildOption(
+                        context,
+                        'Help & FAQ',
+                        Icons.question_answer_outlined,
+                        Colors.orange,
+                        () => _navigateToInfo(context, 'Help & FAQ', _getFAQContent()),
+                      ),
+                      _buildOption(
+                        context,
+                        'Send Feedback',
+                        Icons.feedback_outlined,
+                        Colors.red,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FeedbackScreen())),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Version 1.0.0',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                  ),
-                ],
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-
-            // Information Options
-            _buildOption(
-              context,
-              'About App',
-              Icons.info_outline,
-              () => _navigateToInfo(context, 'About App', _getAboutContent()),
-            ),
-            _buildOption(
-              context,
-              'How It Works',
-              Icons.help_outline,
-              () => _navigateToInfo(
-                context,
-                'How It Works',
-                _getHowItWorksContent(),
-              ),
-            ),
-            _buildOption(
-              context,
-              'Privacy Policy',
-              Icons.privacy_tip_outlined,
-              () => _navigateToInfo(
-                context,
-                'Privacy Policy',
-                _getPrivacyContent(),
-              ),
-            ),
-            _buildOption(
-              context,
-              'Help & FAQ',
-              Icons.question_answer_outlined,
-              () => _navigateToInfo(context, 'Help & FAQ', _getFAQContent()),
-            ),
-            _buildOption(
-              context,
-              'Send Feedback',
-              Icons.feedback_outlined,
-              () => _showFeedbackDialog(context),
-            ),
-            const SizedBox(height: 20),
-
-            // Additional Info
-            // Center(
-            //   child: Text(
-            //     'Made with ❤️ for geology enthusiasts',
-            //     style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-            //   ),
-            // ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -107,36 +125,44 @@ class SettingsAboutScreen extends StatelessWidget {
     BuildContext context,
     String title,
     IconData icon,
+    Color color,
     VoidCallback onTap,
   ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Icon(icon, color: Colors.brown),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey.shade400,
-            ),
+            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey.shade400),
           ],
         ),
       ),
@@ -148,42 +174,6 @@ class SettingsAboutScreen extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (context) => InfoDetailScreen(title: title, content: content),
-      ),
-    );
-  }
-
-  void _showFeedbackDialog(BuildContext context) {
-    final TextEditingController controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Send Feedback'),
-        content: TextField(
-          controller: controller,
-          maxLines: 5,
-          decoration: const InputDecoration(
-            hintText: 'Share your thoughts, suggestions, or report issues...',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Thank you for your feedback!'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            child: const Text('Send'),
-          ),
-        ],
       ),
     );
   }
