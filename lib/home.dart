@@ -258,7 +258,10 @@ class _HomePageState extends State<HomePage> {
           radius: 30,
           backgroundColor: Colors.orange.withValues(alpha: 0.2),
           backgroundImage: imageExists ? FileImage(File(imagePath)) : null,
-          child: !imageExists ? const Icon(Icons.person, color: Colors.orange, size: 20) : null,
+          child: !imageExists ? Text(
+            name.isNotEmpty ? name[0].toUpperCase() : '?',
+            style: const TextStyle(fontSize: 24, color: Colors.orange, fontWeight: FontWeight.bold),
+          ) : null,
         ),
         const SizedBox(height: 8),
         SizedBox(
@@ -302,7 +305,10 @@ class _HomePageState extends State<HomePage> {
           radius: 30,
           backgroundColor: Colors.grey[200],
           backgroundImage: imageExists ? FileImage(File(imagePath)) : null,
-          child: !imageExists ? const Icon(Icons.person, color: Colors.grey, size: 20) : null,
+          child: !imageExists ? Text(
+            name.isNotEmpty ? name[0].toUpperCase() : '?',
+            style: const TextStyle(fontSize: 24, color: Colors.grey, fontWeight: FontWeight.bold),
+          ) : null,
         ),
         const SizedBox(height: 8),
         SizedBox(

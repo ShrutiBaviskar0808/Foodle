@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'all_allergies_screen.dart';
 import 'all_favorite_foods_screen.dart';
@@ -28,6 +29,49 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
     {'name': 'Tacos', 'restaurant': 'Taco Bell', 'calories': '380', 'image': 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=100'},
     {'name': 'Pasta Carbonara', 'restaurant': 'Olive Garden', 'calories': '850', 'image': 'https://images.unsplash.com/photo-1612874742237-6526221588e3?w=100'},
     {'name': 'Fried Chicken', 'restaurant': 'KFC', 'calories': '620', 'image': 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=100'},
+    {'name': 'Beef Burrito', 'restaurant': 'Chipotle', 'calories': '780', 'image': 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=100'},
+    {'name': 'Pad Thai', 'restaurant': 'Thai Express', 'calories': '520', 'image': 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=100'},
+    {'name': 'Ramen Bowl', 'restaurant': 'Ramen House', 'calories': '680', 'image': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=100'},
+    {'name': 'Fish and Chips', 'restaurant': 'Long John Silvers', 'calories': '920', 'image': 'https://images.unsplash.com/photo-1579208575657-c595a05383b7?w=100'},
+    {'name': 'Veggie Wrap', 'restaurant': 'Subway', 'calories': '290', 'image': 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=100'},
+    {'name': 'BBQ Ribs', 'restaurant': 'Texas Roadhouse', 'calories': '1050', 'image': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=100'},
+    {'name': 'Pho Soup', 'restaurant': 'Pho Restaurant', 'calories': '450', 'image': 'https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=100'},
+    {'name': 'Grilled Salmon', 'restaurant': 'Red Lobster', 'calories': '420', 'image': 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=100'},
+    {'name': 'Chicken Quesadilla', 'restaurant': 'Taco Bell', 'calories': '510', 'image': 'https://images.unsplash.com/photo-1618040996337-56904b7850b9?w=100'},
+    {'name': 'Steak Fajitas', 'restaurant': 'Chilis', 'calories': '740', 'image': 'https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=100'},
+    {'name': 'Chicken Tikka Masala', 'restaurant': 'Indian Palace', 'calories': '620', 'image': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=100'},
+    {'name': 'Lobster Roll', 'restaurant': 'Seafood Shack', 'calories': '480', 'image': 'https://images.unsplash.com/photo-1619895092538-128341789043?w=100'},
+    {'name': 'Chicken Parmesan', 'restaurant': 'Olive Garden', 'calories': '890', 'image': 'https://images.unsplash.com/photo-1632778149955-e80f8ceca2e8?w=100'},
+    {'name': 'Pulled Pork Sandwich', 'restaurant': 'BBQ Joint', 'calories': '670', 'image': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=100'},
+    {'name': 'Shrimp Scampi', 'restaurant': 'Red Lobster', 'calories': '560', 'image': 'https://images.unsplash.com/photo-1633504581786-316c8002b1b9?w=100'},
+    {'name': 'Beef Tacos', 'restaurant': 'Taco Bell', 'calories': '340', 'image': 'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=100'},
+    {'name': 'Chicken Fried Rice', 'restaurant': 'Panda Express', 'calories': '520', 'image': 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=100'},
+    {'name': 'Margherita Pizza', 'restaurant': 'Pizza Hut', 'calories': '720', 'image': 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=100'},
+    {'name': 'Chicken Sandwich', 'restaurant': 'Chick-fil-A', 'calories': '440', 'image': 'https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=100'},
+    {'name': 'Beef Stir Fry', 'restaurant': 'Panda Express', 'calories': '580', 'image': 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=100'},
+    {'name': 'Clam Chowder', 'restaurant': 'Red Lobster', 'calories': '380', 'image': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=100'},
+    {'name': 'Chicken Nachos', 'restaurant': 'Taco Bell', 'calories': '820', 'image': 'https://images.unsplash.com/photo-1513456852971-30c0b8199d4d?w=100'},
+    {'name': 'Teriyaki Chicken', 'restaurant': 'Panda Express', 'calories': '490', 'image': 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=100'},
+    {'name': 'Meatball Sub', 'restaurant': 'Subway', 'calories': '680', 'image': 'https://images.unsplash.com/photo-1607532941433-304659e8198a?w=100'},
+    {'name': 'Chicken Caesar Wrap', 'restaurant': 'Panera Bread', 'calories': '520', 'image': 'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?w=100'},
+    {'name': 'Beef Enchiladas', 'restaurant': 'Chilis', 'calories': '760', 'image': 'https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=100'},
+    {'name': 'Shrimp Tacos', 'restaurant': 'Taco Bell', 'calories': '420', 'image': 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=100'},
+    {'name': 'Chicken Alfredo', 'restaurant': 'Olive Garden', 'calories': '920', 'image': 'https://images.unsplash.com/photo-1645112411341-6c4fd023714a?w=100'},
+    {'name': 'Veggie Pizza', 'restaurant': 'Pizza Hut', 'calories': '640', 'image': 'https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=100'},
+    {'name': 'Chicken Tenders', 'restaurant': 'Raising Canes', 'calories': '580', 'image': 'https://images.unsplash.com/photo-1562967914-608f82629710?w=100'},
+    {'name': 'Beef Pho', 'restaurant': 'Pho Restaurant', 'calories': '520', 'image': 'https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=100'},
+    {'name': 'Chicken Burrito Bowl', 'restaurant': 'Chipotle', 'calories': '620', 'image': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=100'},
+    {'name': 'Pepperoni Pizza', 'restaurant': 'Dominos', 'calories': '780', 'image': 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=100'},
+    {'name': 'Chicken Shawarma', 'restaurant': 'Mediterranean Grill', 'calories': '540', 'image': 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=100'},
+    {'name': 'Beef Burger', 'restaurant': 'Five Guys', 'calories': '840', 'image': 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=100'},
+    {'name': 'Chicken Gyro', 'restaurant': 'Greek Restaurant', 'calories': '480', 'image': 'https://images.unsplash.com/photo-1621852004158-f3bc188ace2d?w=100'},
+    {'name': 'Shrimp Fried Rice', 'restaurant': 'Panda Express', 'calories': '560', 'image': 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=100'},
+    {'name': 'Chicken Fajitas', 'restaurant': 'Chilis', 'calories': '680', 'image': 'https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?w=100'},
+    {'name': 'Beef Tacos Supreme', 'restaurant': 'Taco Bell', 'calories': '420', 'image': 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=100'},
+    {'name': 'Chicken Pad Thai', 'restaurant': 'Thai Express', 'calories': '580', 'image': 'https://images.unsplash.com/photo-1559314809-0d155014e29e?w=100'},
+    {'name': 'Veggie Burger', 'restaurant': 'Burger King', 'calories': '390', 'image': 'https://images.unsplash.com/photo-1520072959219-c595dc870360?w=100'},
+    {'name': 'Chicken Ramen', 'restaurant': 'Ramen House', 'calories': '720', 'image': 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=100'},
+    {'name': 'Beef Kebab', 'restaurant': 'Mediterranean Grill', 'calories': '620', 'image': 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=100'},
   ];
 
   @override
@@ -38,14 +82,38 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
 
   Future<void> _loadData() async {
     if (widget.memberData != null) {
-      setState(() {
-        allergies = (widget.memberData!['allergies'] is List) 
-            ? List<String>.from(widget.memberData!['allergies']) 
-            : (widget.memberData!['allergies']?.toString().split(',').map((e) => e.trim()).toList() ?? []);
-        favoriteFoods = (widget.memberData!['likes'] is List) 
-            ? List<String>.from(widget.memberData!['likes']) 
-            : (widget.memberData!['likes']?.toString().split(',').map((e) => e.trim()).toList() ?? []);
-      });
+      // Reload fresh data from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final String? membersJson = prefs.getString('all_members');
+      if (membersJson != null) {
+        final List<dynamic> members = json.decode(membersJson);
+        final member = members.firstWhere(
+          (m) => m['name'] == widget.memberData!['name'],
+          orElse: () => widget.memberData,
+        );
+        
+        setState(() {
+          // Handle allergies
+          if (member['allergies'] != null) {
+            if (member['allergies'] is List) {
+              allergies = List<String>.from(member['allergies']);
+            } else if (member['allergies'] is String) {
+              final allergyStr = member['allergies'] as String;
+              allergies = allergyStr.isNotEmpty ? allergyStr.split(',').map((e) => e.trim()).toList() : [];
+            }
+          }
+          
+          // Handle favorite foods (likes)
+          if (member['likes'] != null) {
+            if (member['likes'] is List) {
+              favoriteFoods = List<String>.from(member['likes']);
+            } else if (member['likes'] is String) {
+              final likesStr = member['likes'] as String;
+              favoriteFoods = likesStr.isNotEmpty ? likesStr.split(',').map((e) => e.trim()).toList() : [];
+            }
+          }
+        });
+      }
     } else {
       final prefs = await SharedPreferences.getInstance();
       setState(() {
@@ -67,7 +135,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
         children: [
           // Header with profile image
           Container(
-            height: 300,
+            height: 220,
             decoration: widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
                 ? BoxDecoration(
                     image: DecorationImage(
@@ -143,7 +211,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       const Text('Allergies', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       TextButton(
                         onPressed: () async {
-                          await Navigator.push(context, MaterialPageRoute(builder: (context) => const AllAllergiesScreen()));
+                          await Navigator.push(context, MaterialPageRoute(builder: (context) => AllAllergiesScreen(memberData: widget.memberData)));
                           _loadData();
                         },
                         child: const Text('View All', style: TextStyle(color: Colors.orange)),
@@ -165,7 +233,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       const Text('Favorite Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       TextButton(
                         onPressed: () async {
-                          await Navigator.push(context, MaterialPageRoute(builder: (context) => const AllFavoriteFoodsScreen()));
+                          await Navigator.push(context, MaterialPageRoute(builder: (context) => AllFavoriteFoodsScreen(memberData: widget.memberData)));
                           _loadData();
                         },
                         child: const Text('View All', style: TextStyle(color: Colors.orange)),

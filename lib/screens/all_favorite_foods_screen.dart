@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AllFavoriteFoodsScreen extends StatefulWidget {
-  const AllFavoriteFoodsScreen({super.key});
+  final Map<String, dynamic>? memberData;
+  
+  const AllFavoriteFoodsScreen({super.key, this.memberData});
 
   @override
   State<AllFavoriteFoodsScreen> createState() => _AllFavoriteFoodsScreenState();
@@ -74,9 +77,31 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
   }
 
   Future<void> _loadSelectedFoods() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getStringList('favorite_foods') ?? [];
-    setState(() => selectedFoods = saved.toSet());
+    if (widget.memberData != null) {
+      debugPrint('Loading foods for member: ${widget.memberData!['name']}');
+      // Reload from SharedPreferences to get latest data
+      final prefs = await SharedPreferences.getInstance();
+      final String? membersJson = prefs.getString('all_members');
+      if (membersJson != null) {
+        final List<dynamic> members = json.decode(membersJson);
+        final member = members.firstWhere(
+          (m) => m['name'] == widget.memberData!['name'],
+          orElse: () => widget.memberData,
+        );
+        final memberLikes = member['likes'];
+        debugPrint('Member likes: $memberLikes');
+        if (memberLikes is List) {
+          setState(() => selectedFoods = List<String>.from(memberLikes).toSet());
+        } else if (memberLikes is String && memberLikes.isNotEmpty) {
+          setState(() => selectedFoods = memberLikes.split(',').map((e) => e.trim()).toSet());
+        }
+      }
+    } else {
+      // Load from SharedPreferences for logged-in user
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getStringList('favorite_foods') ?? [];
+      setState(() => selectedFoods = saved.toSet());
+    }
   }
 
   Future<void> _toggleFood(String foodName) async {
@@ -87,8 +112,7 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
         selectedFoods.add(foodName);
       }
     });
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('favorite_foods', selectedFoods.toList());
+    await _saveFoods();
   }
 
   @override
@@ -162,55 +186,141 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
   }
 
   void _showAddFoodDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final restaurantController = TextEditingController();
-    final caloriesController = TextEditingController();
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController restaurantController = TextEditingController();
+    final TextEditingController caloriesController = TextEditingController();
+    final Set<String> tempSelected = {};
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Custom Food'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Food Name'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add Custom Food'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return const Iterable<String>.empty();
+                      }
+                      return allFoods.map((f) => f['name']!).where((String option) {
+                        return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (String selection) {
+                      setDialogState(() {
+                        tempSelected.add(selection);
+                        nameController.clear();
+                      });
+                    },
+                    fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                      nameController.text = controller.text;
+                      return TextField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Search or add food name',
+                          border: OutlineInputBorder(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: restaurantController,
+                    decoration: const InputDecoration(
+                      labelText: 'Restaurant/Place',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: caloriesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Calories',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  if (tempSelected.isNotEmpty)
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: tempSelected.map((food) {
+                        return Chip(
+                          label: Text(food),
+                          deleteIcon: const Icon(Icons.close, size: 18),
+                          onDeleted: () {
+                            setDialogState(() {
+                              tempSelected.remove(food);
+                            });
+                          },
+                          backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                        );
+                      }).toList(),
+                    ),
+                ],
+              ),
             ),
-            TextField(
-              controller: restaurantController,
-              decoration: const InputDecoration(labelText: 'Restaurant/Place'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
-            TextField(
-              controller: caloriesController,
-              decoration: const InputDecoration(labelText: 'Calories'),
-              keyboardType: TextInputType.number,
+            TextButton(
+              onPressed: () {
+                if (nameController.text.isNotEmpty && !allFoods.any((f) => f['name'] == nameController.text)) {
+                  setState(() {
+                    allFoods.add({
+                      'name': nameController.text,
+                      'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                      'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                      'image': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100',
+                    });
+                    tempSelected.add(nameController.text);
+                  });
+                }
+                setState(() {
+                  selectedFoods.addAll(tempSelected);
+                });
+                _saveFoods();
+                Navigator.pop(context);
+              },
+              child: const Text('Add'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                setState(() {
-                  allFoods.add({
-                    'name': nameController.text,
-                    'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                    'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
-                    'image': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100',
-                  });
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
+  }
+
+  Future<void> _saveFoods() async {
+    if (widget.memberData != null) {
+      debugPrint('Saving foods for member: ${widget.memberData!['name']}');
+      debugPrint('Selected foods: ${selectedFoods.toList()}');
+      final prefs = await SharedPreferences.getInstance();
+      final String? membersJson = prefs.getString('all_members');
+      if (membersJson != null) {
+        final List<dynamic> members = json.decode(membersJson);
+        for (int i = 0; i < members.length; i++) {
+          if (members[i]['name'] == widget.memberData!['name']) {
+            members[i]['likes'] = selectedFoods.toList();
+            debugPrint('Updated member at index $i');
+            break;
+          }
+        }
+        await prefs.setString('all_members', json.encode(members));
+        debugPrint('Saved to SharedPreferences');
+      }
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('favorite_foods', selectedFoods.toList());
+    }
   }
 }

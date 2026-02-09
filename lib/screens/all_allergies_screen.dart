@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AllAllergiesScreen extends StatefulWidget {
-  const AllAllergiesScreen({super.key});
+  final Map<String, dynamic>? memberData;
+  final int? memberIndex;
+  
+  const AllAllergiesScreen({super.key, this.memberData, this.memberIndex});
 
   @override
   State<AllAllergiesScreen> createState() => _AllAllergiesScreenState();
@@ -32,9 +36,31 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
   }
 
   Future<void> _loadSelectedAllergies() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getStringList('user_allergies') ?? [];
-    setState(() => selectedAllergies = saved.toSet());
+    if (widget.memberData != null) {
+      debugPrint('Loading allergies for member: ${widget.memberData!['name']}');
+      // Reload from SharedPreferences to get latest data
+      final prefs = await SharedPreferences.getInstance();
+      final String? membersJson = prefs.getString('all_members');
+      if (membersJson != null) {
+        final List<dynamic> members = json.decode(membersJson);
+        final member = members.firstWhere(
+          (m) => m['name'] == widget.memberData!['name'],
+          orElse: () => widget.memberData,
+        );
+        final memberAllergies = member['allergies'];
+        debugPrint('Member allergies: $memberAllergies');
+        if (memberAllergies is List) {
+          setState(() => selectedAllergies = List<String>.from(memberAllergies).toSet());
+        } else if (memberAllergies is String && memberAllergies.isNotEmpty) {
+          setState(() => selectedAllergies = memberAllergies.split(',').map((e) => e.trim()).toSet());
+        }
+      }
+    } else {
+      // Load from SharedPreferences for logged-in user
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getStringList('user_allergies') ?? [];
+      setState(() => selectedAllergies = saved.toSet());
+    }
   }
 
   Future<void> _toggleAllergy(String allergy) async {
@@ -45,8 +71,7 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
         selectedAllergies.add(allergy);
       }
     });
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList('user_allergies', selectedAllergies.toList());
+    await _saveAllergies();
   }
 
   @override
@@ -119,34 +144,117 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
   }
 
   void _showAddAllergyDialog(BuildContext context) {
-    final controller = TextEditingController();
+    final TextEditingController controller = TextEditingController();
+    final Set<String> tempSelected = {};
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Custom Allergy'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(labelText: 'Allergy Name'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Add Custom Allergy'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Autocomplete<String>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text.isEmpty) {
+                      return const Iterable<String>.empty();
+                    }
+                    return allAllergies.where((String option) {
+                      return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                    });
+                  },
+                  onSelected: (String selection) {
+                    setDialogState(() {
+                      tempSelected.add(selection);
+                      controller.clear();
+                    });
+                  },
+                  fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                    return TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      decoration: const InputDecoration(
+                        labelText: 'Search or add allergy',
+                        border: OutlineInputBorder(),
+                      ),
+                      onSubmitted: (value) {
+                        if (value.isNotEmpty && !allAllergies.contains(value)) {
+                          setDialogState(() {
+                            allAllergies.add(value);
+                            tempSelected.add(value);
+                            controller.clear();
+                          });
+                        }
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                if (tempSelected.isNotEmpty)
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: tempSelected.map((allergy) {
+                      return Chip(
+                        label: Text(allergy),
+                        deleteIcon: const Icon(Icons.close, size: 18),
+                        onDeleted: () {
+                          setDialogState(() {
+                            tempSelected.remove(allergy);
+                          });
+                        },
+                        backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                      );
+                    }).toList(),
+                  ),
+              ],
+            ),
           ),
-          TextButton(
-            onPressed: () {
-              if (controller.text.isNotEmpty) {
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
                 setState(() {
-                  allAllergies.add(controller.text);
+                  selectedAllergies.addAll(tempSelected);
                 });
+                _saveAllergies();
                 Navigator.pop(context);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _saveAllergies() async {
+    if (widget.memberData != null) {
+      debugPrint('Saving allergies for member: ${widget.memberData!['name']}');
+      debugPrint('Selected allergies: ${selectedAllergies.toList()}');
+      final prefs = await SharedPreferences.getInstance();
+      final String? membersJson = prefs.getString('all_members');
+      if (membersJson != null) {
+        final List<dynamic> members = json.decode(membersJson);
+        for (int i = 0; i < members.length; i++) {
+          if (members[i]['name'] == widget.memberData!['name']) {
+            members[i]['allergies'] = selectedAllergies.toList();
+            debugPrint('Updated member at index $i');
+            break;
+          }
+        }
+        await prefs.setString('all_members', json.encode(members));
+        debugPrint('Saved to SharedPreferences');
+      }
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('user_allergies', selectedAllergies.toList());
+    }
   }
 }
