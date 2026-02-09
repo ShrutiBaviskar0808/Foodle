@@ -91,7 +91,78 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return Scaffold(
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.orange, Colors.orange.withValues(alpha: 0.8)],
+                ),
+              ),
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text('Every Plate, Perfectly Planned', style: TextStyle(color: Colors.white, fontSize: 14)),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home, color: Colors.orange),
+              title: const Text('Home'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person, color: Colors.orange),
+              title: const Text('My Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.family_restroom, color: Colors.orange),
+              title: const Text('Family'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.place, color: Colors.orange),
+              title: const Text('Favorite Places'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.people, color: Colors.orange),
+              title: const Text('Friends'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen()));
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Logout'),
+              onTap: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.clear();
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+            ),
+          ],
+        ),
+      ),
+      body: SafeArea(
       child: Column(
       children: [
         Container(
@@ -124,7 +195,12 @@ class _HomePageState extends State<HomePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(Icons.menu, color: Colors.white, size: 24),
+                          Builder(
+                            builder: (context) => IconButton(
+                              icon: const Icon(Icons.menu, color: Colors.white, size: 24),
+                              onPressed: () => Scaffold.of(context).openDrawer(),
+                            ),
+                          ),
                           const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300)),
                           GestureDetector(
                             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen())),
@@ -247,6 +323,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      ),
+    ),
     );
   }
 
