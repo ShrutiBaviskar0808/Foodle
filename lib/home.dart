@@ -163,8 +163,8 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       body: SafeArea(
-      child: Column(
-      children: [
+        child: Column(
+          children: [
         Container(
           height: 200,
           decoration: BoxDecoration(
@@ -322,6 +322,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ],
+        ),
       ),
     );
   }
