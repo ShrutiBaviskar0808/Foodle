@@ -74,6 +74,22 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
   void initState() {
     super.initState();
     _loadSelectedFoods();
+    _loadCustomFoods();
+  }
+
+  Future<void> _loadCustomFoods() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? customFoodsJson = prefs.getString('custom_foods');
+    if (customFoodsJson != null) {
+      final List<dynamic> customFoods = json.decode(customFoodsJson);
+      setState(() {
+        for (var food in customFoods) {
+          if (!allFoods.any((f) => f['name'] == food['name'])) {
+            allFoods.add(Map<String, String>.from(food));
+          }
+        }
+      });
+    }
   }
 
   Future<void> _loadSelectedFoods() async {
@@ -296,14 +312,17 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
                             ElevatedButton(
                               onPressed: () {
                                 if (searchQuery.isNotEmpty) {
+                                  final newFood = {
+                                    'name': searchQuery,
+                                    'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                                    'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                                    'image': '',
+                                  };
+                                  debugPrint('Adding food: $newFood');
                                   setState(() {
-                                    allFoods.add({
-                                      'name': searchQuery,
-                                      'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                                      'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
-                                      'image': '',
-                                    });
+                                    allFoods.add(newFood);
                                   });
+                                  _saveCustomFoods();
                                   setDialogState(() {
                                     tempSelected.add(searchQuery);
                                     searchController.clear();
@@ -411,5 +430,11 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList('favorite_foods', selectedFoods.toList());
     }
+  }
+
+  Future<void> _saveCustomFoods() async {
+    final prefs = await SharedPreferences.getInstance();
+    final customFoods = allFoods.where((f) => f['image']!.isEmpty).toList();
+    await prefs.setString('custom_foods', json.encode(customFoods));
   }
 }

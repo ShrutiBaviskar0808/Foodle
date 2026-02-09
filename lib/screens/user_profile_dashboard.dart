@@ -77,7 +77,21 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   @override
   void initState() {
     super.initState();
+    _loadCustomFoods();
     _loadData();
+  }
+
+  Future<void> _loadCustomFoods() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? customFoodsJson = prefs.getString('custom_foods');
+    if (customFoodsJson != null) {
+      final List<dynamic> customFoods = json.decode(customFoodsJson);
+      for (var food in customFoods) {
+        if (!allFoodsData.any((f) => f['name'] == food['name'])) {
+          allFoodsData.add(Map<String, String>.from(food));
+        }
+      }
+    }
   }
 
   Future<void> _loadData() async {
