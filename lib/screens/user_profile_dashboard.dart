@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'all_allergies_screen.dart';
 import 'all_favorite_foods_screen.dart';
 
 class UserProfileDashboard extends StatefulWidget {
-  const UserProfileDashboard({super.key});
+  final Map<String, dynamic>? memberData;
+  
+  const UserProfileDashboard({super.key, this.memberData});
 
   @override
   State<UserProfileDashboard> createState() => _UserProfileDashboardState();
@@ -34,11 +37,22 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   }
 
   Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      allergies = prefs.getStringList('user_allergies') ?? [];
-      favoriteFoods = prefs.getStringList('favorite_foods') ?? [];
-    });
+    if (widget.memberData != null) {
+      setState(() {
+        allergies = (widget.memberData!['allergies'] is List) 
+            ? List<String>.from(widget.memberData!['allergies']) 
+            : (widget.memberData!['allergies']?.toString().split(',').map((e) => e.trim()).toList() ?? []);
+        favoriteFoods = (widget.memberData!['likes'] is List) 
+            ? List<String>.from(widget.memberData!['likes']) 
+            : (widget.memberData!['likes']?.toString().split(',').map((e) => e.trim()).toList() ?? []);
+      });
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        allergies = prefs.getStringList('user_allergies') ?? [];
+        favoriteFoods = prefs.getStringList('favorite_foods') ?? [];
+      });
+    }
   }
 
   List<Map<String, String>> _getSelectedFoodsData() {
@@ -54,23 +68,41 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           // Header with profile image
           Container(
             height: 300,
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: NetworkImage('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
+            decoration: widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
+                ? BoxDecoration(
+                    image: DecorationImage(
+                      image: FileImage(File(widget.memberData!['imagePath'])),
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.black.withValues(alpha: 0.3), Colors.transparent],
+                      colors: [Colors.orange, Colors.orange.withValues(alpha: 0.7)],
                     ),
                   ),
-                ),
+            child: Stack(
+              children: [
+                if (widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync())
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.black.withValues(alpha: 0.3), Colors.transparent],
+                      ),
+                    ),
+                  ),
+                if (widget.memberData?['imagePath'] == null || !File(widget.memberData!['imagePath']).existsSync())
+                  Center(
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: Colors.white,
+                      child: Text(
+                        (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
+                        style: const TextStyle(fontSize: 60, color: Colors.orange, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -79,23 +111,20 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       children: [
                         IconButton(
                           onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.arrow_back, color: Colors.black),
+                          icon: const Icon(Icons.arrow_back, color: Colors.white),
                         ),
                         const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundImage: NetworkImage('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100'),
-                        ),
+                        const SizedBox(width: 40),
                       ],
                     ),
                   ),
                 ),
-                const Positioned(
+                Positioned(
                   bottom: 20,
                   left: 20,
                   child: Text(
-                    'Dale Hicks',
-                    style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                    widget.memberData?['name'] ?? 'Dale Hicks',
+                    style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

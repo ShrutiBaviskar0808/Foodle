@@ -7,7 +7,7 @@ import 'screens/family_screen.dart';
 import 'screens/favorite_places_screen.dart';
 import 'screens/friends_screen.dart';
 import 'screens/user_dashboard_screen.dart';
-import 'screens/meal_planner_screen.dart';
+import 'screens/user_profile_dashboard.dart';
 import 'config.dart';
 
 class HomePage extends StatefulWidget {
@@ -177,7 +177,10 @@ class _HomePageState extends State<HomePage> {
                         child: Row(
                           children: familyMembers.map((member) => Padding(
                             padding: const EdgeInsets.only(right: 15),
-                            child: _buildFamilyMember(member['name'], member['imagePath']),
+                            child: GestureDetector(
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserProfileDashboard(memberData: member))),
+                              child: _buildFamilyMember(member['name'], member['imagePath']),
+                            ),
                           )).toList(),
                         ),
                       ),
@@ -231,7 +234,10 @@ class _HomePageState extends State<HomePage> {
                         child: Row(
                           children: friends.map((friend) => Padding(
                             padding: const EdgeInsets.only(right: 15),
-                            child: _buildFriend(friend['name'], friend['imagePath']),
+                            child: GestureDetector(
+                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserProfileDashboard(memberData: friend))),
+                              child: _buildFriend(friend['name'], friend['imagePath']),
+                            ),
                           )).toList(),
                         ),
                       ),
