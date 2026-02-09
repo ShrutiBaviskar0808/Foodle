@@ -166,7 +166,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.black.withValues(alpha: 0.3), Colors.transparent],
+                        colors: [Colors.black.withValues(alpha: 0.5), Colors.black.withValues(alpha: 0.7)],
                       ),
                     ),
                   ),
