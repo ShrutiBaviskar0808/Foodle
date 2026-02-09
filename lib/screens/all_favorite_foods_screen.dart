@@ -186,116 +186,158 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
   }
 
   void _showAddFoodDialog(BuildContext context) {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController restaurantController = TextEditingController();
-    final TextEditingController caloriesController = TextEditingController();
-    final Set<String> tempSelected = {};
+    final TextEditingController searchController = TextEditingController();
+    final Set<String> tempSelected = Set.from(selectedFoods);
+    String searchQuery = '';
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Add Custom Food'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: SingleChildScrollView(
+        builder: (context, setDialogState) {
+          final filteredFoods = searchQuery.isEmpty
+              ? allFoods
+              : allFoods.where((f) => f['name']!.toLowerCase().contains(searchQuery.toLowerCase())).toList();
+          
+          return AlertDialog(
+            title: const Text('Select Favorite Foods'),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 400,
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Autocomplete<String>(
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty) {
-                        return const Iterable<String>.empty();
-                      }
-                      return allFoods.map((f) => f['name']!).where((String option) {
-                        return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
-                      });
-                    },
-                    onSelected: (String selection) {
-                      setDialogState(() {
-                        tempSelected.add(selection);
-                        nameController.clear();
-                      });
-                    },
-                    fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                      nameController.text = controller.text;
-                      return TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        decoration: const InputDecoration(
-                          labelText: 'Search or add food name',
-                          border: OutlineInputBorder(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: restaurantController,
-                    decoration: const InputDecoration(
-                      labelText: 'Restaurant/Place',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: caloriesController,
-                    decoration: const InputDecoration(
-                      labelText: 'Calories',
-                      border: OutlineInputBorder(),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 16),
                   if (tempSelected.isNotEmpty)
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: tempSelected.map((food) {
-                        return Chip(
-                          label: Text(food),
-                          deleteIcon: const Icon(Icons.close, size: 18),
-                          onDeleted: () {
+                    Container(
+                      constraints: const BoxConstraints(maxHeight: 100),
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: SingleChildScrollView(
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: tempSelected.map((food) {
+                            return Chip(
+                              label: Text(food),
+                              deleteIcon: const Icon(Icons.close, size: 18),
+                              onDeleted: () {
+                                setDialogState(() {
+                                  tempSelected.remove(food);
+                                });
+                              },
+                              backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Search or add new food',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: searchQuery.isNotEmpty && !allFoods.any((f) => f['name']!.toLowerCase() == searchQuery.toLowerCase())
+                          ? IconButton(
+                              icon: const Icon(Icons.add_circle, color: Colors.orange),
+                              onPressed: () {
+                                if (searchQuery.isNotEmpty) {
+                                  setDialogState(() {
+                                    allFoods.add({
+                                      'name': searchQuery,
+                                      'restaurant': 'Custom',
+                                      'calories': '0',
+                                      'image': '',
+                                    });
+                                    tempSelected.add(searchQuery);
+                                    searchController.clear();
+                                    searchQuery = '';
+                                  });
+                                }
+                              },
+                            )
+                          : null,
+                    ),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        searchQuery = value;
+                      });
+                    },
+                    onSubmitted: (value) {
+                      if (value.isNotEmpty && !allFoods.any((f) => f['name']!.toLowerCase() == value.toLowerCase())) {
+                        setDialogState(() {
+                          allFoods.add({
+                            'name': value,
+                            'restaurant': 'Custom',
+                            'calories': '0',
+                            'image': '',
+                          });
+                          tempSelected.add(value);
+                          searchController.clear();
+                          searchQuery = '';
+                        });
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: filteredFoods.length,
+                      itemBuilder: (context, index) {
+                        final food = filteredFoods[index];
+                        final foodName = food['name']!;
+                        final isSelected = tempSelected.contains(foodName);
+                        final hasImage = food['image']!.isNotEmpty;
+                        
+                        return CheckboxListTile(
+                          title: Text(foodName),
+                          subtitle: Text(food['restaurant']!),
+                          secondary: hasImage
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(food['image']!, width: 40, height: 40, fit: BoxFit.cover),
+                                )
+                              : CircleAvatar(
+                                  backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                                  child: Text(
+                                    foodName[0].toUpperCase(),
+                                    style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                          value: isSelected,
+                          activeColor: Colors.orange,
+                          onChanged: (bool? value) {
                             setDialogState(() {
-                              tempSelected.remove(food);
+                              if (value == true) {
+                                tempSelected.add(foodName);
+                              } else {
+                                tempSelected.remove(foodName);
+                              }
                             });
                           },
-                          backgroundColor: Colors.orange.withValues(alpha: 0.2),
                         );
-                      }).toList(),
+                      },
                     ),
+                  ),
                 ],
               ),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty && !allFoods.any((f) => f['name'] == nameController.text)) {
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
                   setState(() {
-                    allFoods.add({
-                      'name': nameController.text,
-                      'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                      'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
-                      'image': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100',
-                    });
-                    tempSelected.add(nameController.text);
+                    selectedFoods = tempSelected;
                   });
-                }
-                setState(() {
-                  selectedFoods.addAll(tempSelected);
-                });
-                _saveFoods();
-                Navigator.pop(context);
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        ),
+                  _saveFoods();
+                  Navigator.pop(context);
+                },
+                child: const Text('Done'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
