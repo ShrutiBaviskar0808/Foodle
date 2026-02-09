@@ -123,10 +123,6 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
     }
   }
 
-  List<Map<String, String>> _getSelectedFoodsData() {
-    return allFoodsData.where((food) => favoriteFoods.contains(food['name'])).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -181,8 +177,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                           onPressed: () => Navigator.pop(context),
                           icon: const Icon(Icons.arrow_back, color: Colors.white),
                         ),
-                        const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                        const SizedBox(width: 40),
+                        const Spacer(),
                       ],
                     ),
                   ),
@@ -241,12 +236,18 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  ...(_getSelectedFoodsData().isEmpty
+                  ...(favoriteFoods.isEmpty
                       ? [const Text('No favorite foods added', style: TextStyle(color: Colors.grey))]
-                      : _getSelectedFoodsData().map((food) => Padding(
+                      : favoriteFoods.map((foodName) {
+                          final foodData = allFoodsData.firstWhere(
+                            (f) => f['name'] == foodName,
+                            orElse: () => {'name': foodName, 'restaurant': 'Custom', 'calories': '0', 'image': ''},
+                          );
+                          return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
-                            child: _buildFoodItem(food['name']!, food['restaurant']!, food['calories']!, food['image']!),
-                          )).toList()),
+                            child: _buildFoodItem(foodData['name']!, foodData['restaurant']!, foodData['calories']!, foodData['image']!),
+                          );
+                        }).toList()),
                 ],
               ),
             ),
@@ -272,6 +273,8 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   }
 
   Widget _buildFoodItem(String name, String restaurant, String calories, String imageUrl) {
+    final hasImage = imageUrl.isNotEmpty;
+    
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -280,10 +283,25 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
-          ),
+          hasImage
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
+                )
+              : Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      name[0].toUpperCase(),
+                      style: const TextStyle(fontSize: 24, color: Colors.orange, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
