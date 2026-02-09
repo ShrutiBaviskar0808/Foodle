@@ -144,6 +144,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         title: const Text('Add Custom Allergy'),
         content: TextField(
           controller: _customAllergyController,
+          textCapitalization: TextCapitalization.words,
           decoration: const InputDecoration(
             hintText: 'Enter allergy name',
             border: OutlineInputBorder(),
@@ -217,6 +218,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             const SizedBox(height: 30),
             TextFormField(
               controller: _nameController,
+              textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 labelText: 'Name *',
                 border: OutlineInputBorder(),
@@ -226,6 +228,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             const SizedBox(height: 15),
             TextFormField(
               controller: _nicknameController,
+              textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 labelText: 'Nickname',
                 border: OutlineInputBorder(),
@@ -266,6 +269,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             const SizedBox(height: 15),
             TextFormField(
               controller: _foodNameController,
+              textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(
                 labelText: 'Favorite Food',
                 border: OutlineInputBorder(),

@@ -265,6 +265,7 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
                     ),
                   TextField(
                     controller: searchController,
+                    textCapitalization: TextCapitalization.words,
                     decoration: InputDecoration(
                       labelText: 'Search or add new food',
                       border: const OutlineInputBorder(),
@@ -294,6 +295,7 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
                           children: [
                             TextField(
                               controller: restaurantController,
+                              textCapitalization: TextCapitalization.words,
                               decoration: const InputDecoration(
                                 labelText: 'Restaurant/Place',
                                 border: OutlineInputBorder(),
