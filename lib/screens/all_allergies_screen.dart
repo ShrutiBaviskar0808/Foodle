@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'select_allergies_screen.dart';
 
 class AllAllergiesScreen extends StatefulWidget {
   final Map<String, dynamic>? memberData;
@@ -83,7 +84,20 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            onPressed: () => _showAddAllergyDialog(context),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SelectAllergiesScreen(initialAllergies: selectedAllergies.toList()),
+                ),
+              );
+              if (result != null) {
+                setState(() {
+                  selectedAllergies = (result as List<String>).toSet();
+                });
+                await _saveAllergies();
+              }
+            },
             icon: const Icon(Icons.add),
           ),
         ],
@@ -139,137 +153,6 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
           },
           ),
         ),
-      ),
-    );
-  }
-
-  void _showAddAllergyDialog(BuildContext context) {
-    final TextEditingController searchController = TextEditingController();
-    final Set<String> tempSelected = Set.from(selectedAllergies);
-    String searchQuery = '';
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          final filteredAllergies = searchQuery.isEmpty
-              ? allAllergies
-              : allAllergies.where((a) => a.toLowerCase().contains(searchQuery.toLowerCase())).toList();
-          
-          return AlertDialog(
-            title: const Text('Select Allergies'),
-            content: SizedBox(
-              width: double.maxFinite,
-              height: 400,
-              child: Column(
-                children: [
-                  if (tempSelected.isNotEmpty)
-                    Container(
-                      constraints: const BoxConstraints(maxHeight: 100),
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: SingleChildScrollView(
-                        child: Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: tempSelected.map((allergy) {
-                            return Chip(
-                              label: Text(allergy),
-                              deleteIcon: const Icon(Icons.close, size: 18),
-                              onDeleted: () {
-                                setDialogState(() {
-                                  tempSelected.remove(allergy);
-                                });
-                              },
-                              backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  TextField(
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      labelText: 'Search or add new allergy',
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: searchQuery.isNotEmpty && !allAllergies.any((a) => a.toLowerCase() == searchQuery.toLowerCase())
-                          ? IconButton(
-                              icon: const Icon(Icons.add_circle, color: Colors.orange),
-                              onPressed: () {
-                                if (searchQuery.isNotEmpty) {
-                                  setDialogState(() {
-                                    allAllergies.add(searchQuery);
-                                    tempSelected.add(searchQuery);
-                                    searchController.clear();
-                                    searchQuery = '';
-                                  });
-                                }
-                              },
-                            )
-                          : null,
-                    ),
-                    onChanged: (value) {
-                      setDialogState(() {
-                        searchQuery = value;
-                      });
-                    },
-                    onSubmitted: (value) {
-                      if (value.isNotEmpty && !allAllergies.any((a) => a.toLowerCase() == value.toLowerCase())) {
-                        setDialogState(() {
-                          allAllergies.add(value);
-                          tempSelected.add(value);
-                          searchController.clear();
-                          searchQuery = '';
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: filteredAllergies.length,
-                      itemBuilder: (context, index) {
-                        final allergy = filteredAllergies[index];
-                        final isSelected = tempSelected.contains(allergy);
-                        return CheckboxListTile(
-                          title: Text(allergy),
-                          value: isSelected,
-                          activeColor: Colors.orange,
-                          onChanged: (bool? value) {
-                            setDialogState(() {
-                              if (value == true) {
-                                tempSelected.add(allergy);
-                              } else {
-                                tempSelected.remove(allergy);
-                              }
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    selectedAllergies = tempSelected;
-                  });
-                  _saveAllergies();
-                  Navigator.pop(context);
-                },
-                child: const Text('Done'),
-              ),
-            ],
-          );
-        },
       ),
     );
   }

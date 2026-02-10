@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../config.dart';
+import 'add_member_screen.dart';
+import 'add_place_screen.dart';
 
 class UserDashboardScreen extends StatefulWidget {
   const UserDashboardScreen({super.key});
@@ -150,7 +152,20 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     const SizedBox(height: 15),
                     _buildStatCard('Friends', friends.length, Icons.people, Colors.blue),
                     const SizedBox(height: 30),
-                    const Text('Family Members', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Family Members', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        TextButton.icon(
+                          onPressed: () async {
+                            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
+                            _loadUserData();
+                          },
+                          icon: const Icon(Icons.add, color: Colors.orange),
+                          label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 15),
                     familyMembers.isEmpty
                         ? const Text('No family members added yet', style: TextStyle(color: Colors.grey))
@@ -175,7 +190,20 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                             },
                           ),
                     const SizedBox(height: 30),
-                    const Text('Favorite Places', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Favorite Places', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        TextButton.icon(
+                          onPressed: () async {
+                            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
+                            _loadUserData();
+                          },
+                          icon: const Icon(Icons.add, color: Colors.orange),
+                          label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 15),
                     places.isEmpty
                         ? const Text('No favorite places added yet', style: TextStyle(color: Colors.grey))
@@ -199,7 +227,20 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                             },
                           ),
                     const SizedBox(height: 30),
-                    const Text('Friends', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Friends', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        TextButton.icon(
+                          onPressed: () async {
+                            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
+                            _loadUserData();
+                          },
+                          icon: const Icon(Icons.add, color: Colors.orange),
+                          label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 15),
                     friends.isEmpty
                         ? const Text('No friends added yet', style: TextStyle(color: Colors.grey))

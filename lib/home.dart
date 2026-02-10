@@ -8,6 +8,8 @@ import 'screens/favorite_places_screen.dart';
 import 'screens/friends_screen.dart';
 import 'screens/user_dashboard_screen.dart';
 import 'screens/user_profile_dashboard.dart';
+import 'screens/add_member_screen.dart';
+import 'screens/add_place_screen.dart';
 import 'config.dart';
 
 class HomePage extends StatefulWidget {
@@ -236,12 +238,13 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Family', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(
+                    TextButton.icon(
                       onPressed: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen()));
-                        _loadFamilyMembers();
+                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
+                        _loadData();
                       },
-                      child: const Text('View All >', style: TextStyle(color: Colors.orange)),
+                      icon: const Icon(Icons.add, color: Colors.orange, size: 20),
+                      label: const Text('Add', style: TextStyle(color: Colors.orange)),
                     ),
                   ],
                 ),
@@ -265,12 +268,13 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Favorite Places', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(
+                    TextButton.icon(
                       onPressed: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen()));
-                        _loadPlaces();
+                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
+                        _loadData();
                       },
-                      child: const Text('View All >', style: TextStyle(color: Colors.orange)),
+                      icon: const Icon(Icons.add, color: Colors.orange, size: 20),
+                      label: const Text('Add', style: TextStyle(color: Colors.orange)),
                     ),
                   ],
                 ),
@@ -293,12 +297,13 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('My Friends', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    TextButton(
+                    TextButton.icon(
                       onPressed: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen()));
-                        _loadFriends();
+                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
+                        _loadData();
                       },
-                      child: const Text('View All >', style: TextStyle(color: Colors.orange)),
+                      icon: const Icon(Icons.add, color: Colors.orange, size: 20),
+                      label: const Text('Add', style: TextStyle(color: Colors.orange)),
                     ),
                   ],
                 ),
