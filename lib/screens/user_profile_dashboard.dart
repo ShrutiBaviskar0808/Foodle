@@ -140,6 +140,25 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SelectFoodsScreen(
+                initialFoods: favoriteFoods,
+                availableFoods: allFoodsData,
+              ),
+            ),
+          );
+          if (result != null) {
+            await _saveFoods(result as List<String>);
+            _loadData();
+          }
+        },
+        backgroundColor: Colors.orange,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
       body: SafeArea(
         child: Column(
         children: [
