@@ -29,6 +29,9 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
     allFoods = List.from(widget.availableFoods);
     selectedFoods = (widget.initialFoods ?? []).toSet();
     filteredFoods = allFoods;
@@ -102,35 +105,48 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
         ),
         body: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.tune, color: Colors.grey),
-                    onPressed: () {},
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: searchController,
-                      onChanged: _filterFoods,
-                      decoration: InputDecoration(
-                        hintText: 'Search online',
-                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                        suffixIcon: const Icon(Icons.mic, color: Colors.orange),
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
+            if (_tabController.index == 0)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.tune, color: Colors.grey),
+                      onPressed: () {},
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        onChanged: _filterFoods,
+                        decoration: InputDecoration(
+                          hintText: 'Search online',
+                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                          suffixIcon: const Icon(Icons.mic, color: Colors.orange),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+            if (_tabController.index == 1)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  'Tag Your Own Food',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[700],
+                  ),
+                ),
+              ),
             Expanded(
               child: TabBarView(
                 controller: _tabController,

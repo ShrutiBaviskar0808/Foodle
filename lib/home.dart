@@ -219,8 +219,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           ),
                           const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300)),
                           GestureDetector(
-                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen())),
-                            child: CircleAvatar(radius: 22, backgroundImage: NetworkImage('https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100')),
+                            onTap: () async {
+                              final prefs = await SharedPreferences.getInstance();
+                              final userName = prefs.getString('user_name') ?? 'User';
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
+                            },
+                            child: CircleAvatar(
+                              radius: 22,
+                              backgroundColor: Colors.white,
+                              child: FutureBuilder<String>(
+                                future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
+                                builder: (context, snapshot) {
+                                  final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
+                                  return Text(
+                                    initial,
+                                    style: const TextStyle(fontSize: 18, color: Colors.orange, fontWeight: FontWeight.bold),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ],
                       ),
