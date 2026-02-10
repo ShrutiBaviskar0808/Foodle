@@ -12,265 +12,303 @@ class SelectFoodsScreen extends StatefulWidget {
   State<SelectFoodsScreen> createState() => _SelectFoodsScreenState();
 }
 
-class _SelectFoodsScreenState extends State<SelectFoodsScreen> {
+class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTickerProviderStateMixin {
   Set<String> selectedFoods = {};
   TextEditingController searchController = TextEditingController();
   List<Map<String, String>> filteredFoods = [];
   List<Map<String, String>> allFoods = [];
+  List<Map<String, String>> customFoods = [];
+  List<Map<String, String>> filteredCustomFoods = [];
+  late TabController _tabController;
+  bool showAddForm = false;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController restaurantController = TextEditingController();
+  final TextEditingController caloriesController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     allFoods = List.from(widget.availableFoods);
     selectedFoods = (widget.initialFoods ?? []).toSet();
     filteredFoods = allFoods;
+    _loadCustomFoods();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    searchController.dispose();
+    nameController.dispose();
+    restaurantController.dispose();
+    caloriesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadCustomFoods() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? customFoodsJson = prefs.getString('custom_foods');
+    if (customFoodsJson != null) {
+      final List<dynamic> decoded = json.decode(customFoodsJson);
+      setState(() {
+        customFoods = decoded.map((f) => Map<String, String>.from(f)).toList();
+        filteredCustomFoods = customFoods;
+      });
+    }
   }
 
   void _filterFoods(String query) {
     setState(() {
       if (query.isEmpty) {
         filteredFoods = allFoods;
+        filteredCustomFoods = customFoods;
       } else {
         filteredFoods = allFoods
+            .where((food) => food['name']!.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+        filteredCustomFoods = customFoods
             .where((food) => food['name']!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
   }
 
-  void _showAddFoodDialog() {
-    final nameController = TextEditingController();
-    final restaurantController = TextEditingController();
-    final caloriesController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: const Color(0xFFF5E6D3),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Add Custom Food', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: 'Food Name',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: restaurantController,
-                decoration: InputDecoration(
-                  labelText: 'Restaurant/Place',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: caloriesController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Calories',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel', style: TextStyle(color: Colors.brown)),
-                  ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (nameController.text.isNotEmpty) {
-                        final newFood = {
-                          'name': nameController.text,
-                          'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                          'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
-                          'image': '',
-                        };
-                        setState(() {
-                          allFoods.add(newFood);
-                          selectedFoods.add(nameController.text);
-                          filteredFoods = allFoods;
-                        });
-                        // Save to SharedPreferences
-                        final prefs = await SharedPreferences.getInstance();
-                        final customFoods = allFoods.where((f) => f['image']!.isEmpty).toList();
-                        await prefs.setString('custom_foods', json.encode(customFoods));
-                        if (context.mounted) Navigator.pop(context);
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                    child: const Text('Add', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5E6D3),
-      body: SafeArea(
-        child: Column(
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.orange, size: 32),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: const Text('Favorite Food', style: TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold)),
+          actions: [
+            TextButton(
+              onPressed: () {},
+              child: const Text('Help', style: TextStyle(color: Colors.orange, fontSize: 18)),
+            ),
+          ],
+          bottom: TabBar(
+            controller: _tabController,
+            labelColor: Colors.orange,
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: Colors.orange,
+            indicatorWeight: 3,
+            tabs: const [
+              Tab(text: 'Favorite Food'),
+              Tab(text: 'Custom Food'),
+            ],
+          ),
+        ),
+        body: Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.brown),
-                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.tune, color: Colors.grey),
+                    onPressed: () {},
                   ),
-                  const Spacer(),
-                ],
-              ),
-            ),
-            const Text('Select Favorite Foods', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w400)),
-            const SizedBox(height: 20),
-            if (selectedFoods.isNotEmpty)
-              Container(
-                constraints: const BoxConstraints(maxHeight: 120),
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: SingleChildScrollView(
-                  child: Wrap(
-                    spacing: 10,
-                    children: selectedFoods.map((food) => Chip(
-                      label: Text(food),
-                      deleteIcon: const Icon(Icons.close, size: 18),
-                      onDeleted: () => setState(() => selectedFoods.remove(food)),
-                      backgroundColor: const Color(0xFFE8D4B8),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    )).toList(),
-                  ),
-                ),
-              ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: TextField(
-                controller: searchController,
-                onChanged: _filterFoods,
-                decoration: InputDecoration(
-                  hintText: 'Search or add new food...',
-                  prefixIcon: const Icon(Icons.search, size: 28),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.add_circle, color: Colors.orange),
-                    onPressed: _showAddFoodDialog,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFD4B896)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFFD4B896)),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                itemCount: filteredFoods.length,
-                itemBuilder: (context, index) {
-                  final food = filteredFoods[index];
-                  final foodName = food['name']!;
-                  final isSelected = selectedFoods.contains(foodName);
-                  final hasImage = food['image']!.isNotEmpty;
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 15),
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            selectedFoods.remove(foodName);
-                          } else {
-                            selectedFoods.add(foodName);
-                          }
-                        });
-                      },
-                      child: Row(
-                        children: [
-                          if (hasImage)
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(food['image']!, width: 50, height: 50, fit: BoxFit.cover),
-                            )
-                          else
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Center(
-                                child: Text(
-                                  foodName[0].toUpperCase(),
-                                  style: const TextStyle(fontSize: 20, color: Colors.orange, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          const SizedBox(width: 12),
-                          Expanded(child: Text(foodName, style: const TextStyle(fontSize: 18))),
-                          Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey, width: 2),
-                              borderRadius: BorderRadius.circular(4),
-                              color: isSelected ? Colors.orange : Colors.transparent,
-                            ),
-                            child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
-                          ),
-                        ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: searchController,
+                      onChanged: _filterFoods,
+                      decoration: InputDecoration(
+                        hintText: 'Search online',
+                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                        suffixIcon: const Icon(Icons.mic, color: Colors.orange),
+                        filled: true,
+                        fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
                     ),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel', style: TextStyle(fontSize: 18, color: Colors.brown)),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, selectedFoods.toList()),
-                    child: const Text('Done', style: TextStyle(fontSize: 18, color: Colors.brown)),
                   ),
                 ],
               ),
             ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildFavoriteFoodTab(),
+                  _buildCustomFoodTab(),
+                ],
+              ),
+            ),
+            if (selectedFoods.isNotEmpty && _tabController.index == 0)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          side: const BorderSide(color: Colors.orange),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Cancel', style: TextStyle(color: Colors.orange, fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context, selectedFoods.toList()),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Done', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFavoriteFoodTab() {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: filteredFoods.length,
+      itemBuilder: (context, index) {
+        final food = filteredFoods[index];
+        final foodName = food['name']!;
+        final isSelected = selectedFoods.contains(foodName);
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(12),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(food['image']!, width: 60, height: 60, fit: BoxFit.cover),
+            ),
+            title: Text(foodName, style: const TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(food['restaurant']!, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.local_fire_department, color: Colors.orange, size: 14),
+                    const SizedBox(width: 4),
+                    Text('${food['calories']} Calories', style: const TextStyle(fontSize: 12, color: Colors.orange)),
+                  ],
+                ),
+              ],
+            ),
+            trailing: Checkbox(
+              value: isSelected,
+              onChanged: (value) {
+                setState(() {
+                  if (value == true) {
+                    selectedFoods.add(foodName);
+                  } else {
+                    selectedFoods.remove(foodName);
+                  }
+                });
+              },
+              activeColor: Colors.orange,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            ),
+            onTap: () {
+              setState(() {
+                if (isSelected) {
+                  selectedFoods.remove(foodName);
+                } else {
+                  selectedFoods.add(foodName);
+                }
+              });
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCustomFoodTab() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Add Custom Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          TextField(
+            controller: nameController,
+            decoration: InputDecoration(
+              labelText: 'Food Name',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: restaurantController,
+            decoration: InputDecoration(
+              labelText: 'Restaurant/Place',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: caloriesController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Calories',
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+          const Spacer(),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                if (nameController.text.isNotEmpty) {
+                  final newFood = {
+                    'name': nameController.text,
+                    'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                    'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                    'image': '',
+                  };
+                  customFoods.add(newFood);
+                  selectedFoods.add(nameController.text);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('custom_foods', json.encode(customFoods));
+                  if (mounted) Navigator.pop(context, selectedFoods.toList());
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Add', style: TextStyle(color: Colors.white)),
+            ),
+          ),
+        ],
       ),
     );
   }
