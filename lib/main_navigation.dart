@@ -4,7 +4,7 @@ import 'home.dart';
 
 import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/user_profile_dashboard.dart';
+import 'screens/my_profile_screen.dart';
 import 'screens/meal_planner_screen.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -42,7 +42,7 @@ class _MainNavigationState extends State<MainNavigation> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const UserProfileDashboard()),
+            MaterialPageRoute(builder: (context) => const MyProfileScreen()),
           );
         },
         backgroundColor: Colors.orange,

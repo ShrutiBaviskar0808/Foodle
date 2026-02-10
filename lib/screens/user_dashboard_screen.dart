@@ -4,6 +4,9 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../config.dart';
+import 'family_screen.dart';
+import 'friends_screen.dart';
+import 'favorite_places_screen.dart';
 import 'add_member_screen.dart';
 import 'add_place_screen.dart';
 
@@ -17,9 +20,10 @@ class UserDashboardScreen extends StatefulWidget {
 class _UserDashboardScreenState extends State<UserDashboardScreen> {
   String userName = '';
   String userEmail = '';
+  int? userId;
   List<Map<String, dynamic>> familyMembers = [];
-  List<Map<String, dynamic>> places = [];
   List<Map<String, dynamic>> friends = [];
+  List<Map<String, dynamic>> places = [];
 
   @override
   void initState() {
@@ -32,12 +36,12 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     setState(() {
       userName = prefs.getString('user_name') ?? 'User';
       userEmail = prefs.getString('user_email') ?? '';
+      userId = prefs.getInt('user_id');
     });
-    
     await Future.wait([
       _loadFamilyMembers(),
-      _loadPlaces(),
       _loadFriends(),
+      _loadPlaces(),
     ]);
   }
 
@@ -50,6 +54,20 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
         familyMembers = decoded
             .map((item) => Map<String, dynamic>.from(item))
             .where((member) => member['relation'] == 'Family')
+            .toList();
+      });
+    }
+  }
+
+  Future<void> _loadFriends() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? membersJson = prefs.getString('all_members');
+    if (membersJson != null) {
+      final List<dynamic> decoded = json.decode(membersJson);
+      setState(() {
+        friends = decoded
+            .map((item) => Map<String, dynamic>.from(item))
+            .where((member) => member['relation'] != 'Family')
             .toList();
       });
     }
@@ -80,20 +98,6 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     }
   }
 
-  Future<void> _loadFriends() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? membersJson = prefs.getString('all_members');
-    if (membersJson != null) {
-      final List<dynamic> decoded = json.decode(membersJson);
-      setState(() {
-        friends = decoded
-            .map((item) => Map<String, dynamic>.from(item))
-            .where((member) => member['relation'] != 'Family')
-            .toList();
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,9 +122,52 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                         onPressed: () => Navigator.pop(context),
                       ),
                       const Spacer(),
-                      const Text('My Profile', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500)),
+                      const Text('User Details', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500)),
                       const Spacer(),
-                      const SizedBox(width: 48),
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert, color: Colors.white, size: 24),
+                        onSelected: (value) {
+                          if (value == 'family') {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen()));
+                          } else if (value == 'friends') {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen()));
+                          } else if (value == 'places') {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen()));
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'family',
+                            child: Row(
+                              children: [
+                                Icon(Icons.family_restroom, color: Colors.orange),
+                                SizedBox(width: 12),
+                                Text('Family Members'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'friends',
+                            child: Row(
+                              children: [
+                                Icon(Icons.people, color: Colors.orange),
+                                SizedBox(width: 12),
+                                Text('Friends'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'places',
+                            child: Row(
+                              children: [
+                                Icon(Icons.restaurant, color: Colors.orange),
+                                SizedBox(width: 12),
+                                Text('Favorite Places'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -146,11 +193,24 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStatCard('Family Members', familyMembers.length, Icons.family_restroom, Colors.orange),
-                    const SizedBox(height: 15),
-                    _buildStatCard('Favorite Places', places.length, Icons.restaurant, Colors.green),
-                    const SizedBox(height: 15),
-                    _buildStatCard('Friends', friends.length, Icons.people, Colors.blue),
+                    Card(
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Personal Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 15),
+                            _buildInfoRow(Icons.person, 'Name', userName),
+                            const SizedBox(height: 10),
+                            _buildInfoRow(Icons.email, 'Email', userEmail),
+                            if (userId != null) const SizedBox(height: 10),
+                            if (userId != null) _buildInfoRow(Icons.badge, 'User ID', userId.toString()),
+                          ],
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -193,43 +253,6 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Favorite Places', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        TextButton.icon(
-                          onPressed: () async {
-                            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
-                            _loadUserData();
-                          },
-                          icon: const Icon(Icons.add, color: Colors.orange),
-                          label: const Text('Add', style: TextStyle(color: Colors.orange)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    places.isEmpty
-                        ? const Text('No favorite places added yet', style: TextStyle(color: Colors.grey))
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: places.length,
-                            itemBuilder: (context, index) {
-                              final place = places[index];
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                child: ListTile(
-                                  leading: const CircleAvatar(
-                                    backgroundColor: Colors.green,
-                                    child: Icon(Icons.restaurant, color: Colors.white),
-                                  ),
-                                  title: Text(place['store_name'] ?? 'Unknown'),
-                                  subtitle: Text(place['food_item'] ?? ''),
-                                ),
-                              );
-                            },
-                          ),
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
                         const Text('Friends', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                         TextButton.icon(
                           onPressed: () async {
@@ -264,6 +287,43 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                               );
                             },
                           ),
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Favorite Places', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                        TextButton.icon(
+                          onPressed: () async {
+                            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
+                            _loadUserData();
+                          },
+                          icon: const Icon(Icons.add, color: Colors.orange),
+                          label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+                    places.isEmpty
+                        ? const Text('No favorite places added yet', style: TextStyle(color: Colors.grey))
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: places.length,
+                            itemBuilder: (context, index) {
+                              final place = places[index];
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                child: ListTile(
+                                  leading: const CircleAvatar(
+                                    backgroundColor: Colors.green,
+                                    child: Icon(Icons.restaurant, color: Colors.white),
+                                  ),
+                                  title: Text(place['store_name'] ?? 'Unknown'),
+                                  subtitle: Text(place['food_item'] ?? ''),
+                                ),
+                              );
+                            },
+                          ),
                   ],
                 ),
               ),
@@ -274,32 +334,22 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     );
   }
 
-  Widget _buildStatCard(String title, int count, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: color.withValues(alpha: 0.2),
-            child: Icon(icon, color: color, size: 28),
-          ),
-          const SizedBox(width: 15),
-          Column(
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.orange, size: 20),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 14, color: Colors.grey)),
-              const SizedBox(height: 5),
-              Text('$count', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
+              Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              const SizedBox(height: 4),
+              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
