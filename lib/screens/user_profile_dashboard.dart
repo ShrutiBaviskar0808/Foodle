@@ -140,6 +140,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(

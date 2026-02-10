@@ -74,6 +74,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   }
 
 
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -177,135 +178,167 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   }
 
   Widget _buildFavoriteFoodTab() {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: filteredFoods.length,
-      itemBuilder: (context, index) {
-        final food = filteredFoods[index];
-        final foodName = food['name']!;
-        final isSelected = selectedFoods.contains(foodName);
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(12),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(food['image']!, width: 60, height: 60, fit: BoxFit.cover),
-            ),
-            title: Text(foodName, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(food['restaurant']!, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-                const SizedBox(height: 4),
-                Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final horizontalPadding = screenWidth * 0.04;
+        
+        return ListView.builder(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          itemCount: filteredFoods.length,
+          itemBuilder: (context, index) {
+            final food = filteredFoods[index];
+            final foodName = food['name']!;
+            final isSelected = selectedFoods.contains(foodName);
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                contentPadding: EdgeInsets.all(screenWidth * 0.03),
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    food['image']!,
+                    width: screenWidth * 0.15,
+                    height: screenWidth * 0.15,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: screenWidth * 0.15,
+                        height: screenWidth * 0.15,
+                        decoration: BoxDecoration(
+                          color: Colors.orange.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(Icons.fastfood, color: Colors.orange, size: screenWidth * 0.08),
+                      );
+                    },
+                  ),
+                ),
+                title: Text(foodName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenWidth * 0.04)),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.local_fire_department, color: Colors.orange, size: 14),
-                    const SizedBox(width: 4),
-                    Text('${food['calories']} Calories', style: const TextStyle(fontSize: 12, color: Colors.orange)),
+                    Text(food['restaurant']!, style: TextStyle(color: Colors.grey[600], fontSize: screenWidth * 0.03)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(Icons.local_fire_department, color: Colors.orange, size: screenWidth * 0.035),
+                        const SizedBox(width: 4),
+                        Text('${food['calories']} Calories', style: TextStyle(fontSize: screenWidth * 0.03, color: Colors.orange)),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
-            trailing: Checkbox(
-              value: isSelected,
-              onChanged: (value) {
-                setState(() {
-                  if (value == true) {
-                    selectedFoods.add(foodName);
-                  } else {
-                    selectedFoods.remove(foodName);
-                  }
-                });
-              },
-              activeColor: Colors.orange,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-            ),
-            onTap: () {
-              setState(() {
-                if (isSelected) {
-                  selectedFoods.remove(foodName);
-                } else {
-                  selectedFoods.add(foodName);
-                }
-              });
-            },
-          ),
+                trailing: Checkbox(
+                  value: isSelected,
+                  onChanged: (value) {
+                    setState(() {
+                      if (value == true) {
+                        selectedFoods.add(foodName);
+                      } else {
+                        selectedFoods.remove(foodName);
+                      }
+                    });
+                  },
+                  activeColor: Colors.orange,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                ),
+                onTap: () {
+                  setState(() {
+                    if (isSelected) {
+                      selectedFoods.remove(foodName);
+                    } else {
+                      selectedFoods.add(foodName);
+                    }
+                  });
+                },
+              ),
+            );
+          },
         );
       },
     );
   }
 
   Widget _buildCustomFoodTab() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Add Custom Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Food Name',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: restaurantController,
-              decoration: InputDecoration(
-                labelText: 'Restaurant/Place',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: caloriesController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Calories',
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  if (nameController.text.isNotEmpty) {
-                    final newFood = {
-                      'name': nameController.text,
-                      'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                      'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
-                      'image': '',
-                    };
-                    customFoods.add(newFood);
-                    selectedFoods.add(nameController.text);
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('custom_foods', json.encode(customFoods));
-                    if (mounted) Navigator.pop(context, selectedFoods.toList());
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final horizontalPadding = screenWidth * 0.04;
+        
+        return SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(horizontalPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Add Custom Food', style: TextStyle(fontSize: screenWidth * 0.048, fontWeight: FontWeight.bold)),
+                SizedBox(height: screenWidth * 0.04),
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Food Name',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
-                child: const Text('Add', style: TextStyle(color: Colors.white)),
-              ),
+                SizedBox(height: screenWidth * 0.03),
+                TextField(
+                  controller: restaurantController,
+                  decoration: InputDecoration(
+                    labelText: 'Restaurant/Place',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                SizedBox(height: screenWidth * 0.03),
+                TextField(
+                  controller: caloriesController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Calories',
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                SizedBox(height: screenWidth * 0.06),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (nameController.text.isNotEmpty) {
+                        final navigator = Navigator.of(context);
+                        final newFood = {
+                          'name': nameController.text,
+                          'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                          'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                          'image': '',
+                        };
+                        customFoods.add(newFood);
+                        selectedFoods.add(nameController.text);
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('custom_foods', json.encode(customFoods));
+                        if (!mounted) return;
+                        navigator.pop(selectedFoods.toList());
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.04),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Add', style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
