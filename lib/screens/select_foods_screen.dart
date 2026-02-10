@@ -87,12 +87,6 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text('Favorite Food', style: TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold)),
-          actions: [
-            TextButton(
-              onPressed: () {},
-              child: const Text('Help', style: TextStyle(color: Colors.orange, fontSize: 18)),
-            ),
-          ],
           bottom: TabBar(
             controller: _tabController,
             labelColor: Colors.orange,
@@ -244,71 +238,73 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   }
 
   Widget _buildCustomFoodTab() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Add Custom Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          TextField(
-            controller: nameController,
-            decoration: InputDecoration(
-              labelText: 'Food Name',
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: restaurantController,
-            decoration: InputDecoration(
-              labelText: 'Restaurant/Place',
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: caloriesController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Calories',
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-          ),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () async {
-                if (nameController.text.isNotEmpty) {
-                  final newFood = {
-                    'name': nameController.text,
-                    'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                    'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
-                    'image': '',
-                  };
-                  customFoods.add(newFood);
-                  selectedFoods.add(nameController.text);
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setString('custom_foods', json.encode(customFoods));
-                  if (mounted) Navigator.pop(context, selectedFoods.toList());
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Add Custom Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Food Name',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Add', style: TextStyle(color: Colors.white)),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            TextField(
+              controller: restaurantController,
+              decoration: InputDecoration(
+                labelText: 'Restaurant/Place',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: caloriesController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Calories',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (nameController.text.isNotEmpty) {
+                    final newFood = {
+                      'name': nameController.text,
+                      'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                      'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                      'image': '',
+                    };
+                    customFoods.add(newFood);
+                    selectedFoods.add(nameController.text);
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('custom_foods', json.encode(customFoods));
+                    if (mounted) Navigator.pop(context, selectedFoods.toList());
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Add', style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
