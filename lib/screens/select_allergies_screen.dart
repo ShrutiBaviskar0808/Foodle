@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SelectAllergiesScreen extends StatefulWidget {
   final List<String>? initialAllergies;
@@ -44,6 +45,21 @@ class _SelectAllergiesScreenState extends State<SelectAllergiesScreen> {
     });
   }
 
+  void _addCustomAllergy() async {
+    final query = searchController.text.trim();
+    if (query.isNotEmpty && !availableAllergies.any((a) => a.toLowerCase() == query.toLowerCase())) {
+      setState(() {
+        availableAllergies.add(query);
+        selectedAllergies.add(query);
+        searchController.clear();
+        filteredAllergies = availableAllergies;
+      });
+      // Save custom allergies
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('custom_allergies', availableAllergies);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,9 +101,16 @@ class _SelectAllergiesScreenState extends State<SelectAllergiesScreen> {
               child: TextField(
                 controller: searchController,
                 onChanged: _filterAllergies,
+                onSubmitted: (_) => _addCustomAllergy(),
                 decoration: InputDecoration(
                   hintText: 'Search or add new a...',
                   prefixIcon: const Icon(Icons.search, size: 28),
+                  suffixIcon: searchController.text.isNotEmpty && !availableAllergies.any((a) => a.toLowerCase() == searchController.text.toLowerCase())
+                      ? IconButton(
+                          icon: const Icon(Icons.add_circle, color: Colors.orange),
+                          onPressed: _addCustomAllergy,
+                        )
+                      : null,
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(

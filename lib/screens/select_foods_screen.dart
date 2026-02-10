@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class SelectFoodsScreen extends StatefulWidget {
   final List<String>? initialFoods;
@@ -14,24 +16,114 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> {
   Set<String> selectedFoods = {};
   TextEditingController searchController = TextEditingController();
   List<Map<String, String>> filteredFoods = [];
+  List<Map<String, String>> allFoods = [];
 
   @override
   void initState() {
     super.initState();
+    allFoods = List.from(widget.availableFoods);
     selectedFoods = (widget.initialFoods ?? []).toSet();
-    filteredFoods = widget.availableFoods;
+    filteredFoods = allFoods;
   }
 
   void _filterFoods(String query) {
     setState(() {
       if (query.isEmpty) {
-        filteredFoods = widget.availableFoods;
+        filteredFoods = allFoods;
       } else {
-        filteredFoods = widget.availableFoods
+        filteredFoods = allFoods
             .where((food) => food['name']!.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
+  }
+
+  void _showAddFoodDialog() {
+    final nameController = TextEditingController();
+    final restaurantController = TextEditingController();
+    final caloriesController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: const Color(0xFFF5E6D3),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Add Custom Food', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Food Name',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 15),
+              TextField(
+                controller: restaurantController,
+                decoration: InputDecoration(
+                  labelText: 'Restaurant/Place',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 15),
+              TextField(
+                controller: caloriesController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Calories',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel', style: TextStyle(color: Colors.brown)),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (nameController.text.isNotEmpty) {
+                        final newFood = {
+                          'name': nameController.text,
+                          'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                          'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                          'image': '',
+                        };
+                        setState(() {
+                          allFoods.add(newFood);
+                          selectedFoods.add(nameController.text);
+                          filteredFoods = allFoods;
+                        });
+                        // Save to SharedPreferences
+                        final prefs = await SharedPreferences.getInstance();
+                        final customFoods = allFoods.where((f) => f['image']!.isEmpty).toList();
+                        await prefs.setString('custom_foods', json.encode(customFoods));
+                        if (context.mounted) Navigator.pop(context);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                    child: const Text('Add', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -54,19 +146,22 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> {
               ),
             ),
             const Text('Select Favorite Foods', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w400)),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             if (selectedFoods.isNotEmpty)
-              Padding(
+              Container(
+                constraints: const BoxConstraints(maxHeight: 120),
                 padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Wrap(
-                  spacing: 10,
-                  children: selectedFoods.map((food) => Chip(
-                    label: Text(food),
-                    deleteIcon: const Icon(Icons.close, size: 18),
-                    onDeleted: () => setState(() => selectedFoods.remove(food)),
-                    backgroundColor: const Color(0xFFE8D4B8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  )).toList(),
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 10,
+                    children: selectedFoods.map((food) => Chip(
+                      label: Text(food),
+                      deleteIcon: const Icon(Icons.close, size: 18),
+                      onDeleted: () => setState(() => selectedFoods.remove(food)),
+                      backgroundColor: const Color(0xFFE8D4B8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    )).toList(),
+                  ),
                 ),
               ),
             const SizedBox(height: 20),
@@ -78,6 +173,10 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search or add new food...',
                   prefixIcon: const Icon(Icons.search, size: 28),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.add_circle, color: Colors.orange),
+                    onPressed: _showAddFoodDialog,
+                  ),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(

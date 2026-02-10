@@ -153,7 +153,8 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           );
           if (result != null) {
             await _saveFoods(result as List<String>);
-            _loadData();
+            await _loadCustomFoods();
+            await _loadData();
           }
         },
         backgroundColor: Colors.orange,
@@ -247,7 +248,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                           );
                           if (result != null) {
                             await _saveAllergies(result as List<String>);
-                            _loadData();
+                            await _loadData();
                           }
                         },
                         child: const Text('Add', style: TextStyle(color: Colors.orange)),
@@ -263,30 +264,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                         : allergies.map((allergy) => _buildAllergyChip(allergy)).toList(),
                   ),
                   const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Favorite Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      TextButton(
-                        onPressed: () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SelectFoodsScreen(
-                                initialFoods: favoriteFoods,
-                                availableFoods: allFoodsData,
-                              ),
-                            ),
-                          );
-                          if (result != null) {
-                            await _saveFoods(result as List<String>);
-                            _loadData();
-                          }
-                        },
-                        child: const Text('Add', style: TextStyle(color: Colors.orange)),
-                      ),
-                    ],
-                  ),
+                  const Text('Favorite Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   ...(favoriteFoods.isEmpty
                       ? [const Text('No favorite foods added', style: TextStyle(color: Colors.grey))]
