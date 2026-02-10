@@ -4,7 +4,9 @@ import 'privacy_policy_screen.dart';
 import 'terms_conditions_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final VoidCallback? onBackPressed;
+  
+  const SettingsScreen({super.key, this.onBackPressed});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -47,7 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: widget.onBackPressed ?? () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(

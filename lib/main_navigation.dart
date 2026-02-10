@@ -17,12 +17,22 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomePage(),
-    const MealPlannerScreen(),
-    const ProfileScreen(),
-    const SettingsScreen(),
-  ];
+  void _navigateToHome() {
+    setState(() => _currentIndex = 0);
+  }
+
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      const HomePage(),
+      const MealPlannerScreen(),
+      ProfileScreen(onBackPressed: _navigateToHome),
+      SettingsScreen(onBackPressed: _navigateToHome),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {

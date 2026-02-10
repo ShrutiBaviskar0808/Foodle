@@ -7,7 +7,9 @@ import 'add_account_screen.dart';
 import 'request_deletion_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onBackPressed;
+  
+  const ProfileScreen({super.key, this.onBackPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class ProfileScreen extends StatelessWidget {
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: onBackPressed ?? () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
