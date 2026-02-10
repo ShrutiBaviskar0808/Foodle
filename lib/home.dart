@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<Map<String, dynamic>> familyMembers = [];
   List<Map<String, dynamic>> places = [];
   List<Map<String, dynamic>> friends = [];
@@ -27,7 +27,21 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {
@@ -240,8 +254,18 @@ class _HomePageState extends State<HomePage> {
                     const Text('My Family', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                     TextButton.icon(
                       onPressed: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
-                        _loadData();
+                        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
+                        if (result != null) {
+                          final prefs = await SharedPreferences.getInstance();
+                          final String? membersJson = prefs.getString('all_members');
+                          List<Map<String, dynamic>> allMembers = [];
+                          if (membersJson != null) {
+                            allMembers = (json.decode(membersJson) as List).map((e) => Map<String, dynamic>.from(e)).toList();
+                          }
+                          allMembers.add(result['data']);
+                          await prefs.setString('all_members', json.encode(allMembers));
+                          _loadData();
+                        }
                       },
                       icon: const Icon(Icons.add, color: Colors.orange, size: 20),
                       label: const Text('Add', style: TextStyle(color: Colors.orange)),
@@ -299,8 +323,18 @@ class _HomePageState extends State<HomePage> {
                     const Text('My Friends', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                     TextButton.icon(
                       onPressed: () async {
-                        await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
-                        _loadData();
+                        final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
+                        if (result != null) {
+                          final prefs = await SharedPreferences.getInstance();
+                          final String? membersJson = prefs.getString('all_members');
+                          List<Map<String, dynamic>> allMembers = [];
+                          if (membersJson != null) {
+                            allMembers = (json.decode(membersJson) as List).map((e) => Map<String, dynamic>.from(e)).toList();
+                          }
+                          allMembers.add(result['data']);
+                          await prefs.setString('all_members', json.encode(allMembers));
+                          _loadData();
+                        }
                       },
                       icon: const Icon(Icons.add, color: Colors.orange, size: 20),
                       label: const Text('Add', style: TextStyle(color: Colors.orange)),

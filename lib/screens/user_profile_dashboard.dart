@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'all_allergies_screen.dart';
-import 'all_favorite_foods_screen.dart';
+import 'select_allergies_screen.dart';
+import 'select_foods_screen.dart';
 
 class UserProfileDashboard extends StatefulWidget {
   final Map<String, dynamic>? memberData;
@@ -220,8 +220,16 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       const Text('Allergies', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       TextButton(
                         onPressed: () async {
-                          await Navigator.push(context, MaterialPageRoute(builder: (context) => AllAllergiesScreen(memberData: widget.memberData)));
-                          _loadData();
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SelectAllergiesScreen(initialAllergies: allergies),
+                            ),
+                          );
+                          if (result != null) {
+                            await _saveAllergies(result as List<String>);
+                            _loadData();
+                          }
                         },
                         child: const Text('View All', style: TextStyle(color: Colors.orange)),
                       ),
@@ -242,8 +250,19 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       const Text('Favorite Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       TextButton(
                         onPressed: () async {
-                          await Navigator.push(context, MaterialPageRoute(builder: (context) => AllFavoriteFoodsScreen(memberData: widget.memberData)));
-                          _loadData();
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SelectFoodsScreen(
+                                initialFoods: favoriteFoods,
+                                availableFoods: allFoodsData,
+                              ),
+                            ),
+                          );
+                          if (result != null) {
+                            await _saveFoods(result as List<String>);
+                            _loadData();
+                          }
                         },
                         child: const Text('View All', style: TextStyle(color: Colors.orange)),
                       ),
@@ -338,5 +357,45 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
         ],
       ),
     );
+  }
+
+  Future<void> _saveAllergies(List<String> newAllergies) async {
+    if (widget.memberData != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final String? membersJson = prefs.getString('all_members');
+      if (membersJson != null) {
+        final List<dynamic> members = json.decode(membersJson);
+        for (int i = 0; i < members.length; i++) {
+          if (members[i]['name'] == widget.memberData!['name']) {
+            members[i]['allergies'] = newAllergies;
+            break;
+          }
+        }
+        await prefs.setString('all_members', json.encode(members));
+      }
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('user_allergies', newAllergies);
+    }
+  }
+
+  Future<void> _saveFoods(List<String> newFoods) async {
+    if (widget.memberData != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final String? membersJson = prefs.getString('all_members');
+      if (membersJson != null) {
+        final List<dynamic> members = json.decode(membersJson);
+        for (int i = 0; i < members.length; i++) {
+          if (members[i]['name'] == widget.memberData!['name']) {
+            members[i]['likes'] = newFoods;
+            break;
+          }
+        }
+        await prefs.setString('all_members', json.encode(members));
+      }
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('favorite_foods', newFoods);
+    }
   }
 }

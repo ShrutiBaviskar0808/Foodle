@@ -92,9 +92,7 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
                 ),
               );
               if (result != null) {
-                setState(() {
-                  selectedAllergies = (result as List<String>).toSet();
-                });
+                setState(() => selectedAllergies = (result as List<String>).toSet());
                 await _saveAllergies();
               }
             },
