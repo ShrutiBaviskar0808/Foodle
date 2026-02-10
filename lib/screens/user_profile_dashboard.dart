@@ -231,7 +231,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                             _loadData();
                           }
                         },
-                        child: const Text('View All', style: TextStyle(color: Colors.orange)),
+                        child: const Text('Add', style: TextStyle(color: Colors.orange)),
                       ),
                     ],
                   ),
@@ -264,7 +264,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                             _loadData();
                           }
                         },
-                        child: const Text('View All', style: TextStyle(color: Colors.orange)),
+                        child: const Text('Add', style: TextStyle(color: Colors.orange)),
                       ),
                     ],
                   ),
