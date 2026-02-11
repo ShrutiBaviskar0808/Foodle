@@ -174,9 +174,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               leading: const Icon(Icons.logout, color: Colors.red),
               title: const Text('Logout'),
               onTap: () async {
+                if (!mounted) return;
+                final navigator = Navigator.of(context);
                 final prefs = await SharedPreferences.getInstance();
                 await prefs.clear();
-                Navigator.pushReplacementNamed(context, '/login');
+                navigator.pushReplacementNamed('/login');
               },
             ),
           ],
@@ -222,9 +224,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                         const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300)),
                         GestureDetector(
-                          onTap: () async {
-                            final prefs = await SharedPreferences.getInstance();
-                            final userName = prefs.getString('user_name') ?? 'User';
+                          onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
                           },
                           child: CircleAvatar(

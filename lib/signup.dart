@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'config.dart';
-import 'common/app_theme.dart';
 import 'common/app_widgets.dart';
 
 class SignupPage extends StatefulWidget {
