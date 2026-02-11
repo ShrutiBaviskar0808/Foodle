@@ -259,9 +259,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ),
         ),
         Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(padding),
-            child: Column(
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
+            ),
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(padding),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -373,6 +381,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                       ),
               ],
+              ),
             ),
           ),
         ),
