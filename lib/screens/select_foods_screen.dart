@@ -289,41 +289,103 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Add Custom Food', style: TextStyle(fontSize: screenWidth * 0.048, fontWeight: FontWeight.bold)),
-                SizedBox(height: screenWidth * 0.04),
+                const Text('What\'s the dish called?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
                 TextField(
                   controller: nameController,
                   decoration: InputDecoration(
-                    labelText: 'Food Name',
+                    hintText: 'Pepperoni pizza, Mac & cheese',
                     filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                 ),
-                SizedBox(height: screenWidth * 0.03),
+                const SizedBox(height: 20),
+                const Text('Where do they love it from?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
                 TextField(
                   controller: restaurantController,
                   decoration: InputDecoration(
-                    labelText: 'Restaurant/Place',
+                    hintText: 'Starbucks, Grandma\'s kitchen',
                     filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                 ),
-                SizedBox(height: screenWidth * 0.03),
+                const SizedBox(height: 20),
+                const Text('How much do they love this?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    hintText: 'Select Option',
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'love', child: Text('❤️ Absolutely Love It')),
+                    DropdownMenuItem(value: 'favorite', child: Text('😍 One of Their Favorites')),
+                    DropdownMenuItem(value: 'enjoy', child: Text('😋 Really Enjoy It')),
+                    DropdownMenuItem(value: 'good', child: Text('🙂 It\'s Pretty Good')),
+                  ],
+                  onChanged: (value) {},
+                ),
+                const SizedBox(height: 20),
+                const Text('When do they crave this?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    hintText: 'Select Option',
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'happy', child: Text('😊 When they\'re happy')),
+                    DropdownMenuItem(value: 'low', child: Text('😔 When they\'re feeling low')),
+                    DropdownMenuItem(value: 'celebration', child: Text('🎉 During celebrations')),
+                    DropdownMenuItem(value: 'night', child: Text('🌙 Late night cravings')),
+                    DropdownMenuItem(value: 'comfort', child: Text('😌 Comfort food moment')),
+                    DropdownMenuItem(value: 'energy', child: Text('💪 Energy boost')),
+                  ],
+                  onChanged: (value) {},
+                ),
+                const SizedBox(height: 20),
+                const Text('Have a picture of it?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Upload', style: TextStyle(color: Colors.grey[400])),
+                      const Icon(Icons.upload, color: Colors.grey),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text('Optional, but makes memories sweeter', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                const SizedBox(height: 20),
+                const Text('How do they like it made?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
                 TextField(
                   controller: caloriesController,
-                  keyboardType: TextInputType.number,
+                  maxLines: 4,
                   decoration: InputDecoration(
-                    labelText: 'Calories',
+                    hintText: 'Extra cheese, No onions, Gluten-free crust,\nLight sauce etc..',
                     filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                 ),
-                SizedBox(height: screenWidth * 0.06),
+                const SizedBox(height: 30),
                 SizedBox(
                   width: double.infinity,
+                  height: 56,
                   child: ElevatedButton(
                     onPressed: () async {
                       if (nameController.text.isNotEmpty) {
@@ -331,7 +393,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                         final newFood = {
                           'name': nameController.text,
                           'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                          'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                          'calories': '0',
                           'image': '',
                         };
                         customFoods.add(newFood);
@@ -344,12 +406,12 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
-                      padding: EdgeInsets.symmetric(vertical: screenWidth * 0.04),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
-                    child: const Text('Add', style: TextStyle(color: Colors.white)),
+                    child: const Text('Save', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),

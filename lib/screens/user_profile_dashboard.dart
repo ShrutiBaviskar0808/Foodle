@@ -140,7 +140,6 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
@@ -161,6 +160,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add, color: Colors.white),
       ),
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           // Orange header
@@ -204,52 +204,53 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
             ),
           ),
           // Header with profile image
-          Container(
-            height: 220,
-            decoration: widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
-                ? BoxDecoration(
-                    image: DecorationImage(
-                      image: FileImage(File(widget.memberData!['imagePath'])),
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.orange, Colors.orange.withValues(alpha: 0.7)],
-                    ),
-                  ),
-            child: Stack(
-              children: [
-                if (widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync())
-                  Container(
-                    decoration: BoxDecoration(
+          Expanded(
+            child: Container(
+              decoration: widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
+                  ? BoxDecoration(
+                      image: DecorationImage(
+                        image: FileImage(File(widget.memberData!['imagePath'])),
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : BoxDecoration(
                       gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.black.withValues(alpha: 0.5), Colors.black.withValues(alpha: 0.7)],
+                        colors: [Colors.orange, Colors.orange.withValues(alpha: 0.7)],
                       ),
                     ),
-                  ),
-                if (widget.memberData?['imagePath'] == null || !File(widget.memberData!['imagePath']).existsSync())
-                  Center(
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Colors.white,
-                      child: Text(
-                        (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
-                        style: const TextStyle(fontSize: 60, color: Colors.orange, fontWeight: FontWeight.bold),
+              child: Stack(
+                children: [
+                  if (widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync())
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.black.withValues(alpha: 0.5), Colors.black.withValues(alpha: 0.7)],
+                        ),
                       ),
                     ),
+                  if (widget.memberData?['imagePath'] == null || !File(widget.memberData!['imagePath']).existsSync())
+                    Center(
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundColor: Colors.white,
+                        child: Text(
+                          (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
+                          style: const TextStyle(fontSize: 60, color: Colors.orange, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  Positioned(
+                    bottom: 20,
+                    left: 20,
+                    child: Text(
+                      widget.memberData?['name'] ?? 'Dale Hicks',
+                      style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  child: Text(
-                    widget.memberData?['name'] ?? 'Dale Hicks',
-                    style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           // Content
