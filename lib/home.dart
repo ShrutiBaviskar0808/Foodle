@@ -187,11 +187,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       body: Column(
         children: [
           Container(
-            color: const Color(0xFFFF8C00),
+            decoration: const BoxDecoration(
+              color: Color(0xFFFE8D00),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -225,7 +231,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
                             return Text(
                               initial,
-                              style: const TextStyle(fontSize: 16, color: Color(0xFFFF8C00), fontWeight: FontWeight.bold),
+                              style: const TextStyle(fontSize: 16, color: Color(0xFFFE8D00), fontWeight: FontWeight.bold),
                             );
                           },
                         ),
@@ -246,11 +252,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             ),
             child: Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black.withValues(alpha: 0.3), Colors.black.withValues(alpha: 0.5)],
-                ),
+                color: const Color(0xFF080703).withValues(alpha: 0.6),
               ),
               child: Center(
                 child: Column(
