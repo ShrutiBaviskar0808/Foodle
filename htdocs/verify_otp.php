@@ -4,15 +4,18 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
+// Get input
 $input = json_decode(file_get_contents('php://input'), true);
-
 $email = $input['email'] ?? '';
 $otp = $input['otp'] ?? '';
 
-// Log received data
-error_log("Received email: " . $email);
-error_log("Received OTP: " . $otp);
+// Log for debugging
+error_log("=== VERIFY OTP DEBUG ===");
+error_log("Email received: " . $email);
+error_log("OTP received: " . $otp);
+error_log("File location: " . __FILE__);
 
+// Validate input
 if (empty($email) || empty($otp)) {
     echo json_encode(['success' => false, 'message' => 'Email and OTP are required']);
     exit;
@@ -36,7 +39,7 @@ try {
     error_log("Database result: " . json_encode($result));
     
     if ($result) {
-        // Compare OTPs (trim whitespace)
+        // Compare OTPs
         if (trim($result['otp']) == trim($otp)) {
             $user_id = $result['user_id'];
             
@@ -48,27 +51,19 @@ try {
             $deleteStmt = $pdo->prepare("DELETE FROM verify_otp WHERE email = ?");
             $deleteStmt->execute([$email]);
             
-            echo json_encode([
-                'success' => true,
-                'message' => 'Email verified successfully!'
-            ]);
+            error_log("SUCCESS: User verified!");
+            echo json_encode(['success' => true, 'message' => 'Email verified successfully!']);
         } else {
-            error_log("OTP mismatch - DB: '" . $result['otp'] . "' vs Input: '" . $otp . "'");
-            echo json_encode([
-                'success' => false,
-                'message' => 'Invalid OTP. Please check and try again.'
-            ]);
+            error_log("OTP MISMATCH - DB: '" . $result['otp'] . "' Input: '" . $otp . "'");
+            echo json_encode(['success' => false, 'message' => 'Invalid OTP']);
         }
     } else {
-        error_log("No OTP found for email: " . $email);
-        echo json_encode([
-            'success' => false,
-            'message' => 'No OTP found for this email. Please request a new OTP.'
-        ]);
+        error_log("NO OTP FOUND for email: " . $email);
+        echo json_encode(['success' => false, 'message' => 'No OTP found']);
     }
     
 } catch (PDOException $e) {
-    error_log("Database error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    error_log("DATABASE ERROR: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => 'Database error']);
 }
 ?>
