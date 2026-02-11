@@ -244,44 +244,57 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ],
             ),
           ),
-          Container(
-            height: size.height * 0.2,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: NetworkImage('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800'),
-                fit: BoxFit.cover,
-              ),
-            ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF080703).withValues(alpha: 0.6),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Every Plate,',
-                      style: TextStyle(color: Colors.white, fontSize: size.width * 0.08, fontWeight: FontWeight.bold),
+          Stack(
+            children: [
+              Container(
+                height: size.height * 0.35,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF080703).withValues(alpha: 0.6),
+                  ),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Every Plate,',
+                          style: TextStyle(color: Colors.white, fontSize: size.width * 0.09, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'Perfectly Planned',
+                          style: TextStyle(color: Colors.white, fontSize: size.width * 0.09, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
-                    Text(
-                      'Perfectly Planned',
-                      style: TextStyle(color: Colors.white, fontSize: size.width * 0.08, fontWeight: FontWeight.bold),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 30,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-              ),
+              color: Colors.white,
               child: SingleChildScrollView(
                 padding: EdgeInsets.all(padding),
                 child: Column(
