@@ -124,11 +124,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
               const Spacer(),
               // Bottom card
               Container(
-                margin: const EdgeInsets.all(20),
-                padding: const EdgeInsets.all(24),
+                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+                padding: const EdgeInsets.all(32),
                 decoration: BoxDecoration(
                     color: const Color(0xFFFF8C00),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(28),
                   ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -137,20 +137,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     Text(
                       data['heading']!,
                       style: const TextStyle(
-                        fontSize: 20,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
-                        height: 1.4,
+                        height: 1.3,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     // Description
                     Text(
                       data['description']!,
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 15,
                         color: Colors.white,
-                        height: 1.5,
+                        height: 1.6,
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -188,19 +188,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             ),
                           ),
                         ),
-                        TextButton.icon(
+                        TextButton(
                           onPressed: _nextPage,
-                          label: const Text(
-                            'Next',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          icon: const Icon(
-                            Icons.arrow_forward,
-                            color: Colors.white,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                'Next',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.arrow_forward,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ],
                           ),
                         ),
                       ],
