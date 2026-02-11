@@ -198,7 +198,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               children: [
                 SizedBox(height: MediaQuery.of(context).padding.top),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
