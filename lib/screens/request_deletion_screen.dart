@@ -14,6 +14,7 @@ class _RequestDeletionScreenState extends State<RequestDeletionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Delete Account'),
         backgroundColor: Colors.red,

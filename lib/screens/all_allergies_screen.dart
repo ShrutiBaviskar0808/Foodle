@@ -78,6 +78,7 @@ class _AllAllergiesScreenState extends State<AllAllergiesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('All Allergies'),
         backgroundColor: Colors.orange,

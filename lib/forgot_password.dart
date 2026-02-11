@@ -40,6 +40,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     
     const brandColor = Color(0xFFFD8C00);
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

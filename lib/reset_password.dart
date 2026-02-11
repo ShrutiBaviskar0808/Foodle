@@ -47,6 +47,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     
     const brandColor = Color(0xFFFD8C00);
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Reset Password'),
         backgroundColor: Colors.orange,

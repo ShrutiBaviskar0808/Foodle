@@ -56,6 +56,7 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
     final padding = size.width * 0.05;
     
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Favorite Places'),
         backgroundColor: Colors.orange,

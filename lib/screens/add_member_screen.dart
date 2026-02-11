@@ -194,6 +194,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
     final padding = size.width * 0.05;
     
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(widget.member == null ? 'Add Member' : 'Edit Member'),
         backgroundColor: Colors.orange,

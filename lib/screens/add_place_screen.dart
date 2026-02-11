@@ -226,6 +226,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
     final padding = size.width * 0.05;
     
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(widget.place == null ? 'Add Favorite Place' : 'Edit Favorite Place'),
         backgroundColor: Colors.orange,

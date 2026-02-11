@@ -111,6 +111,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final padding = size.width * 0.05;
     
     return Scaffold(
+      backgroundColor: Colors.white,
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,

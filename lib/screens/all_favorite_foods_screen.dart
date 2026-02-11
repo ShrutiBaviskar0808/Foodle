@@ -135,6 +135,7 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('All Favorite Foods'),
         backgroundColor: Colors.orange,

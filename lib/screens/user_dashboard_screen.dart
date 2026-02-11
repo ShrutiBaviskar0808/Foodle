@@ -104,6 +104,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     final padding = size.width * 0.05;
     
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
