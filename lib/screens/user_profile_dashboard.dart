@@ -260,6 +260,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Divider(thickness: 1, color: Colors.grey),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -290,6 +291,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                         : allergies.map((allergy) => _buildAllergyChip(allergy)).toList(),
                   ),
                   const SizedBox(height: 24),
+                  const Divider(thickness: 1, color: Colors.grey),
                   const Text('Favorite Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
                   ...(favoriteFoods.isEmpty
@@ -329,6 +331,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
 
   Widget _buildFoodItem(String name, String restaurant, String calories, String imageUrl) {
     final hasImage = imageUrl.isNotEmpty;
+    final isLocalFile = imageUrl.startsWith('/') || imageUrl.contains('cache');
     
     return Container(
       padding: const EdgeInsets.all(12),
@@ -341,7 +344,29 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           hasImage
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
+                  child: isLocalFile
+                      ? Image.file(File(imageUrl), width: 60, height: 60, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.fastfood, color: Colors.orange),
+                          );
+                        })
+                      : Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.fastfood, color: Colors.orange),
+                          );
+                        }),
                 )
               : Container(
                   width: 60,

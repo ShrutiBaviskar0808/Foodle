@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
+import 'dart:io';
 
 class SelectFoodsScreen extends StatefulWidget {
   final List<String>? initialFoods;
@@ -24,6 +26,8 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   final TextEditingController nameController = TextEditingController();
   final TextEditingController restaurantController = TextEditingController();
   final TextEditingController caloriesController = TextEditingController();
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -74,6 +78,43 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
             .toList();
       }
     });
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(source: source);
+    if (image != null) {
+      setState(() {
+        _selectedImage = File(image.path);
+      });
+    }
+  }
+
+  void _showImageSourceDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: Colors.orange),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: Colors.orange),
+              title: const Text('Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
 
@@ -353,18 +394,33 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                 const SizedBox(height: 20),
                 const Text('Have a picture of it?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Upload', style: TextStyle(color: Colors.grey[400])),
-                      const Icon(Icons.upload, color: Colors.grey),
-                    ],
+                InkWell(
+                  onTap: _showImageSourceDialog,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: _selectedImage != null
+                        ? Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(_selectedImage!, width: 60, height: 60, fit: BoxFit.cover),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(child: Text('Image selected')),
+                              const Icon(Icons.check_circle, color: Colors.orange),
+                            ],
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Upload', style: TextStyle(color: Colors.grey[400])),
+                              const Icon(Icons.upload, color: Colors.grey),
+                            ],
+                          ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -394,7 +450,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                           'name': nameController.text,
                           'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
                           'calories': '0',
-                          'image': '',
+                          'image': _selectedImage?.path ?? '',
                         };
                         customFoods.add(newFood);
                         selectedFoods.add(nameController.text);
