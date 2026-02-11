@@ -52,21 +52,21 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final List<Map<String, String>> onboardingData = [
     {
       'title': 'Foodle',
-      'heading': 'Know what everyone\nLoves or Avoids',
+      'heading': 'Make Every Meal\nPersonal',
       'description':
-          'Foodie helps users track food preferences, allergies, and dietary needs of people in their circle (family, friends, colleagues) to plan better meals, parties, and gifts.',
+          'Foodle helps you remember everyone\'s favorite foods, dislikes, and special cravings — so you always get it right.',
       'image': 'assets/main bg.jpg.jpg',
     },
     {
       'title': 'Preferences',
-      'heading': 'Track Preferences\nEasily',
-      'description': 'Keep a record of your friends food preferences and allergies.',
+      'heading': 'Know What They\nLove',
+      'description': 'From birthdays to late-night cravings, Foodle helps you choose food that truly makes them smile.',
       'image': 'assets/main bg.jpg.jpg',
     },
     {
       'title': 'Plan Better',
-      'heading': 'Plan Better Meals\n& Parties',
-      'description': 'Make informed decisions when planning meals and events.',
+      'heading': 'Avoid What They\nCan\'t Have',
+      'description': 'Track allergies and dietary needs to plan meals, parties, and surprises safely and thoughtfully.',
       'image': 'assets/main bg.jpg.jpg',
     },
   ];

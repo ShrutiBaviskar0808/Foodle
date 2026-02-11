@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/family_screen.dart';
 import 'screens/favorite_places_screen.dart';
 import 'screens/friends_screen.dart';
@@ -186,120 +187,157 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ),
       body: Column(
         children: [
-          Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFFFE8D00),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30),
-              ),
-            ),
-            child: Column(
-              children: [
-                SizedBox(height: MediaQuery.of(context).padding.top),
-                Padding(
-                  padding: const EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Builder(
-                        builder: (context) => IconButton(
-                          icon: const Icon(Icons.menu, color: Colors.white, size: 26),
-                          onPressed: () => Scaffold.of(context).openDrawer(),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ),
-                      const Text(
-                        'Foodle',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w400,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
-                        },
-                        child: CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.white,
-                          child: FutureBuilder<String>(
-                            future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
-                            builder: (context, snapshot) {
-                              final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
-                              return Text(
-                                initial,
-                                style: const TextStyle(fontSize: 16, color: Color(0xFFFE8D00), fontWeight: FontWeight.bold),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
           Stack(
             children: [
               Container(
-                height: size.height * 0.35,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800'),
-                    fit: BoxFit.cover,
+                height: 280,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF2C2C2C),
+                      Color(0xFF1A1A1A),
+                    ],
                   ),
                 ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF080703).withValues(alpha: 0.6),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Every Plate,',
-                          style: TextStyle(color: Colors.white, fontSize: size.width * 0.09, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          'Perfectly Planned',
-                          style: TextStyle(color: Colors.white, fontSize: size.width * 0.09, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.zero,
+                  child: Stack(
+                    children: [
+                      Positioned(top: 100, left: 20, child: Icon(Icons.restaurant_menu, size: 40, color: Colors.black.withOpacity(0.1))),
+                      Positioned(top: 120, right: 30, child: Icon(Icons.local_pizza, size: 50, color: Colors.black.withOpacity(0.08))),
+                      Positioned(top: 150, left: 100, child: Icon(Icons.fastfood, size: 35, color: Colors.black.withOpacity(0.1))),
+                      Positioned(top: 180, right: 80, child: Icon(Icons.cake, size: 45, color: Colors.black.withOpacity(0.08))),
+                      Positioned(top: 140, left: 200, child: Icon(Icons.lunch_dining, size: 38, color: Colors.black.withOpacity(0.1))),
+                      Positioned(top: 200, left: 50, child: Icon(Icons.icecream, size: 42, color: Colors.black.withOpacity(0.08))),
+                    ],
                   ),
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 30,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
+              Container(
+                height: 280,
+                decoration: const BoxDecoration(
+                  color: Colors.transparent,
+                ),
+              ),
+              Container(
+                height: 90,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFE8D00),
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
                   ),
+                ),
+              ),
+              SafeArea(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Builder(
+                            builder: (context) => IconButton(
+                              icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                              onPressed: () => Scaffold.of(context).openDrawer(),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ),
+                          Text(
+                            'Foodle',
+                            style: GoogleFonts.pacifico(
+                              color: Colors.white,
+                              fontSize: 32,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const UserDashboardScreen(),
+                              ),
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                              ),
+                              child: CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Colors.white,
+                                child: FutureBuilder<String>(
+                                  future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
+                                  builder: (context, snapshot) {
+                                    final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
+                                    return Text(
+                                      initial,
+                                      style: const TextStyle(
+                                        color: Color(0xFFFE8D00),
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 70),
+                    Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Every Plate,',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              height: 1.2,
+                            ),
+                          ),
+                          Text(
+                            'Perfectly Planned',
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
           Expanded(
             child: Container(
-              color: Colors.white,
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(padding),
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
+                ),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -408,7 +446,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           )).toList(),
                         ),
                       ),
-              ],
+                    ],
+                  ),
                 ),
               ),
             ),

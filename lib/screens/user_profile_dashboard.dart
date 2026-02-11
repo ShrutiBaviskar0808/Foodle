@@ -161,9 +161,48 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      body: SafeArea(
-        child: Column(
+      body: Column(
         children: [
+          // Orange header
+          Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFFF8C00),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: SafeArea(
+              bottom: false,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Text(
+                    'Foodle',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.white,
+                    child: Text(
+                      (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
+                      style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           // Header with profile image
           Container(
             height: 220,
@@ -202,21 +241,6 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       ),
                     ),
                   ),
-                SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          onPressed: () => Navigator.pop(context),
-                          icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        ),
-                        const Spacer(),
-                      ],
-                    ),
-                  ),
-                ),
                 Positioned(
                   bottom: 20,
                   left: 20,
@@ -284,7 +308,6 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
             ),
           ),
         ],
-        ),
       ),
     );
   }
