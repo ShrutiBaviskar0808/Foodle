@@ -335,9 +335,12 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     Expanded(
                       child: RichText(
-                        text: const TextSpan(
-                          style: TextStyle(fontSize: 12, color: Colors.black),
-                          children: [
+                        text: TextSpan(
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontSize: 12,
+                            color: Colors.black,
+                          ),
+                          children: const [
                             TextSpan(text: 'I Agree with '),
                             TextSpan(
                               text: 'Terms of Service',
