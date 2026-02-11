@@ -184,92 +184,103 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ],
         ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-        Container(
-          height: size.height * 0.25,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.orange, Colors.orange.withValues(alpha: 0.8)],
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800'),
-                      fit: BoxFit.cover,
-                      opacity: 0.3,
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.all(padding),
-                child: Column(
+      body: Column(
+        children: [
+          Container(
+            color: const Color(0xFFFF8C00),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Builder(
-                          builder: (context) => IconButton(
-                            icon: const Icon(Icons.menu, color: Colors.white, size: 24),
-                            onPressed: () => Scaffold.of(context).openDrawer(),
-                          ),
-                        ),
-                        const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300)),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
-                          },
-                          child: CircleAvatar(
-                            radius: 22,
-                            backgroundColor: Colors.white,
-                            child: FutureBuilder<String>(
-                              future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
-                              builder: (context, snapshot) {
-                                final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
-                                return Text(
-                                  initial,
-                                  style: const TextStyle(fontSize: 18, color: Colors.orange, fontWeight: FontWeight.bold),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+                    Builder(
+                      builder: (context) => IconButton(
+                        icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                        onPressed: () => Scaffold.of(context).openDrawer(),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
                     ),
-                    const Spacer(),
-                    Column(
-                      children: [
-                        Text('Every Plate,', style: TextStyle(color: Colors.white, fontSize: size.width * 0.09, fontWeight: FontWeight.bold)),
-                        Text('Perfectly Planned', style: TextStyle(color: Colors.white, fontSize: size.width * 0.09, fontWeight: FontWeight.bold)),
-                        SizedBox(height: size.height * 0.025),
-                      ],
+                    const Text(
+                      'Foodle',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w400,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
+                      },
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Colors.white,
+                        child: FutureBuilder<String>(
+                          future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
+                          builder: (context, snapshot) {
+                            final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
+                            return Text(
+                              initial,
+                              style: const TextStyle(fontSize: 16, color: Color(0xFFFF8C00), fontWeight: FontWeight.bold),
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-        Expanded(
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
+          Container(
+            height: size.height * 0.2,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800'),
+                fit: BoxFit.cover,
               ),
             ),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(padding),
-              child: Column(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.black.withValues(alpha: 0.3), Colors.black.withValues(alpha: 0.5)],
+                ),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Every Plate,',
+                      style: TextStyle(color: Colors.white, fontSize: size.width * 0.08, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Perfectly Planned',
+                      style: TextStyle(color: Colors.white, fontSize: size.width * 0.08, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(padding),
+                child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
@@ -381,12 +392,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                       ),
               ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
-        ),
+        ],
       ),
     );
   }
