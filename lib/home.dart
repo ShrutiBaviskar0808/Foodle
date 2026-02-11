@@ -194,52 +194,54 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 bottomRight: Radius.circular(30),
               ),
             ),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Builder(
-                      builder: (context) => IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ),
-                    const Text(
-                      'Foodle',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w400,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
-                      },
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.white,
-                        child: FutureBuilder<String>(
-                          future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
-                          builder: (context, snapshot) {
-                            final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
-                            return Text(
-                              initial,
-                              style: const TextStyle(fontSize: 16, color: Color(0xFFFE8D00), fontWeight: FontWeight.bold),
-                            );
-                          },
+            child: Column(
+              children: [
+                SizedBox(height: MediaQuery.of(context).padding.top),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Builder(
+                        builder: (context) => IconButton(
+                          icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                          onPressed: () => Scaffold.of(context).openDrawer(),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                         ),
                       ),
-                    ),
-                  ],
+                      const Text(
+                        'Foodle',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w400,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
+                        },
+                        child: CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.white,
+                          child: FutureBuilder<String>(
+                            future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
+                            builder: (context, snapshot) {
+                              final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
+                              return Text(
+                                initial,
+                                style: const TextStyle(fontSize: 18, color: Color(0xFFFE8D00), fontWeight: FontWeight.bold),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           Container(
