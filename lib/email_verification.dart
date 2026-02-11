@@ -126,6 +126,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   // ================= UI =====================
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.06;
+    
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -134,7 +137,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
               children: [
                 // Header
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: padding, vertical: size.height * 0.015),
                   child: Row(
                     children: [
                       IconButton(
@@ -157,7 +160,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                 Expanded(
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: EdgeInsets.symmetric(horizontal: padding),
                       child: Column(
                         children: [
                           const SizedBox(height: 24),

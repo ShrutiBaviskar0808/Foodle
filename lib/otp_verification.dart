@@ -71,6 +71,9 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.06;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -78,7 +81,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
           children: [
             // Custom app bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: padding, vertical: size.height * 0.015),
               child: Row(
                 children: [
                   IconButton(
@@ -100,7 +103,7 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
             // Content
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.all(padding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

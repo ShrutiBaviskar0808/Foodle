@@ -107,6 +107,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.05;
+    
     return Scaffold(
       drawer: Drawer(
         child: ListView(
@@ -182,7 +185,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         child: Column(
           children: [
         Container(
-          height: 200,
+          height: size.height * 0.25,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -203,56 +206,51 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   ),
                 ),
               ),
-              SafeArea(
+              Padding(
+                padding: EdgeInsets.all(padding),
                 child: Column(
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Builder(
-                            builder: (context) => IconButton(
-                              icon: const Icon(Icons.menu, color: Colors.white, size: 24),
-                              onPressed: () => Scaffold.of(context).openDrawer(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Builder(
+                          builder: (context) => IconButton(
+                            icon: const Icon(Icons.menu, color: Colors.white, size: 24),
+                            onPressed: () => Scaffold.of(context).openDrawer(),
+                          ),
+                        ),
+                        const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300)),
+                        GestureDetector(
+                          onTap: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            final userName = prefs.getString('user_name') ?? 'User';
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
+                          },
+                          child: CircleAvatar(
+                            radius: 22,
+                            backgroundColor: Colors.white,
+                            child: FutureBuilder<String>(
+                              future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
+                              builder: (context, snapshot) {
+                                final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
+                                return Text(
+                                  initial,
+                                  style: const TextStyle(fontSize: 18, color: Colors.orange, fontWeight: FontWeight.bold),
+                                );
+                              },
                             ),
                           ),
-                          const Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w300)),
-                          GestureDetector(
-                            onTap: () async {
-                              final prefs = await SharedPreferences.getInstance();
-                              final userName = prefs.getString('user_name') ?? 'User';
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
-                            },
-                            child: CircleAvatar(
-                              radius: 22,
-                              backgroundColor: Colors.white,
-                              child: FutureBuilder<String>(
-                                future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
-                                builder: (context, snapshot) {
-                                  final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
-                                  return Text(
-                                    initial,
-                                    style: const TextStyle(fontSize: 18, color: Colors.orange, fontWeight: FontWeight.bold),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     const Spacer(),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        children: [
-                          Text('Every Plate,', style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
-                          Text('Perfectly Planned', style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
+                    Column(
+                      children: [
+                        Text('Every Plate,', style: TextStyle(color: Colors.white, fontSize: size.width * 0.09, fontWeight: FontWeight.bold)),
+                        Text('Perfectly Planned', style: TextStyle(color: Colors.white, fontSize: size.width * 0.09, fontWeight: FontWeight.bold)),
+                        SizedBox(height: size.height * 0.025),
+                      ],
                     ),
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -261,7 +259,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ),
         Expanded(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(padding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

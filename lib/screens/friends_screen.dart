@@ -65,6 +65,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.05;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Circle'),
@@ -76,7 +79,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           children: [
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(padding),
                 itemCount: friends.length,
                 itemBuilder: (context, index) {
                   final friend = friends[index];

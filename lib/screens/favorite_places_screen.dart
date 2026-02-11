@@ -52,6 +52,9 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.05;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Favorite Places'),
@@ -63,7 +66,7 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
           children: [
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(padding),
                 itemCount: places.length,
                 itemBuilder: (context, index) {
                   final place = places[index];

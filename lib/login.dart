@@ -176,29 +176,32 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.06;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(padding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 40),
-              const Text(
+              SizedBox(height: size.height * 0.05),
+              Text(
                 'Login to your\naccount.',
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: size.width * 0.08,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                   height: 1.2,
                 ),
               ),
-              const SizedBox(height: 8),
-              const Text(
+              SizedBox(height: size.height * 0.01),
+              Text(
                 'Please sign in to your account',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: size.width * 0.04,
                   color: Colors.grey,
                 ),
               ),

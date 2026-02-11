@@ -35,6 +35,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.05;
+    
     const brandColor = Color(0xFFFD8C00);
     return Scaffold(
       appBar: AppBar(
@@ -47,7 +50,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          padding: EdgeInsets.symmetric(horizontal: padding, vertical: size.height * 0.03),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

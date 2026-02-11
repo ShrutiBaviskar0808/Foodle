@@ -66,6 +66,9 @@ class _FamilyScreenState extends State<FamilyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.05;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Foodles'),
@@ -77,7 +80,7 @@ class _FamilyScreenState extends State<FamilyScreen> {
           children: [
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(padding),
                 itemCount: familyMembers.length,
                 itemBuilder: (context, index) {
                   final member = familyMembers[index];

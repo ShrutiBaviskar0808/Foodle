@@ -42,6 +42,9 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.05;
+    
     const brandColor = Color(0xFFFD8C00);
     return Scaffold(
       appBar: AppBar(
@@ -55,7 +58,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(padding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

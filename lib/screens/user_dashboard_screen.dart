@@ -100,12 +100,15 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.05;
+    
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(padding),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -172,7 +175,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                   ),
                   const SizedBox(height: 20),
                   CircleAvatar(
-                    radius: 50,
+                    radius: size.width * 0.12,
                     backgroundColor: Colors.white,
                     child: Text(
                       userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
@@ -180,16 +183,16 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  Text(userName, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 5),
-                  Text(userEmail, style: const TextStyle(color: Colors.white70, fontSize: 14)),
+                  Text(userName, style: TextStyle(color: Colors.white, fontSize: size.width * 0.06, fontWeight: FontWeight.bold)),
+                  SizedBox(height: size.height * 0.006),
+                  Text(userEmail, style: TextStyle(color: Colors.white70, fontSize: size.width * 0.035)),
                   const SizedBox(height: 20),
                 ],
               ),
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(padding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

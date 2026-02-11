@@ -222,6 +222,9 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final padding = size.width * 0.05;
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.place == null ? 'Add Favorite Place' : 'Edit Favorite Place'),
@@ -232,17 +235,17 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(padding),
             children: [
               Center(
                 child: GestureDetector(
                   onTap: _showImageSourceDialog,
                   child: CircleAvatar(
-                    radius: 60,
+                    radius: size.width * 0.15,
                     backgroundColor: Colors.orange.withValues(alpha: 0.2),
                     backgroundImage: _imagePath != null ? FileImage(File(_imagePath!)) : null,
                     child: _imagePath == null
-                        ? const Icon(Icons.add_a_photo, size: 40, color: Colors.orange)
+                        ? Icon(Icons.add_a_photo, size: size.width * 0.1, color: Colors.orange)
                         : null,
                   ),
                 ),
