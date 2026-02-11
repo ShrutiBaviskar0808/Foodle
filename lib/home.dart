@@ -198,13 +198,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               children: [
                 SizedBox(height: MediaQuery.of(context).padding.top),
                 Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Builder(
                         builder: (context) => IconButton(
-                          icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                          icon: const Icon(Icons.menu, color: Colors.white, size: 26),
                           onPressed: () => Scaffold.of(context).openDrawer(),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -214,7 +214,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         'Foodle',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 28,
+                          fontSize: 24,
                           fontWeight: FontWeight.w400,
                           fontStyle: FontStyle.italic,
                         ),
@@ -224,7 +224,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
                         },
                         child: CircleAvatar(
-                          radius: 24,
+                          radius: 20,
                           backgroundColor: Colors.white,
                           child: FutureBuilder<String>(
                             future: SharedPreferences.getInstance().then((prefs) => prefs.getString('user_name') ?? 'U'),
@@ -232,7 +232,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                               final initial = snapshot.data?.isNotEmpty == true ? snapshot.data![0].toUpperCase() : 'U';
                               return Text(
                                 initial,
-                                style: const TextStyle(fontSize: 18, color: Color(0xFFFE8D00), fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 16, color: Color(0xFFFE8D00), fontWeight: FontWeight.bold),
                               );
                             },
                           ),
