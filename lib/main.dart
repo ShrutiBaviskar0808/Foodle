@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'login.dart';
 import 'signup.dart';
 import 'main_navigation.dart';
-import 'email_verification.dart';
 import 'otp_verification.dart';
 import 'forgot_password.dart';
 import 'reset_password.dart';
@@ -32,7 +31,6 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
         '/home': (context) => const MainNavigation(),
-        '/email_verification': (context) => const EmailVerificationPage(),
         '/otp': (context) => const OTPVerificationPage(),
         '/forgot-password': (context) => const ForgotPasswordPage(),
         '/reset-password': (context) => const ResetPasswordPage(),

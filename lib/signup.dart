@@ -220,22 +220,41 @@ class _SignupPageState extends State<SignupPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: size.height * 0.05),
-              Text(
-                'Create your new\naccount',
-                style: TextStyle(
-                  fontSize: size.width * 0.07,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+              if (!_showOtpField) ...[
+                Text(
+                  'Create your new\naccount',
+                  style: TextStyle(
+                    fontSize: size.width * 0.07,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              SizedBox(height: size.height * 0.01),
-              Text(
-                'Create an account to start looking for the food\nyou like',
-                style: TextStyle(
-                  fontSize: size.width * 0.035,
-                  color: Colors.grey,
+                SizedBox(height: size.height * 0.01),
+                Text(
+                  'Create an account to start looking for the food\nyou like',
+                  style: TextStyle(
+                    fontSize: size.width * 0.035,
+                    color: Colors.grey,
+                  ),
                 ),
-              ),
+              ] else ...[
+                const Text(
+                  'Email Verification',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Enter the verification code we sent to\n${_emailController.text}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
               const SizedBox(height: 40),
               if (!_showOtpField) ...[
                 const Text('Email Address', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
@@ -384,10 +403,6 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
               ] else ...[
-                const Text('Enter OTP', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                Text('We sent a verification code to ${_emailController.text}', style: const TextStyle(fontSize: 14, color: Colors.grey)),
-                const SizedBox(height: 20),
                 TextField(
                   controller: _otpController,
                   keyboardType: TextInputType.number,
