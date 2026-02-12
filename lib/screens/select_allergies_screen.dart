@@ -76,7 +76,8 @@ class _SelectAllergiesScreenState extends State<SelectAllergiesScreen> {
           style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
           const SizedBox(height: 10),
           if (selectedAllergies.isNotEmpty)
@@ -179,6 +180,7 @@ class _SelectAllergiesScreenState extends State<SelectAllergiesScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
