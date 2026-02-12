@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_conditions_screen.dart';
+import '../reset_password.dart';
+import 'request_deletion_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   final VoidCallback? onBackPressed;
@@ -58,9 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 10),
             
             _buildNavigationTile('Reset Password', () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Reset password feature coming soon')),
-              );
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const ResetPasswordPage()));
             }),
             
             _buildSwitchTile(
@@ -86,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 10),
             
             _buildNavigationTile('Account Deletion', () {
-              _showAccountDeletionDialog();
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const RequestDeletionScreen()));
             }),
             
             const SizedBox(height: 30),
@@ -160,31 +160,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 5),
-      ),
-    );
-  }
-
-  void _showAccountDeletionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Account deletion requested')),
-              );
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
       ),
     );
   }
