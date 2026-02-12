@@ -11,6 +11,12 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   String userName = '';
   String userEmail = '';
+  String userPhone = '';
+  String userDob = '';
+  String userGender = '';
+  
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
 
   @override
   void initState() {
@@ -23,6 +29,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     setState(() {
       userName = prefs.getString('user_name') ?? 'User';
       userEmail = prefs.getString('user_email') ?? 'user@example.com';
+      userPhone = prefs.getString('user_phone') ?? '';
+      userDob = prefs.getString('user_dob') ?? '';
+      userGender = prefs.getString('user_gender') ?? '';
+      _phoneController.text = userPhone;
+      _dobController.text = userDob;
     });
   }
 
@@ -36,7 +47,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         foregroundColor: Colors.white,
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
@@ -52,7 +63,24 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               const SizedBox(height: 30),
               _buildProfileItem('Name', userName),
               _buildProfileItem('Email', userEmail),
-              const SizedBox(height: 40),
+              _buildEditableField('Phone Number', _phoneController, TextInputType.phone),
+              _buildEditableField('Date of Birth', _dobController, TextInputType.none, isDatePicker: true),
+              _buildGenderDropdown(),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveProfile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => _logout(context),
                 style: ElevatedButton.styleFrom(
@@ -85,6 +113,73 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildEditableField(String label, TextEditingController controller, TextInputType keyboardType, {bool isDatePicker = false}) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        readOnly: isDatePicker,
+        onTap: isDatePicker ? () => _selectDate() : null,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          filled: true,
+          fillColor: Colors.grey[50],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGenderDropdown() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey[400]!),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: userGender.isEmpty ? null : userGender,
+          hint: const Text('Select Gender'),
+          isExpanded: true,
+          items: ['Male', 'Female', 'Other'].map((gender) {
+            return DropdownMenuItem(value: gender, child: Text(gender));
+          }).toList(),
+          onChanged: (value) => setState(() => userGender = value ?? ''),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _dobController.text = '${picked.day}/${picked.month}/${picked.year}';
+      });
+    }
+  }
+
+  Future<void> _saveProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_phone', _phoneController.text);
+    await prefs.setString('user_dob', _dobController.text);
+    await prefs.setString('user_gender', userGender);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile saved successfully')),
+      );
+    }
   }
 
   Future<void> _logout(BuildContext context) async {

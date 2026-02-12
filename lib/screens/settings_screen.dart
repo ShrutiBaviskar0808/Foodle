@@ -99,6 +99,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildNavigationTile('T&C', () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsConditionsScreen()));
             }),
+            
+            const SizedBox(height: 20),
+            _buildNavigationTile('Sign Out', () {
+              _showSignOutDialog();
+            }),
           ],
         ),
       ),
@@ -160,6 +165,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
         trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 5),
+      ),
+    );
+  }
+
+  void _showSignOutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+            },
+            child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
