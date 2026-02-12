@@ -17,11 +17,11 @@ if (empty($member_id)) {
 try {
     $pdo = getDBConnection();
     
-    $stmt = $pdo->prepare("SELECT * FROM foods WHERE member_id = ? ORDER BY created_at DESC");
+    $stmt = $pdo->prepare("SELECT * FROM allergies WHERE member_id = ? ORDER BY created_at DESC");
     $stmt->execute([$member_id]);
-    $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $allergies = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    echo json_encode(['success' => true, 'foods' => $foods]);
+    echo json_encode(['success' => true, 'allergies' => $allergies]);
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }

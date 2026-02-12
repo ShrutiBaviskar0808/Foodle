@@ -4,41 +4,34 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "foodle";
+require_once 'db_config.php';
+
+$input = json_decode(file_get_contents('php://input'), true);
+
+$member_id = $input['member_id'] ?? null;
+$food_name = $input['food_name'] ?? '';
+$preference_type = $input['preference_type'] ?? 'like';
+$mood_tag = $input['mood_tag'] ?? null;
+$photo_path = $input['photo_path'] ?? null;
+$notes = $input['notes'] ?? null;
+$visibility = $input['visibility'] ?? 'private';
+$created_by_user_id = $input['created_by_user_id'] ?? null;
+
+if (empty($member_id) || empty($food_name)) {
+    echo json_encode(['success' => false, 'message' => 'Member ID and food name are required']);
+    exit;
+}
+
+try {
+    $pdo = getDBConnection();
     
-    try {
-        $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        $json = file_get_contents('php://input');
-        $data = json_decode($json, true);
-        
-        $user_id = $data['user_id'] ?? '';
-        $store_name = $data['store_name'] ?? '';
-        $food_item = $data['food_item'] ?? '';
-        $preferences = $data['preferences'] ?? '';
-        $mood = $data['mood'] ?? '';
-        $notes = $data['notes'] ?? '';
-        $image_path = $data['image_path'] ?? '';
-        
-        if (empty($user_id) || empty($store_name)) {
-            echo json_encode(['success' => false, 'message' => 'User ID and store name required']);
-            exit;
-        }
-        
-        $stmt = $pdo->prepare("INSERT INTO foods (user_id, store_name, food_item, preferences, mood, notes, image_path) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$user_id, $store_name, $food_item, $preferences, $mood, $notes, $image_path]);
-        
-        echo json_encode(['success' => true, 'message' => 'Food added successfully', 'food_id' => $pdo->lastInsertId()]);
-        
-    } catch(PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
-    }
-} else {
-    echo json_encode(['success' => false, 'message' => 'Method not allowed']);
+    $stmt = $pdo->prepare("INSERT INTO foods (member_id, food_name, preference_type, mood_tag, photo_path, notes, visibility, created_by_user_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+    $stmt->execute([$member_id, $food_name, $preference_type, $mood_tag, $photo_path, $notes, $visibility, $created_by_user_id]);
+    
+    $food_id = $pdo->lastInsertId();
+    
+    echo json_encode(['success' => true, 'message' => 'Food added successfully', 'food_id' => $food_id]);
+} catch (PDOException $e) {
+    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }
 ?>
