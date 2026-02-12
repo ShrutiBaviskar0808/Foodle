@@ -4,15 +4,11 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
+require_once 'db_config.php';
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "food_app"; // Correct database name
-    
     try {
-        $pdo = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo = getDBConnection();
         
         // Get JSON input
         $json = file_get_contents('php://input');
