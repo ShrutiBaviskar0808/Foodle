@@ -13,7 +13,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   String userEmail = '';
   String userPhone = '';
   String userDob = '';
-  String userGender = '';
+  String? userGender;
   
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
@@ -31,7 +31,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       userEmail = prefs.getString('user_email') ?? 'user@example.com';
       userPhone = prefs.getString('user_phone') ?? '';
       userDob = prefs.getString('user_dob') ?? '';
-      userGender = prefs.getString('user_gender') ?? '';
+      final savedGender = prefs.getString('user_gender');
+      userGender = (savedGender == null || savedGender.isEmpty) ? null : savedGender;
       _phoneController.text = userPhone;
       _dobController.text = userDob;
     });
@@ -50,23 +51,96 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 40),
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                child: Text(
-                  userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                  style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.orange),
+              const SizedBox(height: 20),
+              Center(
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.orange.withValues(alpha: 0.2),
+                  child: Text(
+                    userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                    style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.orange),
+                  ),
                 ),
               ),
-              const SizedBox(height: 30),
-              _buildProfileItem('Name', userName),
-              _buildProfileItem('Email', userEmail),
-              _buildEditableField('Phone Number', _phoneController, TextInputType.phone),
-              _buildEditableField('Date of Birth', _dobController, TextInputType.none, isDatePicker: true),
-              _buildGenderDropdown(),
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
+              const Text('Name', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              TextFormField(
+                initialValue: userName,
+                readOnly: true,
+                decoration: InputDecoration(
+                  hintText: 'Enter your name',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('Email', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              TextFormField(
+                initialValue: userEmail,
+                readOnly: true,
+                decoration: InputDecoration(
+                  hintText: 'Enter your email',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('Phone Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: 'Enter your phone number',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('Date of Birth', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: _dobController,
+                readOnly: true,
+                onTap: _selectDate,
+                decoration: InputDecoration(
+                  hintText: 'Select your date of birth',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  suffixIcon: const Icon(Icons.calendar_today, color: Colors.orange),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('Gender', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey[400]!),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: userGender,
+                    hint: const Text('Select your gender'),
+                    isExpanded: true,
+                    items: ['Male', 'Female', 'Other'].map((gender) {
+                      return DropdownMenuItem(value: gender, child: Text(gender));
+                    }).toList(),
+                    onChanged: (value) => setState(() => userGender = value),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -80,77 +154,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => _logout(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                ),
-                child: const Text('Logout'),
-              ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileItem(String label, String value) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Row(
-        children: [
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          Expanded(child: Text(value, style: const TextStyle(fontSize: 16))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEditableField(String label, TextEditingController controller, TextInputType keyboardType, {bool isDatePicker = false}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      child: TextField(
-        controller: controller,
-        keyboardType: keyboardType,
-        readOnly: isDatePicker,
-        onTap: isDatePicker ? () => _selectDate() : null,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          filled: true,
-          fillColor: Colors.grey[50],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGenderDropdown() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[400]!),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: userGender.isEmpty ? null : userGender,
-          hint: const Text('Select Gender'),
-          isExpanded: true,
-          items: ['Male', 'Female', 'Other'].map((gender) {
-            return DropdownMenuItem(value: gender, child: Text(gender));
-          }).toList(),
-          onChanged: (value) => setState(() => userGender = value ?? ''),
         ),
       ),
     );
@@ -174,21 +179,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_phone', _phoneController.text);
     await prefs.setString('user_dob', _dobController.text);
-    await prefs.setString('user_gender', userGender);
+    await prefs.setString('user_gender', userGender ?? '');
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile saved successfully')),
       );
-    }
-  }
-
-  Future<void> _logout(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    // Clear all user data including family members
-    await prefs.remove('family_members');
-    await prefs.clear();
-    if (context.mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
     }
   }
 }
