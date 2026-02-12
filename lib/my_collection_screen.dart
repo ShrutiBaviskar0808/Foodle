@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'collection_detail_screen.dart';
+import 'models/stone_model.dart';
 
 class MyCollectionScreen extends StatefulWidget {
   const MyCollectionScreen({super.key});
@@ -11,20 +14,34 @@ class MyCollectionScreen extends StatefulWidget {
 class _MyCollectionScreenState extends State<MyCollectionScreen> {
   String _searchQuery = '';
   String _selectedFilter = 'All';
-  
-  final List<Map<String, String>> _allStones = [
-    {'name': 'Granite', 'type': 'Igneous Rock', 'image': 'assets/images/granite.jpg'},
-    {'name': 'Quartz', 'type': 'Mineral', 'image': 'assets/images/quartz.jpg'},
-    {'name': 'Marble', 'type': 'Metamorphic Rock', 'image': 'assets/images/marble.jpg'},
-    {'name': 'Basalt', 'type': 'Igneous Rock', 'image': 'assets/images/basalt.jpg'},
-    {'name': 'Limestone', 'type': 'Sedimentary Rock', 'image': 'assets/images/limestone.jpg'},
-    {'name': 'Amethyst', 'type': 'Crystal', 'image': 'assets/images/amethyst.jpg'},
-  ];
+  List<StoneModel> _allStones = [];
+  bool _isLoading = true;
 
-  List<Map<String, String>> get _filteredStones {
+  @override
+  void initState() {
+    super.initState();
+    _fetchStones();
+  }
+
+  Future<void> _fetchStones() async {
+    try {
+      final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/stone_enhanced_version.json'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _allStones = data.map((json) => StoneModel.fromJson(json)).toList();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  List<StoneModel> get _filteredStones {
     return _allStones.where((stone) {
-      final matchesSearch = stone['name']!.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesFilter = _selectedFilter == 'All' || stone['type'] == _selectedFilter;
+      final matchesSearch = stone.stoneName.toLowerCase().contains(_searchQuery.toLowerCase());
+      final matchesFilter = _selectedFilter == 'All' || stone.gemProperties.rarity == _selectedFilter;
       return matchesSearch && matchesFilter;
     }).toList();
   }
@@ -66,16 +83,14 @@ class _MyCollectionScreenState extends State<MyCollectionScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Filter by Type'),
+        title: const Text('Filter by Rarity'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildFilterOption('All'),
-            _buildFilterOption('Igneous Rock'),
-            _buildFilterOption('Sedimentary Rock'),
-            _buildFilterOption('Metamorphic Rock'),
-            _buildFilterOption('Mineral'),
-            _buildFilterOption('Crystal'),
+            _buildFilterOption('Common'),
+            _buildFilterOption('Rare'),
+            _buildFilterOption('Extremely Rare'),
           ],
         ),
       ),
@@ -112,60 +127,61 @@ class _MyCollectionScreenState extends State<MyCollectionScreen> {
         ],
       ),
       body: SafeArea(
-        child: filteredStones.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No stones found',
-                      style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: Colors.brown))
+            : filteredStones.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No stones found',
+                          style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _searchQuery = '';
+                              _selectedFilter = 'All';
+                            });
+                          },
+                          child: const Text('Clear filters'),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _searchQuery = '';
-                          _selectedFilter = 'All';
-                        });
-                      },
-                      child: const Text('Clear filters'),
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.75,
                     ),
-                  ],
-                ),
-              )
-            : GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.75,
-                ),
-                itemCount: filteredStones.length,
-                itemBuilder: (context, index) {
-                  final stone = filteredStones[index];
-                  return _buildCollectionItem(
-                    context,
-                    stone['name']!,
-                    stone['type']!,
-                    stone['image']!,
-                  );
-                },
-              ),
+                    itemCount: filteredStones.length,
+                    itemBuilder: (context, index) {
+                      final stone = filteredStones[index];
+                      return _buildCollectionItem(context, stone);
+                    },
+                  ),
       ),
     );
   }
 
-  Widget _buildCollectionItem(BuildContext context, String name, String type, String imagePath) {
+  Widget _buildCollectionItem(BuildContext context, StoneModel stone) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CollectionDetailScreen(stoneName: name, imagePath: imagePath),
+            builder: (context) => CollectionDetailScreen(
+              stoneName: stone.stoneName,
+              imagePath: stone.thumbImageUrl,
+              stoneData: stone,
+            ),
           ),
         );
       },
@@ -192,11 +208,10 @@ class _MyCollectionScreenState extends State<MyCollectionScreen> {
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
                 ),
-                child: Image.asset(
-                  imagePath,
+                child: Image.network(
+                  stone.thumbImageUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
-                  cacheWidth: 300,
                   errorBuilder: (context, error, stackTrace) {
                     return Center(
                       child: Icon(Icons.landscape, size: 50, color: Colors.grey.shade400),
@@ -211,7 +226,7 @@ class _MyCollectionScreenState extends State<MyCollectionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    stone.stoneName,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -221,7 +236,7 @@ class _MyCollectionScreenState extends State<MyCollectionScreen> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    type,
+                    stone.gemProperties.rarity,
                     style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

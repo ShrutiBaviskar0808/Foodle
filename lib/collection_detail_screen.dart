@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'stone_detail_screen.dart';
+import 'models/stone_model.dart';
 
 class CollectionDetailScreen extends StatefulWidget {
   final String stoneName;
   final String imagePath;
+  final StoneModel? stoneData;
 
-  const CollectionDetailScreen({super.key, required this.stoneName, required this.imagePath});
+  const CollectionDetailScreen({super.key, required this.stoneName, required this.imagePath, this.stoneData});
 
   @override
   State<CollectionDetailScreen> createState() => _CollectionDetailScreenState();
@@ -103,7 +105,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Image.asset(
+                child: Image.network(
                   widget.imagePath,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
@@ -129,11 +131,41 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                _getStoneType(widget.stoneName),
+                widget.stoneData?.gemProperties.rarity ?? _getStoneType(widget.stoneName),
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.brown),
               ),
             ),
             const SizedBox(height: 20),
+            
+            // Description from API
+            if (widget.stoneData != null) ..[
+              const Text(
+                'Description',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                widget.stoneData!.stoneDescription,
+                style: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.5),
+              ),
+              const SizedBox(height: 20),
+              
+              // Gem Properties
+              const Text(
+                'Properties',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+              ),
+              const SizedBox(height: 8),
+              _buildPropertyRow('Colors', widget.stoneData!.gemProperties.colors),
+              _buildPropertyRow('Hardness', widget.stoneData!.gemProperties.hardness),
+              _buildPropertyRow('Transparency', widget.stoneData!.gemProperties.transparency),
+              _buildPropertyRow('Luster', widget.stoneData!.gemProperties.luster),
+              _buildPropertyRow('Durability', widget.stoneData!.gemProperties.durability),
+              _buildPropertyRow('Jewelry Use', widget.stoneData!.gemProperties.jewelryUse),
+              if (widget.stoneData!.gemProperties.opticalEffects.isNotEmpty)
+                _buildPropertyRow('Optical Effects', widget.stoneData!.gemProperties.opticalEffects),
+              const SizedBox(height: 20),
+            ],
             
             // Identification Details
             _buildSection('Identification Details', 'Confidence: 94%\nIdentified on: December 15, 2024'),
@@ -249,6 +281,30 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
           Text(
             content,
             style: const TextStyle(fontSize: 15, color: Colors.black87),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPropertyRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+            ),
           ),
         ],
       ),
