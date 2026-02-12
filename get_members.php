@@ -7,21 +7,21 @@ header('Access-Control-Allow-Headers: Content-Type');
 require_once 'db_config.php';
 
 $input = json_decode(file_get_contents('php://input'), true);
-$member_id = $input['member_id'] ?? null;
+$owner_user_id = $input['owner_user_id'] ?? null;
 
-if (empty($member_id)) {
-    echo json_encode(['success' => false, 'message' => 'Member ID is required']);
+if (empty($owner_user_id)) {
+    echo json_encode(['success' => false, 'message' => 'Owner user ID is required']);
     exit;
 }
 
 try {
     $pdo = getDBConnection();
     
-    $stmt = $pdo->prepare("SELECT * FROM foods WHERE member_id = ? ORDER BY created_at DESC");
-    $stmt->execute([$member_id]);
-    $foods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare("SELECT * FROM members WHERE owner_user_id = ? ORDER BY created_at DESC");
+    $stmt->execute([$owner_user_id]);
+    $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    echo json_encode(['success' => true, 'foods' => $foods]);
+    echo json_encode(['success' => true, 'members' => $members]);
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }

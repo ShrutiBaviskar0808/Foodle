@@ -4,21 +4,17 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
+require_once 'db_config.php';
+
 $input = json_decode(file_get_contents('php://input'), true);
 
 $name = $input['name'];
 $email = $input['email'];
+$phone = $input['phone'] ?? null;
 $password = $input['password'];
 
-// Database connection
-$host = 'localhost';
-$dbname = 'food_app';
-$username = 'root';
-$db_password = '';
-
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $db_password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = getDBConnection();
     
     // Check if user already exists
     $checkStmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
@@ -33,8 +29,8 @@ try {
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     
     // Insert user
-    $stmt = $pdo->prepare("INSERT INTO users (name, email, password, created_at) VALUES (?, ?, ?, NOW())");
-    $stmt->execute([$name, $email, $hashedPassword]);
+    $stmt = $pdo->prepare("INSERT INTO users (name, email, phone, password, status, created_at) VALUES (?, ?, ?, ?, 'active', NOW())");
+    $stmt->execute([$name, $email, $phone, $hashedPassword]);
     $userId = $pdo->lastInsertId();
     
     // Delete old OTPs for this email
