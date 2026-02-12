@@ -15,7 +15,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool pushNotifications = false;
   bool location = true;
-  String selectedLanguage = 'English';
 
   @override
   void initState() {
@@ -28,7 +27,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       pushNotifications = prefs.getBool('push_notifications') ?? false;
       location = prefs.getBool('location') ?? true;
-      selectedLanguage = prefs.getString('language') ?? 'English';
     });
   }
 
@@ -36,7 +34,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('push_notifications', pushNotifications);
     await prefs.setBool('location', location);
-    await prefs.setString('language', selectedLanguage);
   }
 
   @override
@@ -57,8 +54,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.all(20),
           children: [
             const SizedBox(height: 10),
-            _buildSectionHeader('PROFILE'),
+            _buildSectionHeader('SETTING'),
             const SizedBox(height: 10),
+            
+            _buildNavigationTile('Reset Password', () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Reset password feature coming soon')),
+              );
+            }),
             
             _buildSwitchTile(
               'Push Notification',
@@ -78,7 +81,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               },
             ),
             
-            _buildLanguageTile(),
+            const SizedBox(height: 30),
+            _buildSectionHeader('SUPPORT'),
+            const SizedBox(height: 10),
+            
+            _buildNavigationTile('Account Deletion', () {
+              _showAccountDeletionDialog();
+            }),
             
             const SizedBox(height: 30),
             _buildSectionHeader('OTHER'),
@@ -87,7 +96,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildNavigationTile('Privacy Policy', () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()));
             }),
-            _buildNavigationTile('Terms and Conditions', () {
+            _buildNavigationTile('T&C', () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => const TermsConditionsScreen()));
             }),
           ],
@@ -140,31 +149,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildLanguageTile() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 5),
-      child: ListTile(
-        title: const Text(
-          'Language',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              selectedLanguage,
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-          ],
-        ),
-        onTap: () => _showLanguageDialog(),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 5),
-      ),
-    );
-  }
-
   Widget _buildNavigationTile(String title, VoidCallback onTap) {
     return Container(
       margin: const EdgeInsets.only(bottom: 5),
@@ -180,28 +164,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showLanguageDialog() {
+  void _showAccountDeletionDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Language'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: ['English', 'Spanish', 'French', 'German'].map((language) {
-            return ListTile(
-              title: Text(language),
-              leading: Icon(
-                selectedLanguage == language ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                color: selectedLanguage == language ? Colors.orange : Colors.grey,
-              ),
-              onTap: () {
-                setState(() => selectedLanguage = language);
-                _saveSettings();
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
-        ),
+        title: const Text('Delete Account'),
+        content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Account deletion requested')),
+              );
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
