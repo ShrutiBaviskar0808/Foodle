@@ -109,6 +109,18 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                 child: Image.network(
                   widget.imagePath,
                   fit: BoxFit.cover,
+                  cacheWidth: 500,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            : null,
+                        color: Colors.brown,
+                      ),
+                    );
+                  },
                   errorBuilder: (context, error, stackTrace) {
                     return Icon(Icons.landscape, size: 80, color: Colors.grey.shade400);
                   },
@@ -335,6 +347,22 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
                       Image.network(
                         stone.thumbImageUrl,
                         fit: BoxFit.cover,
+                        cacheWidth: 280,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: Colors.grey.shade300,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                    : null,
+                                color: Colors.brown,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          );
+                        },
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
                             color: Colors.grey.shade300,

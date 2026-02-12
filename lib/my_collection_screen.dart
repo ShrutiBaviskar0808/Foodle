@@ -212,6 +212,19 @@ class _MyCollectionScreenState extends State<MyCollectionScreen> {
                   stone.thumbImageUrl,
                   fit: BoxFit.cover,
                   width: double.infinity,
+                  cacheWidth: 240,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            : null,
+                        color: Colors.brown,
+                        strokeWidth: 2,
+                      ),
+                    );
+                  },
                   errorBuilder: (context, error, stackTrace) {
                     return Center(
                       child: Icon(Icons.landscape, size: 50, color: Colors.grey.shade400),

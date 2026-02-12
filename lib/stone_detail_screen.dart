@@ -77,6 +77,18 @@ class _StoneDetailScreenState extends State<StoneDetailScreen> {
                             child: Image.network(
                               _stoneData!.thumbImageUrl,
                               fit: BoxFit.cover,
+                              cacheWidth: 500,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                        : null,
+                                    color: Colors.brown,
+                                  ),
+                                );
+                              },
                               errorBuilder: (context, error, stackTrace) {
                                 return Icon(Icons.landscape, size: 80, color: Colors.grey.shade400);
                               },
