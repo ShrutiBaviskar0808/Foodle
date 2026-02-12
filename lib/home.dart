@@ -341,7 +341,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('My Family', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text('My Family', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
                     TextButton.icon(
                       onPressed: () async {
                         final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
@@ -381,7 +381,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('My Favorite Places', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text('My Favorite Places', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
                     TextButton.icon(
                       onPressed: () async {
                         await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
@@ -410,7 +410,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('My Friends', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text('My Friends', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
                     TextButton.icon(
                       onPressed: () async {
                         final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
