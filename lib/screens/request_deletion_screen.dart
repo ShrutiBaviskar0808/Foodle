@@ -17,7 +17,7 @@ class _RequestDeletionScreenState extends State<RequestDeletionScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Delete Account'),
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
       ),
       body: SafeArea(
