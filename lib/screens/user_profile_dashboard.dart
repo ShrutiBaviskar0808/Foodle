@@ -140,6 +140,53 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFFF9800),
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const Text(
+                    "Foodle",
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
+                      ? CircleAvatar(
+                          radius: 18,
+                          backgroundImage: FileImage(File(widget.memberData!['imagePath'])),
+                        )
+                      : CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Colors.white,
+                          child: Text(
+                            (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
+                            style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                        ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
@@ -162,63 +209,24 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
       ),
       backgroundColor: Colors.white,
       body: Column(
-        children: [
-          // Orange header
-          Container(
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF8C00),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-            ),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: SafeArea(
-              bottom: false,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white, size: 24),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Text(
-                    'Foodle',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w500,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Text(
-                      (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
-                      style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Header with profile image
-          Expanded(
-            flex: 2,
-            child: Container(
+          children: [
+            // Header with profile image
+            SizedBox(
+              height: 350,
+              child: Container(
               decoration: widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
                   ? BoxDecoration(
                       image: DecorationImage(
                         image: FileImage(File(widget.memberData!['imagePath'])),
                         fit: BoxFit.cover,
+                        alignment: Alignment.center,
                       ),
                     )
                   : BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Colors.orange, Colors.orange.withValues(alpha: 0.7)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.orange.shade400, Colors.orange.shade600],
                       ),
                     ),
               child: Stack(
@@ -229,27 +237,30 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.black.withValues(alpha: 0.5), Colors.black.withValues(alpha: 0.7)],
+                          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
                         ),
                       ),
                     ),
                   if (widget.memberData?['imagePath'] == null || !File(widget.memberData!['imagePath']).existsSync())
                     Center(
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
-                          style: const TextStyle(fontSize: 60, color: Colors.orange, fontWeight: FontWeight.bold),
-                        ),
+                      child: Text(
+                        (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
+                        style: const TextStyle(fontSize: 120, color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
                   Positioned(
-                    bottom: 20,
+                    bottom: 40,
                     left: 20,
                     child: Text(
                       widget.memberData?['name'] ?? 'Dale Hicks',
-                      style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 2)),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -257,12 +268,11 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
             ),
           ),
           // Content
-          Expanded(
-            flex: 3,
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -310,13 +320,13 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                             child: _buildFoodItem(foodData['name']!, foodData['restaurant']!, foodData['calories']!, foodData['image']!),
                           );
                         }).toList()),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
   }
 
   Widget _buildAllergyChip(String label) {

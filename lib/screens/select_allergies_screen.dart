@@ -64,171 +64,121 @@ class _SelectAllergiesScreenState extends State<SelectAllergiesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Orange header
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFFF8C00),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.orange),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Select Allergies',
+          style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: Column(
+        children: [
+          const SizedBox(height: 10),
+          if (selectedAllergies.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Text(
-                    'Foodle',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w500,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                  const CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, color: Color(0xFFFF8C00)),
+                  const Text('Selected Allergies', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: selectedAllergies.map((allergy) => Chip(
+                      label: Text(allergy),
+                      deleteIcon: const Icon(Icons.close, size: 18),
+                      onDeleted: () => setState(() => selectedAllergies.remove(allergy)),
+                      backgroundColor: const Color(0xFFFFE4CC),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    )).toList(),
                   ),
                 ],
               ),
             ),
-            Expanded(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.orange),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const Text(
-                        'Allergy Preferences',
-                        style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.orange),
-                      ),
-                    ],
-                  ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: TextField(
+              controller: searchController,
+              onChanged: _filterAllergies,
+              decoration: InputDecoration(
+                hintText: 'Search or add custom allergy',
+                filled: true,
+                fillColor: Colors.grey[100],
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.add_circle, color: Colors.orange, size: 28),
+                  onPressed: _addCustomAllergy,
                 ),
-                const SizedBox(height: 20),
-                const SizedBox(height: 20),
-                if (selectedAllergies.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: filteredAllergies.length,
+              itemBuilder: (context, index) {
+                final allergy = filteredAllergies[index];
+                final isSelected = selectedAllergies.contains(allergy);
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 15),
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        if (isSelected) {
+                          selectedAllergies.remove(allergy);
+                        } else {
+                          selectedAllergies.add(allergy);
+                        }
+                      });
+                    },
+                    child: Row(
                       children: [
-                        const Text('Selected Allergies', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: selectedAllergies.map((allergy) => Chip(
-                            label: Text(allergy),
-                            deleteIcon: const Icon(Icons.close, size: 18),
-                            onDeleted: () => setState(() => selectedAllergies.remove(allergy)),
-                            backgroundColor: const Color(0xFFFFE4CC),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                          )).toList(),
+                        Expanded(child: Text(allergy, style: const TextStyle(fontSize: 18))),
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey, width: 2),
+                            borderRadius: BorderRadius.circular(4),
+                            color: isSelected ? Colors.orange : Colors.transparent,
+                          ),
+                          child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
                         ),
                       ],
                     ),
                   ),
-                const SizedBox(height: 20),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Choose Allergies', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 10),
-                      TextField(
-                        controller: searchController,
-                        onChanged: _filterAllergies,
-                        onSubmitted: (_) => _addCustomAllergy(),
-                        decoration: InputDecoration(
-                          hintText: 'Add or Update Allergies',
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: filteredAllergies.length,
-                    itemBuilder: (context, index) {
-                      final allergy = filteredAllergies[index];
-                      final isSelected = selectedAllergies.contains(allergy);
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 15),
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                selectedAllergies.remove(allergy);
-                              } else {
-                                selectedAllergies.add(allergy);
-                              }
-                            });
-                          },
-                          child: Row(
-                            children: [
-                              Expanded(child: Text(allergy, style: const TextStyle(fontSize: 18))),
-                              Container(
-                                width: 28,
-                                height: 28,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey, width: 2),
-                                  borderRadius: BorderRadius.circular(4),
-                                  color: isSelected ? Colors.orange : Colors.transparent,
-                                ),
-                                child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context, selectedAllergies.toList()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      ),
-                      child: const Text('Save', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ),
-              ],
+                );
+              },
             ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context, selectedAllergies.toList()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ),
+                child: const Text('Save', style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
