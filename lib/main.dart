@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'camera_screens.dart';
 import 'my_collection_screen.dart';
+import 'minerals_screen.dart';
 import 'learn_guides_screen.dart';
 import 'settings_about_screen.dart';
 
@@ -105,7 +106,12 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const CameraScreen(),
-    const MyCollectionScreen(),
+    PageView(
+      children: const [
+        MyCollectionScreen(),
+        MineralsScreen(),
+      ],
+    ),
     const LearnGuidesScreen(),
     const SettingsAboutScreen(),
   ];
