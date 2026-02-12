@@ -1,8 +1,8 @@
 <?php
 // Database configuration
-$servername = "localhost";
-$username = "root";
-$password = "";
+$servername = "auth-db1927.hstgr.io";
+$username = "u196786599_foodle";
+$password = "Shruti@0808";
 $dbname = "u196786599_foodle";
 
 // Create connection
