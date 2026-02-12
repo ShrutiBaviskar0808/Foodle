@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class MealPlannerScreen extends StatefulWidget {
   const MealPlannerScreen({super.key});
@@ -11,11 +13,19 @@ class MealPlannerScreen extends StatefulWidget {
 
 class _MealPlannerScreenState extends State<MealPlannerScreen> {
   List<Map<String, String>> mealPlans = [];
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     _loadMealPlans();
+  }
+
+  Future<void> _initializeNotifications() async {
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidSettings);
+    await flutterLocalNotificationsPlugin.initialize(initSettings);
   }
 
   Future<void> _loadMealPlans() async {
@@ -36,55 +46,97 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
 
   void _addMealPlan() {
     final mealController = TextEditingController();
-    final dateController = TextEditingController();
-    final notesController = TextEditingController();
+    DateTime? selectedDate;
+    TimeOfDay? selectedTime;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Plan a Meal'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: mealController,
-              decoration: const InputDecoration(labelText: 'Meal Name'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Plan a Meal'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: mealController,
+                decoration: const InputDecoration(labelText: 'Meal Name'),
+              ),
+              const SizedBox(height: 10),
+              ListTile(
+                title: Text(selectedDate == null ? 'Select Date' : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (date != null) setDialogState(() => selectedDate = date);
+                },
+              ),
+              ListTile(
+                title: Text(selectedTime == null ? 'Select Time' : '${selectedTime!.hour}:${selectedTime!.minute.toString().padLeft(2, '0')}'),
+                trailing: const Icon(Icons.access_time),
+                onTap: () async {
+                  final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+                  if (time != null) setDialogState(() => selectedTime = time);
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
-            TextField(
-              controller: dateController,
-              decoration: const InputDecoration(labelText: 'Date (e.g., Tomorrow)'),
-            ),
-            TextField(
-              controller: notesController,
-              decoration: const InputDecoration(labelText: 'Notes'),
-              maxLines: 2,
+            TextButton(
+              onPressed: () {
+                if (mealController.text.isNotEmpty && selectedDate != null && selectedTime != null) {
+                  final mealDateTime = DateTime(selectedDate!.year, selectedDate!.month, selectedDate!.day, selectedTime!.hour, selectedTime!.minute);
+                  setState(() {
+                    mealPlans.add({
+                      'meal': mealController.text,
+                      'date': '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+                      'time': '${selectedTime!.hour}:${selectedTime!.minute.toString().padLeft(2, '0')}',
+                      'dateTime': mealDateTime.toIso8601String(),
+                    });
+                  });
+                  _saveMealPlans();
+                  _scheduleNotification(mealController.text, mealDateTime);
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Add'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              if (mealController.text.isNotEmpty) {
-                setState(() {
-                  mealPlans.add({
-                    'meal': mealController.text,
-                    'date': dateController.text.isEmpty ? 'Not set' : dateController.text,
-                    'notes': notesController.text,
-                  });
-                });
-                _saveMealPlans();
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
+  }
+
+  Future<void> _scheduleNotification(String mealName, DateTime mealDateTime) async {
+    final notificationTime = mealDateTime.subtract(const Duration(hours: 2));
+    if (notificationTime.isAfter(DateTime.now())) {
+      const androidDetails = AndroidNotificationDetails(
+        'meal_planner',
+        'Meal Planner',
+        channelDescription: 'Notifications for planned meals',
+        importance: Importance.high,
+        priority: Priority.high,
+      );
+      const notificationDetails = NotificationDetails(android: androidDetails);
+      
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        mealName.hashCode,
+        'Meal Reminder',
+        'Today is your meal planned: $mealName',
+        tz.TZDateTime.from(notificationTime, tz.local),
+        notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    }
   }
 
   void _deleteMealPlan(int index) {
@@ -207,7 +259,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                                           Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
                                           const SizedBox(width: 4),
                                           Text(
-                                            plan['date']!,
+                                            '${plan['date']!} at ${plan['time'] ?? 'Not set'}',
                                             style: TextStyle(
                                               fontSize: 14,
                                               color: Colors.grey[600],
@@ -215,16 +267,6 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                                           ),
                                         ],
                                       ),
-                                      if (plan['notes']!.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          plan['notes']!,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey[500],
-                                          ),
-                                        ),
-                                      ],
                                     ],
                                   ),
                                 ),
