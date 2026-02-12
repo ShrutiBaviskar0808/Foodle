@@ -138,7 +138,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
             const SizedBox(height: 20),
             
             // Description from API
-            if (widget.stoneData != null) ..[
+            if (widget.stoneData != null) ...[
               const Text(
                 'Description',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
@@ -311,3 +311,4 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
     );
   }
 }
+
