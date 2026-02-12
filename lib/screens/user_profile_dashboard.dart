@@ -172,31 +172,33 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                 bottomRight: Radius.circular(20),
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: SafeArea(
               bottom: false,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                    icon: const Icon(Icons.menu, color: Colors.white, size: 24),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                     onPressed: () => Navigator.pop(context),
                   ),
                   const Text(
                     'Foodle',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.w500,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
                   CircleAvatar(
-                    radius: 20,
+                    radius: 18,
                     backgroundColor: Colors.white,
                     child: Text(
                       (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
-                      style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
                 ],
@@ -205,6 +207,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           ),
           // Header with profile image
           Expanded(
+            flex: 2,
             child: Container(
               decoration: widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
                   ? BoxDecoration(
@@ -255,12 +258,12 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           ),
           // Content
           Expanded(
+            flex: 3,
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Divider(thickness: 1, color: Colors.grey),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -282,6 +285,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       ),
                     ],
                   ),
+                  const Divider(thickness: 1, color: Colors.grey),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -291,8 +295,8 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                         : allergies.map((allergy) => _buildAllergyChip(allergy)).toList(),
                   ),
                   const SizedBox(height: 24),
-                  const Divider(thickness: 1, color: Colors.grey),
                   const Text('Favorite Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const Divider(thickness: 1, color: Colors.grey),
                   const SizedBox(height: 12),
                   ...(favoriteFoods.isEmpty
                       ? [const Text('No favorite foods added', style: TextStyle(color: Colors.grey))]
@@ -333,69 +337,65 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
     final hasImage = imageUrl.isNotEmpty;
     final isLocalFile = imageUrl.startsWith('/') || imageUrl.contains('cache');
     
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
           hasImage
               ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   child: isLocalFile
-                      ? Image.file(File(imageUrl), width: 60, height: 60, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
+                      ? Image.file(File(imageUrl), width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            width: 60,
-                            height: 60,
+                            width: 80,
+                            height: 80,
                             decoration: BoxDecoration(
                               color: Colors.orange.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.fastfood, color: Colors.orange),
+                            child: const Icon(Icons.fastfood, color: Colors.orange, size: 32),
                           );
                         })
-                      : Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
+                      : Image.network(imageUrl, width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            width: 60,
-                            height: 60,
+                            width: 80,
+                            height: 80,
                             decoration: BoxDecoration(
                               color: Colors.orange.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.fastfood, color: Colors.orange),
+                            child: const Icon(Icons.fastfood, color: Colors.orange, size: 32),
                           );
                         }),
                 )
               : Container(
-                  width: 60,
-                  height: 60,
+                  width: 80,
+                  height: 80,
                   decoration: BoxDecoration(
                     color: Colors.orange.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Center(
                     child: Text(
                       name[0].toUpperCase(),
-                      style: const TextStyle(fontSize: 24, color: Colors.orange, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 32, color: Colors.orange, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
-                Text(restaurant, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text(restaurant, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.local_fire_department, color: Colors.orange, size: 14),
+                    const Icon(Icons.local_fire_department, color: Colors.orange, size: 16),
                     const SizedBox(width: 4),
-                    Text('$calories Calories', style: const TextStyle(fontSize: 12, color: Colors.orange)),
+                    Text('$calories Calories', style: const TextStyle(fontSize: 14, color: Colors.orange)),
                   ],
                 ),
               ],

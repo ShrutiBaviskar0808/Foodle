@@ -17,7 +17,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
   final _nameController = TextEditingController();
   final _nicknameController = TextEditingController();
   final _dobController = TextEditingController();
-  final _foodNameController = TextEditingController();
   final _customAllergyController = TextEditingController();
   
   String? _imagePath;
@@ -45,7 +44,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       _nameController.text = widget.member!['name'] ?? '';
       _nicknameController.text = widget.member!['nickname'] ?? '';
       _dobController.text = widget.member!['dob'] ?? '';
-      _foodNameController.text = widget.member!['foodName'] ?? '';
       _imagePath = widget.member!['imagePath'];
       _selectedRelation = widget.member!['relation'];
       _age = widget.member!['age'];
@@ -180,7 +178,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         'dob': _dobController.text,
         'age': _age,
         'relation': _selectedRelation,
-        'foodName': _foodNameController.text,
         'allergies': _selectedAllergies,
         'imagePath': _imagePath,
       };
@@ -270,15 +267,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
               onChanged: (value) => setState(() => _selectedRelation = value),
               validator: (value) => value == null ? 'Please select a relation' : null,
             ),
-            const SizedBox(height: 15),
-            TextFormField(
-              controller: _foodNameController,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Favorite Food',
-                border: OutlineInputBorder(),
-              ),
-            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -353,7 +341,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
     _nameController.dispose();
     _nicknameController.dispose();
     _dobController.dispose();
-    _foodNameController.dispose();
     _customAllergyController.dispose();
     super.dispose();
   }
