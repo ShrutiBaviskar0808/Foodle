@@ -27,10 +27,9 @@ class _MineralsScreenState extends State<MineralsScreen> {
     try {
       final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/minerals_database/minerals_part_$page.json'));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final mineralsList = data['minerals'] as List? ?? data as List;
+        final List<dynamic> data = json.decode(response.body);
         setState(() {
-          _minerals = mineralsList.map((json) => MineralModel.fromJson(json)).toList();
+          _minerals = data.map((json) => MineralModel.fromJson(json)).toList();
           _isLoading = false;
         });
       }
