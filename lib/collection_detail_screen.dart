@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'stone_detail_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'models/stone_model.dart';
 
 class CollectionDetailScreen extends StatefulWidget {
@@ -239,27 +240,14 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
             _buildSection('Date Added', 'December 15, 2024'),
             const SizedBox(height: 20),
             
-            // View Full Details Button
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => StoneDetailScreen(stoneName: widget.stoneName, imagePath: widget.imagePath),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.brown,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text('View Full Encyclopedia Details', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
+            // Related Stones Section
+            const Text(
+              'Related Stones',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
             ),
+            const SizedBox(height: 12),
+            _buildRelatedStones(),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -309,6 +297,123 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildRelatedStones() {
+    return FutureBuilder<List<StoneModel>>(
+      future: _fetchRelatedStones(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator(color: Colors.brown));
+        }
+        final stones = snapshot.data!.take(3).toList();
+        return SizedBox(
+          height: 180,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: stones.length,
+            itemBuilder: (context, index) {
+              final stone = stones[index];
+              return Container(
+                width: 140,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.brown.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        stone.thumbImageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade300,
+                            child: Icon(Icons.landscape, size: 50, color: Colors.grey.shade500),
+                          );
+                        },
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.8),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 8,
+                        left: 8,
+                        right: 8,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              stone.stoneName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                stone.gemProperties.rarity,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Future<List<StoneModel>> _fetchRelatedStones() async {
+    try {
+      final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/stone_enhanced_version.json'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        final allStones = data.map((json) => StoneModel.fromJson(json)).toList();
+        allStones.shuffle();
+        return allStones;
+      }
+    } catch (e) {
+      return [];
+    }
+    return [];
   }
 }
 
