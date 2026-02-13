@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'stone_detail_screen.dart';
+import 'stone_data.dart';
 
 class CompareStonesScreen extends StatelessWidget {
   const CompareStonesScreen({super.key});
@@ -61,12 +62,13 @@ class CompareStonesScreen extends StatelessWidget {
   }
 
   Widget _buildStoneCard(BuildContext context, String name, String difference, bool isYourStone) {
+    final stone = stoneDatabase.firstWhere((s) => s.name == name, orElse: () => stoneDatabase[0]);
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StoneDetailScreen(stoneName: name, imagePath: ''),
+            builder: (context) => StoneDetailScreen(stone: stone),
           ),
         );
       },

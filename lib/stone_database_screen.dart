@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'stone_detail_screen.dart';
+import 'stone_data.dart';
 
 class StoneDatabaseScreen extends StatelessWidget {
   const StoneDatabaseScreen({super.key});
@@ -105,12 +106,13 @@ class StoneDatabaseScreen extends StatelessWidget {
   }
 
   Widget _buildStoneItem(BuildContext context, String name, String type) {
+    final stone = stoneDatabase.firstWhere((s) => s.name == name, orElse: () => stoneDatabase[0]);
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StoneDetailScreen(stoneName: name, imagePath: ''),
+            builder: (context) => StoneDetailScreen(stone: stone),
           ),
         );
       },
