@@ -42,6 +42,10 @@ class _StoneDatabaseScreenState extends State<StoneDatabaseScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.brown),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: const Text('Stone Database'),
         elevation: 0,
       ),
