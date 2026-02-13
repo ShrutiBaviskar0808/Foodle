@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'dart:convert';
+import '../config.dart';
 
 class AddMemberScreen extends StatefulWidget {
   final Map<String, dynamic>? member;
@@ -170,18 +174,76 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
     );
   }
 
-  void _saveMember() {
+  void _saveMember() async {
     if (_formKey.currentState!.validate()) {
-      final memberData = {
-        'name': _nameController.text,
-        'nickname': _nicknameController.text,
-        'dob': _dobController.text,
-        'age': _age,
-        'relation': _selectedRelation,
-        'allergies': _selectedAllergies,
-        'imagePath': _imagePath,
-      };
-      Navigator.pop(context, {'data': memberData, 'index': widget.index});
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+      
+      if (userId == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not logged in')),
+        );
+        return;
+      }
+      
+      try {
+        // If editing existing member
+        if (widget.member != null && widget.member!['id'] != null) {
+          final response = await http.post(
+            Uri.parse(AppConfig.updateMemberEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({
+              'member_id': widget.member!['id'],
+              'display_name': _nameController.text,
+              'relation': _selectedRelation,
+              'image_path': _imagePath,
+            }),
+          ).timeout(AppConfig.requestTimeout);
+          
+          final result = json.decode(response.body);
+          
+          if (!mounted) return;
+          
+          if (result['success']) {
+            Navigator.pop(context, {'success': true});
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result['message'] ?? 'Failed to update')),
+            );
+          }
+        } else {
+          // Adding new member
+          final response = await http.post(
+            Uri.parse(AppConfig.addMemberEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({
+              'owner_user_id': userId,
+              'display_name': _nameController.text,
+              'relation': _selectedRelation,
+              'image_path': _imagePath,
+            }),
+          ).timeout(AppConfig.requestTimeout);
+          
+          final result = json.decode(response.body);
+          
+          if (!mounted) return;
+          
+          if (result['success']) {
+            Navigator.pop(context, {'success': true});
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result['message'] ?? 'Failed to save')),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      }
     }
   }
 
