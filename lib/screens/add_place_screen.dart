@@ -109,7 +109,7 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
       }
       
       try {
-        final data = {
+        final Map<String, dynamic> data = {
           'user_id': userId,
           'store_name': _storeNameController.text,
           'food_item': _foodItemController.text,
@@ -119,31 +119,44 @@ class _AddPlaceScreenState extends State<AddPlaceScreen> {
           'image_path': _imagePath ?? '',
         };
         
-        final response = _foodId == null
-            ? await http.post(
-                Uri.parse(AppConfig.addFoodEndpoint),
-                headers: AppConfig.jsonHeaders,
-                body: json.encode(data),
-              ).timeout(AppConfig.requestTimeout)
-            : await http.post(
-                Uri.parse(AppConfig.updateFoodEndpoint),
-                headers: AppConfig.jsonHeaders,
-                body: json.encode({...data, 'food_id': _foodId}),
-              ).timeout(AppConfig.requestTimeout);
+        if (_foodId != null) {
+          data['food_id'] = _foodId!;
+        }
+        
+        final endpoint = _foodId == null ? AppConfig.addFoodEndpoint : AppConfig.updateFoodEndpoint;
+        
+        debugPrint('Saving place: $data to $endpoint');
+        
+        final response = await http.post(
+          Uri.parse(endpoint),
+          headers: AppConfig.jsonHeaders,
+          body: json.encode(data),
+        ).timeout(AppConfig.requestTimeout);
+        
+        debugPrint('Response: ${response.body}');
         
         if (!mounted) return;
         
         if (response.statusCode == 200) {
           final result = json.decode(response.body);
           if (result['success'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Place saved successfully')),
+            );
             Navigator.pop(context, {'success': true});
             return;
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result['message'] ?? 'Failed to save')),
+            );
           }
         }
-        Navigator.pop(context, {'success': true});
       } catch (e) {
+        debugPrint('Error saving place: $e');
         if (mounted) {
-          Navigator.pop(context, {'success': true});
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);

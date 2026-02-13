@@ -195,62 +195,57 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       }
       
       try {
+        final Map<String, dynamic> data = {
+          'owner_user_id': userId,
+          'display_name': _nameController.text,
+          'nickname': _nicknameController.text,
+          'dob': _dobController.text,
+          'age': _age,
+          'relation': _selectedRelation,
+          'image_path': _imagePath ?? '',
+          'allergies': _selectedAllergies,
+        };
+        
         if (widget.member != null && widget.member!['id'] != null) {
-          final response = await http.post(
-            Uri.parse(AppConfig.updateMemberEndpoint),
-            headers: AppConfig.jsonHeaders,
-            body: json.encode({
-              'member_id': widget.member!['id'],
-              'display_name': _nameController.text,
-              'nickname': _nicknameController.text,
-              'dob': _dobController.text,
-              'age': _age,
-              'relation': _selectedRelation,
-              'image_path': _imagePath,
-              'allergies': _selectedAllergies,
-            }),
-          ).timeout(AppConfig.requestTimeout);
-          
-          if (!mounted) return;
-          
-          if (response.statusCode == 200) {
-            final result = json.decode(response.body);
-            if (result['success'] == true) {
-              Navigator.pop(context, {'success': true});
-              return;
-            }
+          data['member_id'] = widget.member!['id'];
+        }
+        
+        final endpoint = widget.member != null && widget.member!['id'] != null
+            ? AppConfig.updateMemberEndpoint
+            : AppConfig.addMemberEndpoint;
+        
+        debugPrint('Saving member: $data to $endpoint');
+        
+        final response = await http.post(
+          Uri.parse(endpoint),
+          headers: AppConfig.jsonHeaders,
+          body: json.encode(data),
+        ).timeout(AppConfig.requestTimeout);
+        
+        debugPrint('Response: ${response.body}');
+        
+        if (!mounted) return;
+        
+        if (response.statusCode == 200) {
+          final result = json.decode(response.body);
+          if (result['success'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Member saved successfully')),
+            );
+            Navigator.pop(context, {'success': true});
+            return;
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(result['message'] ?? 'Failed to save')),
+            );
           }
-          Navigator.pop(context, {'success': true});
-        } else {
-          final response = await http.post(
-            Uri.parse(AppConfig.addMemberEndpoint),
-            headers: AppConfig.jsonHeaders,
-            body: json.encode({
-              'owner_user_id': userId,
-              'display_name': _nameController.text,
-              'nickname': _nicknameController.text,
-              'dob': _dobController.text,
-              'age': _age,
-              'relation': _selectedRelation,
-              'image_path': _imagePath,
-              'allergies': _selectedAllergies,
-            }),
-          ).timeout(AppConfig.requestTimeout);
-          
-          if (!mounted) return;
-          
-          if (response.statusCode == 200) {
-            final result = json.decode(response.body);
-            if (result['success'] == true) {
-              Navigator.pop(context, {'success': true});
-              return;
-            }
-          }
-          Navigator.pop(context, {'success': true});
         }
       } catch (e) {
+        debugPrint('Error saving member: $e');
         if (mounted) {
-          Navigator.pop(context, {'success': true});
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
         }
       }
     }
