@@ -201,6 +201,10 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             }),
           ).timeout(AppConfig.requestTimeout);
           
+          if (response.statusCode != 200) {
+            throw Exception('Server error: ${response.statusCode}');
+          }
+          
           final result = json.decode(response.body);
           
           if (!mounted) return;
@@ -224,6 +228,10 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
               'image_path': _imagePath,
             }),
           ).timeout(AppConfig.requestTimeout);
+          
+          if (response.statusCode != 200) {
+            throw Exception('Server error: ${response.statusCode}');
+          }
           
           final result = json.decode(response.body);
           

@@ -34,6 +34,10 @@ class _FamilyScreenState extends State<FamilyScreen> {
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
+      if (response.statusCode != 200) {
+        throw Exception('Server error: ${response.statusCode}');
+      }
+      
       final data = json.decode(response.body);
       if (data['success']) {
         setState(() {
@@ -231,6 +235,10 @@ class _FamilyScreenState extends State<FamilyScreen> {
         headers: AppConfig.jsonHeaders,
         body: json.encode({'member_id': memberId}),
       ).timeout(AppConfig.requestTimeout);
+      
+      if (response.statusCode != 200) {
+        throw Exception('Server error: ${response.statusCode}');
+      }
       
       final data = json.decode(response.body);
       if (data['success']) {
