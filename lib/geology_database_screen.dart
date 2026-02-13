@@ -26,41 +26,43 @@ class _GeologyDatabaseScreenState extends State<GeologyDatabaseScreen> with Sing
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
+    return SafeArea(
+      child: Scaffold(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.brown),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text('Stone & Mineral Explorer', style: TextStyle(color: Colors.brown, fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.brown),
-            onPressed: () {},
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.brown),
+            onPressed: () => Navigator.pop(context),
           ),
-        ],
-        bottom: TabBar(
+          title: const Text('Stone & Mineral Explorer', style: TextStyle(color: Colors.brown, fontWeight: FontWeight.bold, fontSize: 18)),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.info_outline, color: Colors.brown),
+              onPressed: () {},
+            ),
+          ],
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Colors.brown,
+            indicatorWeight: 3,
+            labelColor: Colors.brown,
+            unselectedLabelColor: Colors.grey,
+            labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            tabs: const [
+              Tab(text: 'Stones'),
+              Tab(text: 'Minerals'),
+            ],
+          ),
+        ),
+        body: TabBarView(
           controller: _tabController,
-          indicatorColor: Colors.brown,
-          indicatorWeight: 3,
-          labelColor: Colors.brown,
-          unselectedLabelColor: Colors.grey,
-          labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          tabs: const [
-            Tab(text: 'Stones'),
-            Tab(text: 'Minerals'),
+          children: const [
+            StonesTab(),
+            MineralsTab(),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          StonesTab(),
-          MineralsTab(),
-        ],
       ),
     );
   }

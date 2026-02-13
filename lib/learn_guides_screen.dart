@@ -6,8 +6,9 @@ class LearnGuidesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CustomScrollView(
+    return SafeArea(
+      child: Scaffold(
+        body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 200,
@@ -117,6 +118,7 @@ class LearnGuidesScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

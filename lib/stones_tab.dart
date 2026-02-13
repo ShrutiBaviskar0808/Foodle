@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'stone_data.dart';
 import 'stone_detail_screen.dart';
+import 'models/stone_model.dart';
 
 class StonesTab extends StatefulWidget {
   const StonesTab({super.key});
@@ -12,6 +15,32 @@ class StonesTab extends StatefulWidget {
 class _StonesTabState extends State<StonesTab> {
   final TextEditingController _searchController = TextEditingController();
   List<StoneData> _filteredStones = stoneDatabase;
+  Map<String, String> _stoneImages = {};
+  bool _imagesLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStoneImages();
+  }
+
+  Future<void> _loadStoneImages() async {
+    try {
+      final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/stone_enhanced_version.json'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          for (var item in data) {
+            final stoneModel = StoneModel.fromJson(item);
+            _stoneImages[stoneModel.stoneName] = stoneModel.thumbImageUrl;
+          }
+          _imagesLoaded = true;
+        });
+      }
+    } catch (e) {
+      setState(() => _imagesLoaded = true);
+    }
+  }
 
   void _filterStones(String query) {
     setState(() {
@@ -96,6 +125,17 @@ class _StonesTabState extends State<StonesTab> {
   }
 
   Widget _buildStoneCard(StoneData stone) {
+    final imageUrl = _stoneImages[stone.name];
+    final imageMap = {
+      'Granite': 'assets/images/granite.jpg',
+      'Basalt': 'assets/images/basalt.jpg',
+      'Marble': 'assets/images/marble.jpg',
+      'Limestone': 'assets/images/limestone.jpg',
+      'Quartz': 'assets/images/quartz.jpg',
+      'Amethyst': 'assets/images/amethyst.jpg',
+    };
+    final localImage = imageMap[stone.name];
+
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StoneDetailScreen(stone: stone))),
       child: Container(
@@ -126,8 +166,19 @@ class _StonesTabState extends State<StonesTab> {
                   topRight: Radius.circular(16),
                 ),
               ),
-              child: Center(
-                child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8)),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                child: imageUrl != null
+                    ? Image.network(imageUrl, fit: BoxFit.cover, width: double.infinity, cacheWidth: 240, loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null, color: Colors.white, strokeWidth: 2));
+                      }, errorBuilder: (context, error, stackTrace) => localImage != null ? Image.asset(localImage, fit: BoxFit.cover, width: double.infinity) : Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))))
+                    : localImage != null
+                        ? Image.asset(localImage, fit: BoxFit.cover, width: double.infinity, errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))))
+                        : Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))),
               ),
             ),
             Padding(
