@@ -47,29 +47,53 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
 
   Future<void> _loadFamilyMembers() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? membersJson = prefs.getString('all_members');
-    if (membersJson != null) {
-      final List<dynamic> decoded = json.decode(membersJson);
-      setState(() {
-        familyMembers = decoded
-            .map((item) => Map<String, dynamic>.from(item))
-            .where((member) => member['relation'] == 'Family')
-            .toList();
-      });
+    final userId = prefs.getInt('user_id');
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getMembersEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'owner_user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final data = json.decode(response.body);
+      if (data['success']) {
+        setState(() {
+          familyMembers = (data['members'] as List)
+              .map((item) => Map<String, dynamic>.from(item))
+              .where((member) => member['relation'] == 'Family')
+              .toList();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading family members: $e');
     }
   }
 
   Future<void> _loadFriends() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? membersJson = prefs.getString('all_members');
-    if (membersJson != null) {
-      final List<dynamic> decoded = json.decode(membersJson);
-      setState(() {
-        friends = decoded
-            .map((item) => Map<String, dynamic>.from(item))
-            .where((member) => member['relation'] != 'Family')
-            .toList();
-      });
+    final userId = prefs.getInt('user_id');
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getMembersEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'owner_user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final data = json.decode(response.body);
+      if (data['success']) {
+        setState(() {
+          friends = (data['members'] as List)
+              .map((item) => Map<String, dynamic>.from(item))
+              .where((member) => member['relation'] != 'Family')
+              .toList();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading friends: $e');
     }
   }
 
@@ -82,7 +106,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
       final response = await http.post(
         Uri.parse(AppConfig.getFoodsEndpoint),
         headers: AppConfig.jsonHeaders,
-        body: json.encode({'user_id': userId}),
+        body: json.encode({'member_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
       final data = json.decode(response.body);
@@ -244,10 +268,10 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                 child: ListTile(
                                   leading: CircleAvatar(
                                     backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                                    backgroundImage: member['imagePath'] != null ? FileImage(File(member['imagePath'])) : null,
-                                    child: member['imagePath'] == null ? const Icon(Icons.person, color: Colors.orange) : null,
+                                    backgroundImage: member['image_path'] != null ? FileImage(File(member['image_path'])) : null,
+                                    child: member['image_path'] == null ? const Icon(Icons.person, color: Colors.orange) : null,
                                   ),
-                                  title: Text(member['name']),
+                                  title: Text(member['display_name'] ?? ''),
                                   subtitle: Text(member['relation'] ?? 'Family'),
                                 ),
                               );
@@ -282,10 +306,10 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                 child: ListTile(
                                   leading: CircleAvatar(
                                     backgroundColor: Colors.blue.withValues(alpha: 0.2),
-                                    backgroundImage: friend['imagePath'] != null ? FileImage(File(friend['imagePath'])) : null,
-                                    child: friend['imagePath'] == null ? const Icon(Icons.person, color: Colors.blue) : null,
+                                    backgroundImage: friend['image_path'] != null ? FileImage(File(friend['image_path'])) : null,
+                                    child: friend['image_path'] == null ? const Icon(Icons.person, color: Colors.blue) : null,
                                   ),
-                                  title: Text(friend['name']),
+                                  title: Text(friend['display_name'] ?? ''),
                                   subtitle: Text(friend['relation'] ?? 'Friend'),
                                 ),
                               );
@@ -322,7 +346,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                     backgroundColor: Colors.green,
                                     child: Icon(Icons.restaurant, color: Colors.white),
                                   ),
-                                  title: Text(place['store_name'] ?? 'Unknown'),
+                                  title: Text(place['food_name'] ?? 'Unknown'),
                                   subtitle: Text(place['food_item'] ?? ''),
                                 ),
                               );

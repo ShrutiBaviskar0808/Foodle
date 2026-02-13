@@ -3,7 +3,7 @@ class AppConfig {
   // For emulator: use 10.0.2.2
   // For physical device: use your computer's IP address (e.g., 192.168.1.100)
   // static const String baseUrl = 'http://localhost/foodle/';   
-  static const String baseUrl = 'http://192.168.137.1/foodle/';  
+  static const String baseUrl = 'http://192.168.29.159/foodle';  
   
   // API endpoints
   static const String loginEndpoint = '$baseUrl/login.php';
@@ -18,6 +18,8 @@ class AppConfig {
   static const String getMembersEndpoint = '$baseUrl/get_members.php';
   static const String updateMemberEndpoint = '$baseUrl/update_member.php';
   static const String deleteMemberEndpoint = '$baseUrl/delete_member.php';
+  static const String addAllergyEndpoint = '$baseUrl/add_allergy.php';
+  static const String getAllergiesEndpoint = '$baseUrl/get_allergies.php';
   static const String getNotificationsEndpoint = '$baseUrl/get_notifications.php';
   static const String markNotificationReadEndpoint = '$baseUrl/mark_notification_read.php';
   static const String linkMemberEndpoint = '$baseUrl/link_member.php';

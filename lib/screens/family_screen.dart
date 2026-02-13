@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'add_member_screen.dart';
+import '../config.dart';
 
 class FamilyScreen extends StatefulWidget {
   const FamilyScreen({super.key});
@@ -22,46 +24,28 @@ class _FamilyScreenState extends State<FamilyScreen> {
 
   Future<void> _loadFamilyMembers() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? membersJson = prefs.getString('all_members');
-    if (membersJson != null) {
-      final List<dynamic> decoded = json.decode(membersJson);
-      setState(() {
-        // Filter to show only Family relation members
-        familyMembers = decoded.map((item) {
-          final member = Map<String, dynamic>.from(item);
-          // Convert allergies list to List<String>
-          if (member['allergies'] != null) {
-            member['allergies'] = List<String>.from(member['allergies']);
-          }
-          return member;
-        }).where((member) => member['relation'] == 'Family').toList();
-      });
-    }
-  }
-
-  Future<void> _saveFamilyMembers() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Load all members first
-    final String? allMembersJson = prefs.getString('all_members');
-    List<Map<String, dynamic>> allMembers = [];
-    if (allMembersJson != null) {
-      final List<dynamic> decoded = json.decode(allMembersJson);
-      allMembers = decoded.map((item) => Map<String, dynamic>.from(item)).toList();
-    }
-    // Update or add family members
-    for (var familyMember in familyMembers) {
-      final index = allMembers.indexWhere((m) => 
-        m['name'] == familyMember['name'] && 
-        m['dob'] == familyMember['dob']);
-      if (index != -1) {
-        allMembers[index] = familyMember;
-      } else {
-        allMembers.add(familyMember);
+    final userId = prefs.getInt('user_id');
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getMembersEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'owner_user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final data = json.decode(response.body);
+      if (data['success']) {
+        setState(() {
+          familyMembers = (data['members'] as List)
+              .map((item) => Map<String, dynamic>.from(item))
+              .where((member) => member['relation'] == 'Family')
+              .toList();
+        });
       }
+    } catch (e) {
+      debugPrint('Error loading family members: $e');
     }
-    // Save all members
-    final String encoded = json.encode(allMembers);
-    await prefs.setString('all_members', encoded);
   }
 
   @override
@@ -91,14 +75,14 @@ class _FamilyScreenState extends State<FamilyScreen> {
                       leading: CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                        backgroundImage: member['imagePath'] != null
-                            ? FileImage(File(member['imagePath']))
+                        backgroundImage: member['image_path'] != null
+                            ? FileImage(File(member['image_path']))
                             : null,
-                        child: member['imagePath'] == null
+                        child: member['image_path'] == null
                             ? const Icon(Icons.person, color: Colors.orange)
                             : null,
                       ),
-                      title: Text(member['name']),
+                      title: Text(member['display_name'] ?? ''),
                       subtitle: Text(
                         '${member['relation'] ?? 'Unknown'} • Age: ${member['age'] ?? 'N/A'}',
                       ),
@@ -125,40 +109,25 @@ class _FamilyScreenState extends State<FamilyScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(member['name']),
+        title: Text(member['display_name'] ?? ''),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (member['imagePath'] != null)
+              if (member['image_path'] != null)
                 Center(
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundImage: FileImage(File(member['imagePath'])),
+                    backgroundImage: FileImage(File(member['image_path'])),
                   ),
                 ),
               const SizedBox(height: 15),
-              _buildDetailRow('Nickname', member['nickname'] ?? 'N/A'),
-              _buildDetailRow('Date of Birth', member['dob'] ?? 'N/A'),
-              _buildDetailRow('Age', '${member['age'] ?? 'N/A'} years'),
               _buildDetailRow('Relation', member['relation'] ?? 'N/A'),
-              _buildDetailRow('Favorite Food', member['foodName'] ?? 'N/A'),
               const SizedBox(height: 10),
               const Text('Allergies:', style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 5),
-              if (member['allergies'] != null && member['allergies'].isNotEmpty)
-                Wrap(
-                  spacing: 5,
-                  children: (member['allergies'] as List<String>)
-                      .map((allergy) => Chip(
-                            label: Text(allergy, style: const TextStyle(fontSize: 12)),
-                            backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                          ))
-                      .toList(),
-                )
-              else
-                const Text('None', style: TextStyle(color: Colors.grey)),
+              const Text('Loading...', style: TextStyle(color: Colors.grey)),
             ],
           ),
         ),
@@ -236,10 +205,6 @@ class _FamilyScreenState extends State<FamilyScreen> {
       ),
     );
     if (result != null) {
-      setState(() {
-        familyMembers[result['index']] = result['data'];
-      });
-      await _saveFamilyMembers();
       await _loadFamilyMembers();
     }
   }
@@ -250,18 +215,45 @@ class _FamilyScreenState extends State<FamilyScreen> {
       MaterialPageRoute(builder: (context) => const AddMemberScreen()),
     );
     if (result != null) {
-      setState(() {
-        familyMembers.add(result['data']);
-      });
-      await _saveFamilyMembers();
       await _loadFamilyMembers();
     }
   }
 
-  void _deleteMember(int index) {
-    setState(() {
-      familyMembers.removeAt(index);
-    });
-    _saveFamilyMembers();
+  void _deleteMember(int index) async {
+    final member = familyMembers[index];
+    final memberId = member['id'];
+    
+    if (memberId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.deleteMemberEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'member_id': memberId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final data = json.decode(response.body);
+      if (data['success']) {
+        await _loadFamilyMembers();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Member deleted successfully')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Failed to delete')),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting member: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error deleting member')),
+        );
+      }
+    }
   }
 }

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'select_allergies_screen.dart';
 import 'select_foods_screen.dart';
+import '../config.dart';
 
 class UserProfileDashboard extends StatefulWidget {
   final Map<String, dynamic>? memberData;
@@ -96,37 +98,46 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
 
   Future<void> _loadData() async {
     if (widget.memberData != null) {
-      // Reload fresh data from SharedPreferences
-      final prefs = await SharedPreferences.getInstance();
-      final String? membersJson = prefs.getString('all_members');
-      if (membersJson != null) {
-        final List<dynamic> members = json.decode(membersJson);
-        final member = members.firstWhere(
-          (m) => m['name'] == widget.memberData!['name'],
-          orElse: () => widget.memberData,
-        );
-        
-        setState(() {
-          // Handle allergies
-          if (member['allergies'] != null) {
-            if (member['allergies'] is List) {
-              allergies = List<String>.from(member['allergies']);
-            } else if (member['allergies'] is String) {
-              final allergyStr = member['allergies'] as String;
-              allergies = allergyStr.isNotEmpty ? allergyStr.split(',').map((e) => e.trim()).toList() : [];
-            }
+      final memberId = widget.memberData!['id'];
+      debugPrint('Loading data for member_id: $memberId');
+      if (memberId != null) {
+        try {
+          // Load allergies from database
+          final allergyResponse = await http.post(
+            Uri.parse(AppConfig.getAllergiesEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'member_id': memberId}),
+          ).timeout(AppConfig.requestTimeout);
+          
+          debugPrint('Allergy response: ${allergyResponse.body}');
+          final allergyData = json.decode(allergyResponse.body);
+          if (allergyData['success']) {
+            setState(() {
+              allergies = (allergyData['allergies'] as List)
+                  .map((item) => item['allergy_name'] as String)
+                  .toList();
+            });
           }
           
-          // Handle favorite foods (likes)
-          if (member['likes'] != null) {
-            if (member['likes'] is List) {
-              favoriteFoods = List<String>.from(member['likes']);
-            } else if (member['likes'] is String) {
-              final likesStr = member['likes'] as String;
-              favoriteFoods = likesStr.isNotEmpty ? likesStr.split(',').map((e) => e.trim()).toList() : [];
-            }
+          // Load favorite foods from database
+          final foodResponse = await http.post(
+            Uri.parse(AppConfig.getFoodsEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'member_id': memberId}),
+          ).timeout(AppConfig.requestTimeout);
+          
+          debugPrint('Food response: ${foodResponse.body}');
+          final foodData = json.decode(foodResponse.body);
+          if (foodData['success']) {
+            setState(() {
+              favoriteFoods = (foodData['foods'] as List)
+                  .map((item) => item['food_name'] as String)
+                  .toList();
+            });
           }
-        });
+        } catch (e) {
+          debugPrint('Error loading member data: $e');
+        }
       }
     } else {
       final prefs = await SharedPreferences.getInstance();
@@ -168,16 +179,16 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       color: Colors.white,
                     ),
                   ),
-                  widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
+                  widget.memberData?['image_path'] != null && File(widget.memberData!['image_path']).existsSync()
                       ? CircleAvatar(
                           radius: 18,
-                          backgroundImage: FileImage(File(widget.memberData!['imagePath'])),
+                          backgroundImage: FileImage(File(widget.memberData!['image_path'])),
                         )
                       : CircleAvatar(
                           radius: 18,
                           backgroundColor: Colors.white,
                           child: Text(
-                            (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
+                            (widget.memberData?['display_name'] ?? 'U')[0].toUpperCase(),
                             style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         ),
@@ -214,10 +225,10 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
             SizedBox(
               height: 350,
               child: Container(
-              decoration: widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync()
+              decoration: widget.memberData?['image_path'] != null && File(widget.memberData!['image_path']).existsSync()
                   ? BoxDecoration(
                       image: DecorationImage(
-                        image: FileImage(File(widget.memberData!['imagePath'])),
+                        image: FileImage(File(widget.memberData!['image_path'])),
                         fit: BoxFit.cover,
                         alignment: Alignment.center,
                       ),
@@ -231,7 +242,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                     ),
               child: Stack(
                 children: [
-                  if (widget.memberData?['imagePath'] != null && File(widget.memberData!['imagePath']).existsSync())
+                  if (widget.memberData?['image_path'] != null && File(widget.memberData!['image_path']).existsSync())
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -241,10 +252,10 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                         ),
                       ),
                     ),
-                  if (widget.memberData?['imagePath'] == null || !File(widget.memberData!['imagePath']).existsSync())
+                  if (widget.memberData?['image_path'] == null || !File(widget.memberData!['image_path']).existsSync())
                     Center(
                       child: Text(
-                        (widget.memberData?['name'] ?? 'D')[0].toUpperCase(),
+                        (widget.memberData?['display_name'] ?? 'U')[0].toUpperCase(),
                         style: const TextStyle(fontSize: 120, color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -252,7 +263,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                     bottom: 40,
                     left: 20,
                     child: Text(
-                      widget.memberData?['name'] ?? 'Dale Hicks',
+                      widget.memberData?['display_name'] ?? 'User',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 32,

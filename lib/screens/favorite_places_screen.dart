@@ -34,7 +34,7 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
       final response = await http.post(
         Uri.parse(AppConfig.getFoodsEndpoint),
         headers: AppConfig.jsonHeaders,
-        body: json.encode({'user_id': userId}),
+        body: json.encode({'member_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
       final data = json.decode(response.body);
@@ -85,8 +85,8 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
                         backgroundImage: imageExists ? FileImage(File(imagePath)) : null,
                         child: !imageExists ? const Icon(Icons.restaurant, color: Colors.orange) : null,
                       ),
-                      title: Text(place['store_name'] ?? 'Unknown'),
-                      subtitle: Text(place['food_item'] ?? ''),
+                      title: Text(place['food_name'] ?? 'Unknown'),
+                      subtitle: Text(place['description'] ?? ''),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () => _showEditDeleteDialog(index),
                     ),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'add_member_screen.dart';
+import '../config.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -22,45 +24,28 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
   Future<void> _loadFriends() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? membersJson = prefs.getString('all_members');
-    if (membersJson != null) {
-      final List<dynamic> decoded = json.decode(membersJson);
-      setState(() {
-        // Filter to show only non-Family relation members
-        friends = decoded.map((item) {
-          final member = Map<String, dynamic>.from(item);
-          if (member['allergies'] != null) {
-            member['allergies'] = List<String>.from(member['allergies']);
-          }
-          return member;
-        }).where((member) => member['relation'] != 'Family').toList();
-      });
-    }
-  }
-
-  Future<void> _saveFriends() async {
-    final prefs = await SharedPreferences.getInstance();
-    // Load all members
-    final String? allMembersJson = prefs.getString('all_members');
-    List<Map<String, dynamic>> allMembers = [];
-    if (allMembersJson != null) {
-      final List<dynamic> decoded = json.decode(allMembersJson);
-      allMembers = decoded.map((item) => Map<String, dynamic>.from(item)).toList();
-    }
-    // Update or add friends
-    for (var friend in friends) {
-      final index = allMembers.indexWhere((m) => 
-        m['name'] == friend['name'] && 
-        m['dob'] == friend['dob']);
-      if (index != -1) {
-        allMembers[index] = friend;
-      } else {
-        allMembers.add(friend);
+    final userId = prefs.getInt('user_id');
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getMembersEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'owner_user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final data = json.decode(response.body);
+      if (data['success']) {
+        setState(() {
+          friends = (data['members'] as List)
+              .map((item) => Map<String, dynamic>.from(item))
+              .where((member) => member['relation'] != 'Family')
+              .toList();
+        });
       }
+    } catch (e) {
+      debugPrint('Error loading friends: $e');
     }
-    // Save all members
-    final String encoded = json.encode(allMembers);
-    await prefs.setString('all_members', encoded);
   }
 
   @override
@@ -90,14 +75,14 @@ class _FriendsScreenState extends State<FriendsScreen> {
                       leading: CircleAvatar(
                         radius: 30,
                         backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                        backgroundImage: friend['imagePath'] != null
-                            ? FileImage(File(friend['imagePath']))
+                        backgroundImage: friend['image_path'] != null
+                            ? FileImage(File(friend['image_path']))
                             : null,
-                        child: friend['imagePath'] == null
+                        child: friend['image_path'] == null
                             ? const Icon(Icons.person, color: Colors.orange)
                             : null,
                       ),
-                      title: Text(friend['name']),
+                      title: Text(friend['display_name'] ?? ''),
                       subtitle: Text(
                         '${friend['relation'] ?? 'Unknown'} • Age: ${friend['age'] ?? 'N/A'}',
                       ),
@@ -124,40 +109,21 @@ class _FriendsScreenState extends State<FriendsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(friend['name']),
+        title: Text(friend['display_name'] ?? ''),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (friend['imagePath'] != null)
+              if (friend['image_path'] != null)
                 Center(
                   child: CircleAvatar(
                     radius: 50,
-                    backgroundImage: FileImage(File(friend['imagePath'])),
+                    backgroundImage: FileImage(File(friend['image_path'])),
                   ),
                 ),
               const SizedBox(height: 15),
-              _buildDetailRow('Nickname', friend['nickname'] ?? 'N/A'),
-              _buildDetailRow('Date of Birth', friend['dob'] ?? 'N/A'),
-              _buildDetailRow('Age', '${friend['age'] ?? 'N/A'} years'),
               _buildDetailRow('Relation', friend['relation'] ?? 'N/A'),
-              _buildDetailRow('Favorite Food', friend['foodName'] ?? 'N/A'),
-              const SizedBox(height: 10),
-              const Text('Allergies:', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 5),
-              if (friend['allergies'] != null && friend['allergies'].isNotEmpty)
-                Wrap(
-                  spacing: 5,
-                  children: (friend['allergies'] as List<String>)
-                      .map((allergy) => Chip(
-                            label: Text(allergy, style: const TextStyle(fontSize: 12)),
-                            backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                          ))
-                      .toList(),
-                )
-              else
-                const Text('None', style: TextStyle(color: Colors.grey)),
             ],
           ),
         ),
@@ -235,10 +201,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
       ),
     );
     if (result != null) {
-      setState(() {
-        friends[result['index']] = result['data'];
-      });
-      await _saveFriends();
       await _loadFriends();
     }
   }
@@ -249,18 +211,45 @@ class _FriendsScreenState extends State<FriendsScreen> {
       MaterialPageRoute(builder: (context) => const AddMemberScreen()),
     );
     if (result != null) {
-      setState(() {
-        friends.add(result['data']);
-      });
-      await _saveFriends();
       await _loadFriends();
     }
   }
 
-  void _deleteFriend(int index) {
-    setState(() {
-      friends.removeAt(index);
-    });
-    _saveFriends();
+  void _deleteFriend(int index) async {
+    final friend = friends[index];
+    final memberId = friend['id'];
+    
+    if (memberId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.deleteMemberEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'member_id': memberId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      final data = json.decode(response.body);
+      if (data['success']) {
+        await _loadFriends();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Member deleted successfully')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(data['message'] ?? 'Failed to delete')),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting friend: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error deleting member')),
+        );
+      }
+    }
   }
 }

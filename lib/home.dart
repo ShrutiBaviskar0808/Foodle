@@ -55,30 +55,46 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _loadFamilyMembers() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? membersJson = prefs.getString('all_members');
-    if (membersJson != null) {
-      final List<dynamic> decoded = json.decode(membersJson);
-      setState(() {
-        familyMembers = decoded
-            .map((item) => Map<String, dynamic>.from(item))
-            .where((member) => member['relation'] == 'Family')
-            .toList();
-      });
+    final userId = prefs.getInt('user_id');
+    debugPrint('Loading family members for user_id: $userId');
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getMembersEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'owner_user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      debugPrint('Family response: ${response.body}');
+      final data = json.decode(response.body);
+      if (data['success']) {
+        final allMembers = (data['members'] as List).map((item) => Map<String, dynamic>.from(item)).toList();
+        debugPrint('All members: $allMembers');
+        setState(() {
+          familyMembers = allMembers.where((member) => member['relation'] == 'Family').toList();
+        });
+        debugPrint('Family members filtered: $familyMembers');
+      }
+    } catch (e) {
+      debugPrint('Error loading family members: $e');
     }
   }
 
   Future<void> _loadPlaces() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
+    debugPrint('Loading places for user_id: $userId');
     if (userId == null) return;
     
     try {
       final response = await http.post(
         Uri.parse(AppConfig.getFoodsEndpoint),
         headers: AppConfig.jsonHeaders,
-        body: json.encode({'user_id': userId}),
+        body: json.encode({'member_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
+      debugPrint('Places response: ${response.body}');
       final data = json.decode(response.body);
       if (data['success']) {
         setState(() {
@@ -86,6 +102,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               .map((item) => Map<String, dynamic>.from(item))
               .toList();
         });
+        debugPrint('Places loaded: $places');
+      } else {
+        debugPrint('Places load failed: ${data['message']}');
       }
     } catch (e) {
       debugPrint('Error loading places: $e');
@@ -94,15 +113,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _loadFriends() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? membersJson = prefs.getString('all_members');
-    if (membersJson != null) {
-      final List<dynamic> decoded = json.decode(membersJson);
-      setState(() {
-        friends = decoded
-            .map((item) => Map<String, dynamic>.from(item))
-            .where((member) => member['relation'] != 'Family')
-            .toList();
-      });
+    final userId = prefs.getInt('user_id');
+    debugPrint('Loading friends for user_id: $userId');
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getMembersEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'owner_user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      debugPrint('Friends response: ${response.body}');
+      final data = json.decode(response.body);
+      if (data['success']) {
+        final allMembers = (data['members'] as List).map((item) => Map<String, dynamic>.from(item)).toList();
+        setState(() {
+          friends = allMembers.where((member) => member['relation'] != 'Family').toList();
+        });
+        debugPrint('Friends filtered: $friends');
+      }
+    } catch (e) {
+      debugPrint('Error loading friends: $e');
     }
   }
 
@@ -372,7 +404,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             padding: const EdgeInsets.only(right: 15),
                             child: GestureDetector(
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserProfileDashboard(memberData: member))),
-                              child: _buildFamilyMember(member['name'], member['imagePath']),
+                              child: _buildFamilyMember(member['display_name'] ?? '', member['image_path']),
                             ),
                           )).toList(),
                         ),
@@ -402,7 +434,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           itemCount: places.length,
                           itemBuilder: (context, index) {
                             final colors = [Colors.green, Colors.blue, Colors.orange, Colors.brown, Colors.purple];
-                            return _buildRestaurant(places[index]['store_name'], colors[index % colors.length]);
+                            return _buildRestaurant(places[index]['food_name'] ?? '', colors[index % colors.length]);
                           },
                         ),
                 ),
@@ -441,7 +473,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             padding: const EdgeInsets.only(right: 15),
                             child: GestureDetector(
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserProfileDashboard(memberData: friend))),
-                              child: _buildFriend(friend['name'], friend['imagePath']),
+                              child: _buildFriend(friend['display_name'] ?? '', friend['image_path']),
                             ),
                           )).toList(),
                         ),
