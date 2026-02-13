@@ -64,8 +64,10 @@ class StoneDetailScreen extends StatelessWidget {
                       height: 200,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: stone.images.length,
-                        itemBuilder: (context, index) => _buildGalleryImage(stone.images[index]),
+                        itemCount: stone.images.isNotEmpty ? stone.images.length : 1,
+                        itemBuilder: (context, index) => _buildGalleryImage(
+                          stone.images.isNotEmpty ? stone.images[index] : stone.thumbImageUrl,
+                        ),
                       ),
                     ),
                   ],
