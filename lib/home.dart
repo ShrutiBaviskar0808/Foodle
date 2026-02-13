@@ -56,7 +56,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> _loadFamilyMembers() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
-    debugPrint('Loading family members for user_id: $userId');
     if (userId == null) return;
     
     try {
@@ -66,55 +65,52 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
-      debugPrint('Family response: ${response.body}');
-      final data = json.decode(response.body);
-      if (data['success']) {
-        final allMembers = (data['members'] as List).map((item) => Map<String, dynamic>.from(item)).toList();
-        debugPrint('All members: $allMembers');
-        setState(() {
-          familyMembers = allMembers.where((member) => member['relation'] == 'Family').toList();
-        });
-        debugPrint('Family members filtered: $familyMembers');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          final allMembers = (data['members'] as List? ?? [])
+              .map((item) => item is Map<String, dynamic> ? item : <String, dynamic>{})
+              .toList();
+          setState(() {
+            familyMembers = allMembers.where((member) => (member['relation'] ?? 'Family') == 'Family').toList();
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error loading family members: $e');
+      debugPrint('Loading family members locally');
     }
   }
 
   Future<void> _loadPlaces() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
-    debugPrint('Loading places for user_id: $userId');
     if (userId == null) return;
     
     try {
       final response = await http.post(
         Uri.parse(AppConfig.getFoodsEndpoint),
         headers: AppConfig.jsonHeaders,
-        body: json.encode({'member_id': userId}),
+        body: json.encode({'user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
-      debugPrint('Places response: ${response.body}');
-      final data = json.decode(response.body);
-      if (data['success']) {
-        setState(() {
-          places = (data['foods'] as List)
-              .map((item) => Map<String, dynamic>.from(item))
-              .toList();
-        });
-        debugPrint('Places loaded: $places');
-      } else {
-        debugPrint('Places load failed: ${data['message']}');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          setState(() {
+            places = (data['foods'] as List? ?? [])
+                .map((item) => item is Map<String, dynamic> ? item : <String, dynamic>{})
+                .toList();
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error loading places: $e');
+      debugPrint('Loading places locally');
     }
   }
 
   Future<void> _loadFriends() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
-    debugPrint('Loading friends for user_id: $userId');
     if (userId == null) return;
     
     try {
@@ -124,17 +120,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
-      debugPrint('Friends response: ${response.body}');
-      final data = json.decode(response.body);
-      if (data['success']) {
-        final allMembers = (data['members'] as List).map((item) => Map<String, dynamic>.from(item)).toList();
-        setState(() {
-          friends = allMembers.where((member) => member['relation'] != 'Family').toList();
-        });
-        debugPrint('Friends filtered: $friends');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          final allMembers = (data['members'] as List? ?? [])
+              .map((item) => item is Map<String, dynamic> ? item : <String, dynamic>{})
+              .toList();
+          setState(() {
+            friends = allMembers.where((member) => (member['relation'] ?? 'Family') != 'Family').toList();
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error loading friends: $e');
+      debugPrint('Loading friends locally');
     }
   }
 
@@ -377,15 +375,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     TextButton.icon(
                       onPressed: () async {
                         final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
-                        if (result != null) {
-                          final prefs = await SharedPreferences.getInstance();
-                          final String? membersJson = prefs.getString('all_members');
-                          List<Map<String, dynamic>> allMembers = [];
-                          if (membersJson != null) {
-                            allMembers = (json.decode(membersJson) as List).map((e) => Map<String, dynamic>.from(e)).toList();
-                          }
-                          allMembers.add(result['data']);
-                          await prefs.setString('all_members', json.encode(allMembers));
+                        if (result != null && result is Map && result['success'] == true) {
                           _loadData();
                         }
                       },
@@ -446,15 +436,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     TextButton.icon(
                       onPressed: () async {
                         final result = await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
-                        if (result != null) {
-                          final prefs = await SharedPreferences.getInstance();
-                          final String? membersJson = prefs.getString('all_members');
-                          List<Map<String, dynamic>> allMembers = [];
-                          if (membersJson != null) {
-                            allMembers = (json.decode(membersJson) as List).map((e) => Map<String, dynamic>.from(e)).toList();
-                          }
-                          allMembers.add(result['data']);
-                          await prefs.setString('all_members', json.encode(allMembers));
+                        if (result != null && result is Map && result['success'] == true) {
                           _loadData();
                         }
                       },
