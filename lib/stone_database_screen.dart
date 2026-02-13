@@ -1,9 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'stone_detail_screen.dart';
-import 'stone_data.dart';
+import 'models/stone_model.dart';
 
-class StoneDatabaseScreen extends StatelessWidget {
+class StoneDatabaseScreen extends StatefulWidget {
   const StoneDatabaseScreen({super.key});
+
+  @override
+  State<StoneDatabaseScreen> createState() => _StoneDatabaseScreenState();
+}
+
+class _StoneDatabaseScreenState extends State<StoneDatabaseScreen> {
+  List<StoneModel> _stones = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStones();
+  }
+
+  Future<void> _loadStones() async {
+    try {
+      final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/stone_enhanced_version.json'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _stones = data.map((json) => StoneModel.fromJson(json)).toList();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +46,11 @@ class StoneDatabaseScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: SafeArea(
-        child: ListView(
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator(color: Colors.brown))
+            : _stones.isEmpty
+                ? const Center(child: Text('No stones available'))
+                : ListView(
         padding: const EdgeInsets.all(16),
         children: [
           // Search Bar
@@ -68,12 +103,7 @@ class StoneDatabaseScreen extends StatelessWidget {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          _buildStoneItem(context, 'Granite', 'Igneous Rock'),
-          _buildStoneItem(context, 'Quartz', 'Mineral'),
-          _buildStoneItem(context, 'Marble', 'Metamorphic Rock'),
-          _buildStoneItem(context, 'Basalt', 'Igneous Rock'),
-          _buildStoneItem(context, 'Limestone', 'Sedimentary Rock'),
-          _buildStoneItem(context, 'Amethyst', 'Crystal'),
+          ..._stones.map((stone) => _buildStoneItem(context, stone)).toList(),
         ],
       ),
       ),
@@ -105,8 +135,7 @@ class StoneDatabaseScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoneItem(BuildContext context, String name, String type) {
-    final stone = stoneDatabase.firstWhere((s) => s.name == name, orElse: () => stoneDatabase[0]);
+  Widget _buildStoneItem(BuildContext context, StoneModel stone) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -133,7 +162,15 @@ class StoneDatabaseScreen extends StatelessWidget {
                 color: Colors.grey.shade200,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.landscape, size: 30, color: Colors.grey.shade400),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  stone.thumbImageUrl,
+                  fit: BoxFit.cover,
+                  cacheWidth: 120,
+                  errorBuilder: (context, error, stackTrace) => Icon(Icons.landscape, size: 30, color: Colors.grey.shade400),
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -141,7 +178,7 @@ class StoneDatabaseScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    stone.stoneName,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -149,7 +186,7 @@ class StoneDatabaseScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    type,
+                    stone.gemProperties.rarity,
                     style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                   ),
                 ],

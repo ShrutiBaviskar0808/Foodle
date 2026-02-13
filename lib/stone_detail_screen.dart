@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'stone_data.dart';
+import 'models/stone_model.dart';
 
 class StoneDetailScreen extends StatelessWidget {
-  final StoneData stone;
+  final StoneModel stone;
   
   const StoneDetailScreen({super.key, required this.stone});
 
@@ -16,17 +16,13 @@ class StoneDetailScreen extends StatelessWidget {
               expandedHeight: 300,
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
-                title: Text(stone.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.brown.shade400, Colors.brown.shade700],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Center(
-                    child: Icon(Icons.landscape, size: 120, color: Colors.white.withValues(alpha: 0.5)),
+                title: Text(stone.stoneName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                background: Image.network(
+                  stone.thumbImageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.brown.shade300,
+                    child: const Icon(Icons.landscape, size: 100, color: Colors.white),
                   ),
                 ),
               ),
@@ -44,46 +40,36 @@ class StoneDetailScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        stone.type,
+                        stone.gemProperties.rarity,
                         style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.brown),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildSection('Formation', stone.formation),
-                    _buildSection('Composition', stone.composition),
+                    _buildSection('Description', stone.stoneDescription),
                     const SizedBox(height: 24),
-                    const Text('Physical Properties', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    const Text('Properties', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
-                    _buildPropertyRow('Hardness', stone.hardness, Icons.hardware),
-                    _buildPropertyRow('Color', stone.color, Icons.palette),
+                    _buildPropertyRow('Colors', stone.gemProperties.colors, Icons.palette),
+                    _buildPropertyRow('Hardness', stone.gemProperties.hardness, Icons.hardware),
+                    _buildPropertyRow('Luster', stone.gemProperties.luster, Icons.auto_awesome),
+                    _buildPropertyRow('Transparency', stone.gemProperties.transparency, Icons.visibility),
+                    _buildPropertyRow('Durability', stone.gemProperties.durability, Icons.shield),
+                    _buildPropertyRow('Jewelry Use', stone.gemProperties.jewelryUse, Icons.diamond),
+                    if (stone.gemProperties.opticalEffects.isNotEmpty)
+                      _buildPropertyRow('Optical Effects', stone.gemProperties.opticalEffects, Icons.blur_on),
                     const SizedBox(height: 24),
-                    _buildSection('Common Uses', stone.uses),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.brown.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
+                    const Text('Gallery', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 200,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
                         children: [
-                          Icon(Icons.verified, color: Colors.brown.shade700, size: 32),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Confidence Score',
-                                  style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
-                                ),
-                                Text(
-                                  '${stone.confidence}%',
-                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.brown.shade700),
-                                ),
-                              ],
-                            ),
-                          ),
+                          _buildGalleryImage(stone.thumbImageUrl),
+                          if (stone.thumbImageUrl.isNotEmpty) ...[
+                            _buildGalleryImage(stone.thumbImageUrl),
+                            _buildGalleryImage(stone.thumbImageUrl),
+                          ],
                         ],
                       ),
                     ),
@@ -125,6 +111,44 @@ class StoneDetailScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGalleryImage(String imageUrl) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 12),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          imageUrl,
+          width: 200,
+          height: 200,
+          fit: BoxFit.cover,
+          cacheWidth: 400,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Container(
+              width: 200,
+              height: 200,
+              color: Colors.grey.shade200,
+              child: Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                      : null,
+                  color: Colors.brown,
+                ),
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) => Container(
+            width: 200,
+            height: 200,
+            color: Colors.grey.shade200,
+            child: const Icon(Icons.landscape, size: 60, color: Colors.grey),
+          ),
+        ),
       ),
     );
   }

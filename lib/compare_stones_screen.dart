@@ -1,12 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'stone_detail_screen.dart';
-import 'stone_data.dart';
+import 'models/stone_model.dart';
 
-class CompareStonesScreen extends StatelessWidget {
+class CompareStonesScreen extends StatefulWidget {
   const CompareStonesScreen({super.key});
 
   @override
+  State<CompareStonesScreen> createState() => _CompareStonesScreenState();
+}
+
+class _CompareStonesScreenState extends State<CompareStonesScreen> {
+  List<StoneModel> _stones = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStones();
+  }
+
+  Future<void> _loadStones() async {
+    try {
+      final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/stone_enhanced_version.json'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _stones = data.map((json) => StoneModel.fromJson(json)).toList();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          title: const Text('Compare Similar Stones'),
+          elevation: 0,
+        ),
+        body: const Center(child: CircularProgressIndicator(color: Colors.brown)),
+      );
+    }
+
+    final granite = _stones.firstWhere((s) => s.stoneName.contains('Granite'), orElse: () => _stones.isNotEmpty ? _stones[0] : _stones[0]);
+    final similar = _stones.where((s) => !s.stoneName.contains('Granite')).take(3).toList();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -23,46 +68,25 @@ class CompareStonesScreen extends StatelessWidget {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          _buildStoneCard(
-            context,
-            'Granite',
-            'Coarse-grained, pink/gray',
-            true,
-          ),
+          _buildStoneCard(context, granite, true),
           const SizedBox(height: 24),
           const Text(
             'Similar Stones',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          _buildStoneCard(
-            context,
-            'Diorite',
-            'Medium-grained, salt & pepper appearance',
-            false,
-          ),
+          if (similar.isNotEmpty) _buildStoneCard(context, similar[0], false),
           const SizedBox(height: 12),
-          _buildStoneCard(
-            context,
-            'Gabbro',
-            'Coarse-grained, dark colored',
-            false,
-          ),
+          if (similar.length > 1) _buildStoneCard(context, similar[1], false),
           const SizedBox(height: 12),
-          _buildStoneCard(
-            context,
-            'Granodiorite',
-            'Similar to granite, less pink feldspar',
-            false,
-          ),
+          if (similar.length > 2) _buildStoneCard(context, similar[2], false),
         ],
       ),
       ),
     );
   }
 
-  Widget _buildStoneCard(BuildContext context, String name, String difference, bool isYourStone) {
-    final stone = stoneDatabase.firstWhere((s) => s.name == name, orElse: () => stoneDatabase[0]);
+  Widget _buildStoneCard(BuildContext context, StoneModel stone, bool isYourStone) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -93,10 +117,21 @@ class CompareStonesScreen extends StatelessWidget {
                   bottomLeft: Radius.circular(12),
                 ),
               ),
-              child: Icon(
-                Icons.landscape,
-                size: 40,
-                color: Colors.grey.shade400,
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                ),
+                child: Image.network(
+                  stone.thumbImageUrl,
+                  fit: BoxFit.cover,
+                  cacheWidth: 200,
+                  errorBuilder: (context, error, stackTrace) => Icon(
+                    Icons.landscape,
+                    size: 40,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
               ),
             ),
             Expanded(
@@ -108,7 +143,7 @@ class CompareStonesScreen extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          name,
+                          stone.stoneName,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -136,7 +171,7 @@ class CompareStonesScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      difference,
+                      stone.gemProperties.colors,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade700,

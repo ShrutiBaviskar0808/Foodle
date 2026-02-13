@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'stone_data.dart';
-import 'stone_detail_screen.dart';
 import 'models/stone_model.dart';
+import 'stone_detail_screen.dart';
 
 class StonesTab extends StatefulWidget {
   const StonesTab({super.key});
@@ -14,40 +13,38 @@ class StonesTab extends StatefulWidget {
 
 class _StonesTabState extends State<StonesTab> {
   final TextEditingController _searchController = TextEditingController();
-  List<StoneData> _filteredStones = stoneDatabase;
-  Map<String, String> _stoneImages = {};
-  bool _imagesLoaded = false;
+  List<StoneModel> _stones = [];
+  List<StoneModel> _filteredStones = [];
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadStoneImages();
+    _loadStones();
   }
 
-  Future<void> _loadStoneImages() async {
+  Future<void> _loadStones() async {
     try {
       final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/stone_enhanced_version.json'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
-          for (var item in data) {
-            final stoneModel = StoneModel.fromJson(item);
-            _stoneImages[stoneModel.stoneName] = stoneModel.thumbImageUrl;
-          }
-          _imagesLoaded = true;
+          _stones = data.map((json) => StoneModel.fromJson(json)).toList();
+          _filteredStones = _stones;
+          _isLoading = false;
         });
       }
     } catch (e) {
-      setState(() => _imagesLoaded = true);
+      setState(() => _isLoading = false);
     }
   }
 
   void _filterStones(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredStones = stoneDatabase;
+        _filteredStones = _stones;
       } else {
-        _filteredStones = stoneDatabase.where((stone) => stone.name.toLowerCase().contains(query.toLowerCase()) || stone.type.toLowerCase().contains(query.toLowerCase())).toList();
+        _filteredStones = _stones.where((stone) => stone.stoneName.toLowerCase().contains(query.toLowerCase())).toList();
       }
     });
   }
@@ -105,7 +102,9 @@ class _StonesTabState extends State<StonesTab> {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: GridView.builder(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator(color: Colors.brown))
+              : GridView.builder(
             padding: const EdgeInsets.all(16),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -124,18 +123,7 @@ class _StonesTabState extends State<StonesTab> {
     );
   }
 
-  Widget _buildStoneCard(StoneData stone) {
-    final imageUrl = _stoneImages[stone.name];
-    final imageMap = {
-      'Granite': 'assets/images/granite.jpg',
-      'Basalt': 'assets/images/basalt.jpg',
-      'Marble': 'assets/images/marble.jpg',
-      'Limestone': 'assets/images/limestone.jpg',
-      'Quartz': 'assets/images/quartz.jpg',
-      'Amethyst': 'assets/images/amethyst.jpg',
-    };
-    final localImage = imageMap[stone.name];
-
+  Widget _buildStoneCard(StoneModel stone) {
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => StoneDetailScreen(stone: stone))),
       child: Container(
@@ -171,14 +159,17 @@ class _StonesTabState extends State<StonesTab> {
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),
                 ),
-                child: imageUrl != null
-                    ? Image.network(imageUrl, fit: BoxFit.cover, width: double.infinity, cacheWidth: 240, loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null, color: Colors.white, strokeWidth: 2));
-                      }, errorBuilder: (context, error, stackTrace) => localImage != null ? Image.asset(localImage, fit: BoxFit.cover, width: double.infinity) : Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))))
-                    : localImage != null
-                        ? Image.asset(localImage, fit: BoxFit.cover, width: double.infinity, errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))))
-                        : Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))),
+                child: Image.network(
+                  stone.thumbImageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  cacheWidth: 300,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null, color: Colors.white, strokeWidth: 2));
+                  },
+                  errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))),
+                ),
               ),
             ),
             Padding(
@@ -187,7 +178,7 @@ class _StonesTabState extends State<StonesTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    stone.name,
+                    stone.stoneName,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -197,7 +188,7 @@ class _StonesTabState extends State<StonesTab> {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    stone.type,
+                    stone.gemProperties.colors,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -209,7 +200,7 @@ class _StonesTabState extends State<StonesTab> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          stone.color,
+                          stone.gemProperties.hardness,
                           style: TextStyle(fontSize: 12, color: Colors.brown.shade300),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
