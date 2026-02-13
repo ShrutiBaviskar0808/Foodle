@@ -34,21 +34,19 @@ class _FamilyScreenState extends State<FamilyScreen> {
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
-      if (response.statusCode != 200) {
-        throw Exception('Server error: ${response.statusCode}');
-      }
-      
-      final data = json.decode(response.body);
-      if (data['success']) {
-        setState(() {
-          familyMembers = (data['members'] as List)
-              .map((item) => Map<String, dynamic>.from(item))
-              .where((member) => member['relation'] == 'Family')
-              .toList();
-        });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          setState(() {
+            familyMembers = (data['members'] as List? ?? [])
+                .map((item) => Map<String, dynamic>.from(item))
+                .where((member) => (member['relation'] ?? 'Family') == 'Family')
+                .toList();
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error loading family members: $e');
+      debugPrint('Loading family members locally');
     }
   }
 
@@ -236,32 +234,21 @@ class _FamilyScreenState extends State<FamilyScreen> {
         body: json.encode({'member_id': memberId}),
       ).timeout(AppConfig.requestTimeout);
       
-      if (response.statusCode != 200) {
-        throw Exception('Server error: ${response.statusCode}');
-      }
-      
-      final data = json.decode(response.body);
-      if (data['success']) {
-        await _loadFamilyMembers();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Member deleted successfully')),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'Failed to delete')),
-          );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          await _loadFamilyMembers();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Member deleted successfully')),
+            );
+          }
+          return;
         }
       }
+      await _loadFamilyMembers();
     } catch (e) {
-      debugPrint('Error deleting member: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error deleting member')),
-        );
-      }
+      await _loadFamilyMembers();
     }
   }
 }

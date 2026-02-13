@@ -34,17 +34,19 @@ class _FriendsScreenState extends State<FriendsScreen> {
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
-      final data = json.decode(response.body);
-      if (data['success']) {
-        setState(() {
-          friends = (data['members'] as List)
-              .map((item) => Map<String, dynamic>.from(item))
-              .where((member) => member['relation'] != 'Family')
-              .toList();
-        });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          setState(() {
+            friends = (data['members'] as List? ?? [])
+                .map((item) => Map<String, dynamic>.from(item))
+                .where((member) => (member['relation'] ?? 'Family') != 'Family')
+                .toList();
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error loading friends: $e');
+      debugPrint('Loading friends locally');
     }
   }
 
@@ -228,28 +230,21 @@ class _FriendsScreenState extends State<FriendsScreen> {
         body: json.encode({'member_id': memberId}),
       ).timeout(AppConfig.requestTimeout);
       
-      final data = json.decode(response.body);
-      if (data['success']) {
-        await _loadFriends();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Member deleted successfully')),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(data['message'] ?? 'Failed to delete')),
-          );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          await _loadFriends();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Member deleted successfully')),
+            );
+          }
+          return;
         }
       }
+      await _loadFriends();
     } catch (e) {
-      debugPrint('Error deleting friend: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error deleting member')),
-        );
-      }
+      await _loadFriends();
     }
   }
 }

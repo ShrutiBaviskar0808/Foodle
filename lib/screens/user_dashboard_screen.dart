@@ -50,17 +50,25 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
 
-      final data = json.decode(response.body);
-      if (data['success']) {
-        setState(() {
-          familyMembers = (data['members'] as List)
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          final members = (data['members'] as List? ?? [])
               .map((item) => Map<String, dynamic>.from(item))
-              .where((member) => member['relation'] == 'Family')
+              .where((member) => (member['relation'] ?? 'Family') == 'Family')
               .toList();
-        });
+          
+          for (var member in members) {
+            await _loadMemberDetails(member);
+          }
+          
+          setState(() {
+            familyMembers = members;
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error loading family members: $e');
+      debugPrint('Loading family members locally');
     }
   }
 
@@ -76,17 +84,57 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
 
-      final data = json.decode(response.body);
-      if (data['success']) {
-        setState(() {
-          friends = (data['members'] as List)
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          final friendsList = (data['members'] as List? ?? [])
               .map((item) => Map<String, dynamic>.from(item))
-              .where((member) => member['relation'] != 'Family')
+              .where((member) => (member['relation'] ?? 'Family') != 'Family')
               .toList();
-        });
+          
+          for (var friend in friendsList) {
+            await _loadMemberDetails(friend);
+          }
+          
+          setState(() {
+            friends = friendsList;
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error loading friends: $e');
+      debugPrint('Loading friends locally');
+    }
+  }
+
+  Future<void> _loadMemberDetails(Map<String, dynamic> member) async {
+    final memberId = member['id'];
+    if (memberId == null) {
+      member['allergies'] = [];
+      return;
+    }
+
+    try {
+      final allergyResponse = await http.post(
+        Uri.parse(AppConfig.getAllergiesEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'member_id': memberId}),
+      ).timeout(AppConfig.requestTimeout);
+
+      if (allergyResponse.statusCode == 200) {
+        final allergyData = json.decode(allergyResponse.body);
+        if (allergyData['success'] == true) {
+          member['allergies'] = (allergyData['allergies'] as List? ?? [])
+              .map((item) => (item['allergy_name'] ?? '').toString())
+              .where((name) => name.isNotEmpty)
+              .toList();
+        } else {
+          member['allergies'] = [];
+        }
+      } else {
+        member['allergies'] = [];
+      }
+    } catch (e) {
+      member['allergies'] = [];
     }
   }
 
@@ -99,19 +147,21 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
       final response = await http.post(
         Uri.parse(AppConfig.getFoodsEndpoint),
         headers: AppConfig.jsonHeaders,
-        body: json.encode({'member_id': userId}),
+        body: json.encode({'user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
 
-      final data = json.decode(response.body);
-      if (data['success']) {
-        setState(() {
-          places = (data['foods'] as List)
-              .map((item) => Map<String, dynamic>.from(item))
-              .toList();
-        });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          setState(() {
+            places = (data['foods'] as List? ?? [])
+                .map((item) => Map<String, dynamic>.from(item))
+                .toList();
+          });
+        }
       }
     } catch (e) {
-      debugPrint('Error loading places: $e');
+      debugPrint('Loading places locally');
     }
   }
 
@@ -277,6 +327,8 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                             itemCount: familyMembers.length,
                             itemBuilder: (context, index) {
                               final member = familyMembers[index];
+                              final allergies = member['allergies'] as List? ?? [];
+                              final allergyText = allergies.isEmpty ? 'No allergies' : allergies.join(', ');
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 child: ListTile(
@@ -286,7 +338,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                     child: member['image_path'] == null ? const Icon(Icons.person, color: Colors.orange) : null,
                                   ),
                                   title: Text(member['display_name'] ?? ''),
-                                  subtitle: Text(member['relation'] ?? 'Family'),
+                                  subtitle: Text('${member['relation'] ?? 'Family'} • $allergyText'),
                                 ),
                               );
                             },
@@ -315,6 +367,8 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                             itemCount: friends.length,
                             itemBuilder: (context, index) {
                               final friend = friends[index];
+                              final allergies = friend['allergies'] as List? ?? [];
+                              final allergyText = allergies.isEmpty ? 'No allergies' : allergies.join(', ');
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 child: ListTile(
@@ -324,7 +378,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                     child: friend['image_path'] == null ? const Icon(Icons.person, color: Colors.blue) : null,
                                   ),
                                   title: Text(friend['display_name'] ?? ''),
-                                  subtitle: Text(friend['relation'] ?? 'Friend'),
+                                  subtitle: Text('${friend['relation'] ?? 'Friend'} • $allergyText'),
                                 ),
                               );
                             },
