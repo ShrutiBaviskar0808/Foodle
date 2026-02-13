@@ -11,7 +11,6 @@ class MineralsScreen extends StatefulWidget {
 }
 
 class _MineralsScreenState extends State<MineralsScreen> {
-  final PageController _pageController = PageController();
   int _currentPage = 1;
   List<MineralModel> _minerals = [];
   bool _isLoading = true;
@@ -60,33 +59,49 @@ class _MineralsScreenState extends State<MineralsScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.brown))
-          : PageView.builder(
-              controller: _pageController,
-              onPageChanged: (page) {
-                final newPage = page + 1;
-                if (newPage != _currentPage && newPage <= 7) {
-                  setState(() => _currentPage = newPage);
-                  _fetchMinerals(newPage);
-                }
-              },
-              itemCount: 7,
-              itemBuilder: (context, pageIndex) {
-                return GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: _minerals.length,
-                  itemBuilder: (context, index) {
-                    final mineral = _minerals[index];
-                    return _buildMineralCard(mineral);
-                  },
-                );
+          : GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.75,
+              ),
+              itemCount: _minerals.length,
+              itemBuilder: (context, index) {
+                final mineral = _minerals[index];
+                return _buildMineralCard(mineral);
               },
             ),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (_currentPage > 1)
+            FloatingActionButton(
+              heroTag: 'prev',
+              mini: true,
+              backgroundColor: Colors.brown,
+              onPressed: () {
+                setState(() => _currentPage--);
+                _fetchMinerals(_currentPage);
+              },
+              child: const Icon(Icons.arrow_back, color: Colors.white),
+            ),
+          const SizedBox(width: 16),
+          if (_currentPage < 7)
+            FloatingActionButton(
+              heroTag: 'next',
+              mini: true,
+              backgroundColor: Colors.brown,
+              onPressed: () {
+                setState(() => _currentPage++);
+                _fetchMinerals(_currentPage);
+              },
+              child: const Icon(Icons.arrow_forward, color: Colors.white),
+            ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -191,11 +206,5 @@ class _MineralsScreenState extends State<MineralsScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 }
