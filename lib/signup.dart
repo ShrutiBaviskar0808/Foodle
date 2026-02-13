@@ -363,7 +363,7 @@ class _SignupPageState extends State<SignupPage> {
                   controller: _otpController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
-                    hintText: 'Enter 6 digit OTP',
+                    hintText: 'Enter 4 digit OTP',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),

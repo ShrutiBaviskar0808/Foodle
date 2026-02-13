@@ -205,12 +205,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   borderRadius: BorderRadius.zero,
                   child: Stack(
                     children: [
-                      Positioned(top: 100, left: 20, child: Icon(Icons.restaurant_menu, size: 40, color: Colors.black.withOpacity(0.1))),
-                      Positioned(top: 120, right: 30, child: Icon(Icons.local_pizza, size: 50, color: Colors.black.withOpacity(0.08))),
-                      Positioned(top: 150, left: 100, child: Icon(Icons.fastfood, size: 35, color: Colors.black.withOpacity(0.1))),
-                      Positioned(top: 180, right: 80, child: Icon(Icons.cake, size: 45, color: Colors.black.withOpacity(0.08))),
-                      Positioned(top: 140, left: 200, child: Icon(Icons.lunch_dining, size: 38, color: Colors.black.withOpacity(0.1))),
-                      Positioned(top: 200, left: 50, child: Icon(Icons.icecream, size: 42, color: Colors.black.withOpacity(0.08))),
+                      Positioned(top: 100, left: 20, child: Icon(Icons.restaurant_menu, size: 40, color: Colors.black.withValues(alpha: 0.1))),
+                      Positioned(top: 120, right: 30, child: Icon(Icons.local_pizza, size: 50, color: Colors.black.withValues(alpha: 0.08))),
+                      Positioned(top: 150, left: 100, child: Icon(Icons.fastfood, size: 35, color: Colors.black.withValues(alpha: 0.1))),
+                      Positioned(top: 180, right: 80, child: Icon(Icons.cake, size: 45, color: Colors.black.withValues(alpha: 0.08))),
+                      Positioned(top: 140, left: 200, child: Icon(Icons.lunch_dining, size: 38, color: Colors.black.withValues(alpha: 0.1))),
+                      Positioned(top: 200, left: 50, child: Icon(Icons.icecream, size: 42, color: Colors.black.withValues(alpha: 0.08))),
                     ],
                   ),
                 ),

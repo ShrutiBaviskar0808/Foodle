@@ -2,7 +2,8 @@ class AppConfig {
   // Server configuration - UPDATE THIS IP FOR PHYSICAL DEVICE
   // For emulator: use 10.0.2.2
   // For physical device: use your computer's IP address (e.g., 192.168.1.100)
-  static const String baseUrl = 'https://your-domain.com'; // Replace with your actual hosting domain
+  // static const String baseUrl = 'http://localhost/foodle/';   
+  static const String baseUrl = 'http://192.168.137.1/foodle/';  
   
   // API endpoints
   static const String loginEndpoint = '$baseUrl/login.php';
