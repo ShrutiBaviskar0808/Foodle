@@ -198,12 +198,9 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         final Map<String, dynamic> data = {
           'owner_user_id': userId,
           'display_name': _nameController.text,
-          'nickname': _nicknameController.text,
           'dob': _dobController.text,
           'age': _age,
           'relation': _selectedRelation,
-          'image_path': _imagePath ?? '',
-          'allergies': _selectedAllergies,
         };
         
         if (widget.member != null && widget.member!['id'] != null) {
@@ -229,6 +226,11 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         if (response.statusCode == 200) {
           final result = json.decode(response.body);
           if (result['success'] == true) {
+            final memberId = result['member_id'];
+            if (_selectedAllergies.isNotEmpty && memberId != null) {
+              await _saveAllergies(memberId);
+            }
+            if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Member saved successfully')),
             );
@@ -248,6 +250,23 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
           );
         }
       }
+    }
+  }
+
+  Future<void> _saveAllergies(int memberId) async {
+    try {
+      for (final allergy in _selectedAllergies) {
+        await http.post(
+          Uri.parse(AppConfig.addAllergyEndpoint),
+          headers: AppConfig.jsonHeaders,
+          body: json.encode({
+            'member_id': memberId,
+            'allergy_name': allergy,
+          }),
+        ).timeout(AppConfig.requestTimeout);
+      }
+    } catch (e) {
+      debugPrint('Error saving allergies: $e');
     }
   }
 
