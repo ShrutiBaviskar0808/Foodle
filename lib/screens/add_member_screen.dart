@@ -198,8 +198,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         final Map<String, dynamic> data = {
           'owner_user_id': userId,
           'display_name': _nameController.text,
-          'dob': _dobController.text,
-          'age': _age,
           'relation': _selectedRelation,
         };
         
