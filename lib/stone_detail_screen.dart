@@ -57,24 +57,6 @@ class StoneDetailScreen extends StatelessWidget {
                     _buildPropertyRow('Jewelry Use', stone.gemProperties.jewelryUse, Icons.diamond),
                     if (stone.gemProperties.opticalEffects.isNotEmpty)
                       _buildPropertyRow('Optical Effects', stone.gemProperties.opticalEffects, Icons.blur_on),
-                    const SizedBox(height: 24),
-                    const Text('Gallery', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        stone.images.isNotEmpty ? stone.images.first : stone.thumbImageUrl,
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(
-                          width: double.infinity,
-                          height: 200,
-                          color: Colors.grey.shade200,
-                          child: const Icon(Icons.landscape, size: 60, color: Colors.grey),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
