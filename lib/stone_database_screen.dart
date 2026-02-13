@@ -165,7 +165,7 @@ class _StoneDatabaseScreenState extends State<StoneDatabaseScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  stone.thumbImageUrl,
+                  stone.images.isNotEmpty ? stone.images.first : stone.thumbImageUrl,
                   fit: BoxFit.cover,
                   cacheWidth: 120,
                   errorBuilder: (context, error, stackTrace) => Icon(Icons.landscape, size: 30, color: Colors.grey.shade400),
