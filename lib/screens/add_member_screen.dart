@@ -203,8 +203,12 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             body: json.encode({
               'member_id': widget.member!['id'],
               'display_name': _nameController.text,
+              'nickname': _nicknameController.text,
+              'dob': _dobController.text,
+              'age': _age,
               'relation': _selectedRelation,
               'image_path': _imagePath,
+              'allergies': _selectedAllergies,
             }),
           ).timeout(AppConfig.requestTimeout);
           
@@ -231,8 +235,12 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             body: json.encode({
               'owner_user_id': userId,
               'display_name': _nameController.text,
+              'nickname': _nicknameController.text,
+              'dob': _dobController.text,
+              'age': _age,
               'relation': _selectedRelation,
               'image_path': _imagePath,
+              'allergies': _selectedAllergies,
             }),
           ).timeout(AppConfig.requestTimeout);
           
