@@ -16,12 +16,24 @@ class StoneModel {
   });
 
   factory StoneModel.fromJson(Map<String, dynamic> json) {
+    // Extract images from imageUrl1, imageUrl2, imageUrl3
+    List<String> imagesList = [];
+    if (json['imageUrl1'] != null && json['imageUrl1'].toString().isNotEmpty) {
+      imagesList.add(json['imageUrl1']);
+    }
+    if (json['imageUrl2'] != null && json['imageUrl2'].toString().isNotEmpty) {
+      imagesList.add(json['imageUrl2']);
+    }
+    if (json['imageUrl3'] != null && json['imageUrl3'].toString().isNotEmpty) {
+      imagesList.add(json['imageUrl3']);
+    }
+    
     return StoneModel(
       id: json['id'],
       stoneName: json['stoneName'],
       stoneDescription: json['stoneDescription'],
       thumbImageUrl: json['thumbImageUrl'],
-      images: List<String>.from(json['images'] ?? []),
+      images: imagesList,
       gemProperties: GemProperties.fromJson(json['gemProperties']),
     );
   }
