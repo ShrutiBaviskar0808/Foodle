@@ -41,10 +41,10 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
   void initState() {
     super.initState();
     if (widget.member != null) {
-      _nameController.text = widget.member!['name'] ?? '';
+      _nameController.text = widget.member!['display_name'] ?? '';
       _nicknameController.text = widget.member!['nickname'] ?? '';
       _dobController.text = widget.member!['dob'] ?? '';
-      _imagePath = widget.member!['imagePath'];
+      _imagePath = widget.member!['image_path'];
       _selectedRelation = widget.member!['relation'];
       _age = widget.member!['age'];
       _selectedAllergies = List<String>.from(widget.member!['allergies'] ?? []);
