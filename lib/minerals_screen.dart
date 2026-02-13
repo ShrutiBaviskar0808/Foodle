@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'models/mineral_model.dart';
+import 'mineral_detail_screen.dart';
 
 class MineralsScreen extends StatefulWidget {
   const MineralsScreen({super.key});
@@ -106,19 +107,21 @@ class _MineralsScreenState extends State<MineralsScreen> {
   }
 
   Widget _buildMineralCard(MineralModel mineral) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.brown.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => MineralDetailScreen(mineral: mineral))),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.brown.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
@@ -204,6 +207,7 @@ class _MineralsScreenState extends State<MineralsScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
