@@ -35,7 +35,7 @@ class _GeologyDatabaseScreenState extends State<GeologyDatabaseScreen> with Sing
           icon: const Icon(Icons.close, color: Colors.brown),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Geology Database', style: TextStyle(color: Colors.brown, fontWeight: FontWeight.bold)),
+        title: const Text('Stone & Mineral Explorer', style: TextStyle(color: Colors.brown, fontWeight: FontWeight.bold)),
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline, color: Colors.brown),
