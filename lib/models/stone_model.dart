@@ -3,6 +3,7 @@ class StoneModel {
   final String stoneName;
   final String stoneDescription;
   final String thumbImageUrl;
+  final List<String> images;
   final GemProperties gemProperties;
 
   StoneModel({
@@ -10,6 +11,7 @@ class StoneModel {
     required this.stoneName,
     required this.stoneDescription,
     required this.thumbImageUrl,
+    required this.images,
     required this.gemProperties,
   });
 
@@ -19,6 +21,7 @@ class StoneModel {
       stoneName: json['stoneName'],
       stoneDescription: json['stoneDescription'],
       thumbImageUrl: json['thumbImageUrl'],
+      images: List<String>.from(json['images'] ?? []),
       gemProperties: GemProperties.fromJson(json['gemProperties']),
     );
   }
