@@ -4,9 +4,6 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../config.dart';
-import 'family_screen.dart';
-import 'friends_screen.dart';
-import 'favorite_places_screen.dart';
 import 'add_member_screen.dart';
 import 'add_place_screen.dart';
 
@@ -38,25 +35,21 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
       userEmail = prefs.getString('user_email') ?? '';
       userId = prefs.getInt('user_id');
     });
-    await Future.wait([
-      _loadFamilyMembers(),
-      _loadFriends(),
-      _loadPlaces(),
-    ]);
+    await Future.wait([_loadFamilyMembers(), _loadFriends(), _loadPlaces()]);
   }
 
   Future<void> _loadFamilyMembers() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
     if (userId == null) return;
-    
+
     try {
       final response = await http.post(
         Uri.parse(AppConfig.getMembersEndpoint),
         headers: AppConfig.jsonHeaders,
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
-      
+
       final data = json.decode(response.body);
       if (data['success']) {
         setState(() {
@@ -75,14 +68,14 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
     if (userId == null) return;
-    
+
     try {
       final response = await http.post(
         Uri.parse(AppConfig.getMembersEndpoint),
         headers: AppConfig.jsonHeaders,
         body: json.encode({'owner_user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
-      
+
       final data = json.decode(response.body);
       if (data['success']) {
         setState(() {
@@ -101,14 +94,14 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
     if (userId == null) return;
-    
+
     try {
       final response = await http.post(
         Uri.parse(AppConfig.getFoodsEndpoint),
         headers: AppConfig.jsonHeaders,
         body: json.encode({'member_id': userId}),
       ).timeout(AppConfig.requestTimeout);
-      
+
       final data = json.decode(response.body);
       if (data['success']) {
         setState(() {
@@ -126,99 +119,120 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final padding = size.width * 0.05;
-    
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(padding),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.orange, Colors.orange.withValues(alpha: 0.8)],
+      extendBodyBehindAppBar: true,
+      backgroundColor: const Color(0xFFFE8D00),
+      body: Column(
+        children: [
+          Stack(
+            children: [
+              Container(
+                height: 280,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFE8D00),
                 ),
               ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      const Spacer(),
-                      const Text('User Details', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w500)),
-                      const Spacer(),
-                      PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert, color: Colors.white, size: 24),
-                        onSelected: (value) {
-                          if (value == 'family') {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen()));
-                          } else if (value == 'friends') {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen()));
-                          } else if (value == 'places') {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen()));
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            value: 'family',
-                            child: Row(
-                              children: [
-                                Icon(Icons.family_restroom, color: Colors.orange),
-                                SizedBox(width: 12),
-                                Text('Family Members'),
-                              ],
+              Container(
+                height: 90,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFE8D00),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
+                  ),
+                ),
+              ),
+              SafeArea(
+                bottom: false,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                            onPressed: () => Navigator.pop(context),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                          Text(
+                            'Foodle',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: size.width * 0.08,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const PopupMenuItem(
-                            value: 'friends',
-                            child: Row(
-                              children: [
-                                Icon(Icons.people, color: Colors.orange),
-                                SizedBox(width: 12),
-                                Text('Friends'),
-                              ],
-                            ),
-                          ),
-                          const PopupMenuItem(
-                            value: 'places',
-                            child: Row(
-                              children: [
-                                Icon(Icons.restaurant, color: Colors.orange),
-                                SizedBox(width: 12),
-                                Text('Favorite Places'),
-                              ],
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.white,
+                            child: Text(
+                              userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                              style: const TextStyle(
+                                color: Color(0xFFFE8D00),
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: size.width * 0.12,
-                    backgroundColor: Colors.white,
-                    child: Text(
-                      userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                      style: const TextStyle(fontSize: 40, color: Colors.orange, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  Text(userName, style: TextStyle(color: Colors.white, fontSize: size.width * 0.06, fontWeight: FontWeight.bold)),
-                  SizedBox(height: size.height * 0.006),
-                  Text(userEmail, style: TextStyle(color: Colors.white70, fontSize: size.width * 0.035)),
-                  const SizedBox(height: 20),
-                ],
+                    const SizedBox(height: 70),
+                    CircleAvatar(
+                      radius: size.width * 0.13,
+                      backgroundColor: Colors.white,
+                      child: Text(
+                        userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                        style: TextStyle(
+                          fontSize: size.width * 0.12,
+                          color: const Color(0xFFFE8D00),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.02),
+                    Text(
+                      userName,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: size.width * 0.06,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: size.height * 0.005),
+                    Text(
+                      userEmail,
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: size.width * 0.035,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(padding),
-                child: Column(
+            ],
+          ),
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
+                ),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.all(padding),
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Card(
@@ -354,10 +368,11 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                           ),
                   ],
                 ),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

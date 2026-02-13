@@ -10,10 +10,10 @@ class AppConfig {
   static const String signupEndpoint = '$baseUrl/test_signup.php';
   static const String verifyOtpEndpoint = '$baseUrl/test_verify_otp.php';
   static const String testEndpoint = '$baseUrl/test.php';
-  static const String addFoodEndpoint = '$baseUrl/add_favorite_food.php';
-  static const String getFoodsEndpoint = '$baseUrl/get_favorite_foods.php';
-  static const String updateFoodEndpoint = '$baseUrl/update_favorite_food.php';
-  static const String deleteFoodEndpoint = '$baseUrl/delete_favorite_food.php';
+  static const String addFoodEndpoint = '$baseUrl/add_food.php';
+  static const String getFoodsEndpoint = '$baseUrl/get_foods.php';
+  static const String updateFoodEndpoint = '$baseUrl/add_food.php';
+  static const String deleteFoodEndpoint = '$baseUrl/add_food.php';
   static const String addMemberEndpoint = '$baseUrl/add_member.php';
   static const String getMembersEndpoint = '$baseUrl/get_members.php';
   static const String updateMemberEndpoint = '$baseUrl/update_member.php';

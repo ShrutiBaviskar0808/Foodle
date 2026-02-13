@@ -50,8 +50,15 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       _dobController.text = widget.member!['dob'] ?? '';
       _imagePath = widget.member!['image_path'];
       _selectedRelation = widget.member!['relation'];
-      _age = widget.member!['age'];
-      _selectedAllergies = List<String>.from(widget.member!['allergies'] ?? []);
+      if (widget.member!['age'] != null) {
+        _age = int.tryParse(widget.member!['age'].toString());
+      }
+      if (widget.member!['allergies'] != null) {
+        _selectedAllergies = List<String>.from(widget.member!['allergies']);
+      }
+      if (_dobController.text.isNotEmpty) {
+        _calculateAge(_dobController.text);
+      }
     }
   }
 
