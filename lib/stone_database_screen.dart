@@ -103,7 +103,7 @@ class _StoneDatabaseScreenState extends State<StoneDatabaseScreen> {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          ..._stones.map((stone) => _buildStoneItem(context, stone)).toList(),
+          ..._stones.map((stone) => _buildStoneItem(context, stone)),
         ],
       ),
       ),
