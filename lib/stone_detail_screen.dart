@@ -51,6 +51,21 @@ class StoneDetailScreen extends StatelessWidget {
                     Image.network(
                       stone.images.isNotEmpty ? stone.images.first : stone.thumbImageUrl,
                       fit: BoxFit.cover,
+                      cacheHeight: 600,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: Colors.brown.shade200,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  : null,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
                       errorBuilder: (context, error, stackTrace) => Container(
                         color: Colors.brown.shade300,
                         child: const Icon(Icons.landscape, size: 100, color: Colors.white),

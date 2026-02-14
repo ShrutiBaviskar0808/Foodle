@@ -49,7 +49,29 @@ class MineralDetailScreen extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     mineral.images.isNotEmpty
-                        ? Image.network(mineral.images[0], fit: BoxFit.cover)
+                        ? Image.network(
+                            mineral.images[0],
+                            fit: BoxFit.cover,
+                            cacheHeight: 600,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                color: Colors.purple.shade200,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                        : null,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              color: Colors.grey.shade300,
+                              child: const Icon(Icons.diamond, size: 100),
+                            ),
+                          )
                         : Container(color: Colors.grey.shade300, child: const Icon(Icons.diamond, size: 100)),
                     Container(
                       decoration: BoxDecoration(
@@ -101,7 +123,28 @@ class MineralDetailScreen extends StatelessWidget {
                             padding: const EdgeInsets.only(right: 8),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.network(mineral.images[index], width: 120, fit: BoxFit.cover),
+                              child: Image.network(
+                                mineral.images[index],
+                                width: 120,
+                                fit: BoxFit.cover,
+                                cacheWidth: 240,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    width: 120,
+                                    color: Colors.grey.shade200,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                            : null,
+                                        color: Colors.brown,
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
