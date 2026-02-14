@@ -255,7 +255,9 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         if (response.statusCode == 200) {
           final result = json.decode(response.body);
           if (result['success'] == true) {
-            final memberId = int.tryParse(result['member_id'].toString());
+            final memberId = widget.member != null && widget.member!['id'] != null 
+                ? widget.member!['id'] 
+                : int.tryParse(result['member_id'].toString());
             
             // Upload photo if exists
             String? photoUrl;
