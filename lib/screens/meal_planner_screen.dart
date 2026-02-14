@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class MealPlannerScreen extends StatefulWidget {
@@ -23,6 +24,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   }
 
   Future<void> _initializeNotifications() async {
+    tz.initializeTimeZones();
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initSettings = InitializationSettings(android: androidSettings);
     await flutterLocalNotificationsPlugin.initialize(initSettings);
@@ -116,26 +118,30 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   }
 
   Future<void> _scheduleNotification(String mealName, DateTime mealDateTime) async {
-    final notificationTime = mealDateTime.subtract(const Duration(hours: 2));
-    if (notificationTime.isAfter(DateTime.now())) {
-      const androidDetails = AndroidNotificationDetails(
-        'meal_planner',
-        'Meal Planner',
-        channelDescription: 'Notifications for planned meals',
-        importance: Importance.high,
-        priority: Priority.high,
-      );
-      const notificationDetails = NotificationDetails(android: androidDetails);
-      
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        mealName.hashCode,
-        'Meal Reminder',
-        'Today is your meal planned: $mealName',
-        tz.TZDateTime.from(notificationTime, tz.local),
-        notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      );
+    try {
+      final notificationTime = mealDateTime.subtract(const Duration(hours: 2));
+      if (notificationTime.isAfter(DateTime.now())) {
+        const androidDetails = AndroidNotificationDetails(
+          'meal_planner',
+          'Meal Planner',
+          channelDescription: 'Notifications for planned meals',
+          importance: Importance.high,
+          priority: Priority.high,
+        );
+        const notificationDetails = NotificationDetails(android: androidDetails);
+        
+        await flutterLocalNotificationsPlugin.zonedSchedule(
+          mealName.hashCode,
+          'Meal Reminder',
+          'Today is your meal planned: $mealName',
+          tz.TZDateTime.from(notificationTime, tz.local),
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error scheduling notification: $e');
     }
   }
 
