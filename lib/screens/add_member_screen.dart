@@ -22,11 +22,13 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
   final _nicknameController = TextEditingController();
   final _dobController = TextEditingController();
   final _customAllergyController = TextEditingController();
+  final _favoriteFoodsController = TextEditingController();
   
   String? _imagePath;
   String? _selectedRelation;
   int? _age;
-  List<String> _selectedAllergies = [];
+  final List<String> _selectedAllergies = [];
+  final List<String> _favoriteFoods = [];
   
   final List<String> _relations = ['Family', 'Friends', 'Colleagues', 'Others'];
   final List<String> _commonAllergies = [
@@ -54,7 +56,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         _age = int.tryParse(widget.member!['age'].toString());
       }
       if (widget.member!['allergies'] != null) {
-        _selectedAllergies = List<String>.from(widget.member!['allergies']);
+        _selectedAllergies.addAll(List<String>.from(widget.member!['allergies']));
       }
       if (_dobController.text.isNotEmpty) {
         _calculateAge(_dobController.text);
@@ -195,11 +197,18 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       }
       
       try {
+        // Convert empty strings to null
         final Map<String, dynamic> data = {
           'owner_user_id': userId,
-          'display_name': _nameController.text,
+          'display_name': _nameController.text.trim(),
+          'nickname': _nicknameController.text.trim().isEmpty ? null : _nicknameController.text.trim(),
+          'photo_path': _imagePath,
+          'dob': _dobController.text.trim().isEmpty ? null : _dobController.text.trim(),
+          'age': _age,
           'relation': _selectedRelation,
         };
+        
+        debugPrint('Data being sent: $data');
         
         if (widget.member != null && widget.member!['id'] != null) {
           data['member_id'] = widget.member!['id'];
@@ -260,6 +269,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
           body: json.encode({
             'member_id': memberId,
             'allergy_name': allergy,
+            'favorite_foods': _favoriteFoods.isNotEmpty ? _favoriteFoods.join(', ') : null,
           }),
         ).timeout(AppConfig.requestTimeout);
       }
@@ -400,6 +410,68 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                 }),
               ],
             ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Favorite Foods', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                TextButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Add Favorite Food'),
+                        content: TextField(
+                          controller: _favoriteFoodsController,
+                          textCapitalization: TextCapitalization.words,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter food name',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              if (_favoriteFoodsController.text.isNotEmpty) {
+                                setState(() {
+                                  _favoriteFoods.add(_favoriteFoodsController.text);
+                                  _favoriteFoodsController.clear();
+                                });
+                                Navigator.pop(context);
+                              }
+                            },
+                            child: const Text('Add'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _favoriteFoods.map((food) {
+                return Chip(
+                  label: Text(food),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                  onDeleted: () {
+                    setState(() {
+                      _favoriteFoods.remove(food);
+                    });
+                  },
+                  backgroundColor: Colors.green.withValues(alpha: 0.3),
+                );
+              }).toList(),
+            ),
             const SizedBox(height: 30),
             SizedBox(
               height: 50,
@@ -425,6 +497,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
     _nicknameController.dispose();
     _dobController.dispose();
     _customAllergyController.dispose();
+    _favoriteFoodsController.dispose();
     super.dispose();
   }
 }

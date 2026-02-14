@@ -394,7 +394,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             padding: const EdgeInsets.only(right: 15),
                             child: GestureDetector(
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserProfileDashboard(memberData: member))),
-                              child: _buildFamilyMember(member['display_name'] ?? '', member['image_path']),
+                              child: _buildFamilyMember(member['display_name'] ?? '', member['photo_path']),
                             ),
                           )).toList(),
                         ),
@@ -455,7 +455,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             padding: const EdgeInsets.only(right: 15),
                             child: GestureDetector(
                               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserProfileDashboard(memberData: friend))),
-                              child: _buildFriend(friend['display_name'] ?? '', friend['image_path']),
+                              child: _buildFriend(friend['display_name'] ?? '', friend['photo_path']),
                             ),
                           )).toList(),
                         ),

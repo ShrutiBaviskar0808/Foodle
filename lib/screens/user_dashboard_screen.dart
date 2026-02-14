@@ -110,6 +110,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     final memberId = member['id'];
     if (memberId == null) {
       member['allergies'] = [];
+      member['favorite_foods'] = [];
       return;
     }
 
@@ -123,18 +124,30 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
       if (allergyResponse.statusCode == 200) {
         final allergyData = json.decode(allergyResponse.body);
         if (allergyData['success'] == true) {
-          member['allergies'] = (allergyData['allergies'] as List? ?? [])
+          final allergyList = allergyData['allergies'] as List? ?? [];
+          member['allergies'] = allergyList
               .map((item) => (item['allergy_name'] ?? '').toString())
               .where((name) => name.isNotEmpty)
               .toList();
+          
+          // Extract favorite foods from first allergy entry
+          if (allergyList.isNotEmpty && allergyList[0]['favorite_foods'] != null) {
+            final favFoods = allergyList[0]['favorite_foods'].toString();
+            member['favorite_foods'] = favFoods.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+          } else {
+            member['favorite_foods'] = [];
+          }
         } else {
           member['allergies'] = [];
+          member['favorite_foods'] = [];
         }
       } else {
         member['allergies'] = [];
+        member['favorite_foods'] = [];
       }
     } catch (e) {
       member['allergies'] = [];
+      member['favorite_foods'] = [];
     }
   }
 
@@ -328,7 +341,9 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                             itemBuilder: (context, index) {
                               final member = familyMembers[index];
                               final allergies = member['allergies'] as List? ?? [];
+                              final favFoods = member['favorite_foods'] as List? ?? [];
                               final allergyText = allergies.isEmpty ? 'No allergies' : allergies.join(', ');
+                              final foodText = favFoods.isEmpty ? '' : ' • Likes: ${favFoods.join(', ')}';
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 child: ListTile(
@@ -338,7 +353,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                     child: member['image_path'] == null ? const Icon(Icons.person, color: Colors.orange) : null,
                                   ),
                                   title: Text(member['display_name'] ?? ''),
-                                  subtitle: Text('${member['relation'] ?? 'Family'} • $allergyText'),
+                                  subtitle: Text('${member['relation'] ?? 'Family'} • $allergyText$foodText'),
                                 ),
                               );
                             },
@@ -368,7 +383,9 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                             itemBuilder: (context, index) {
                               final friend = friends[index];
                               final allergies = friend['allergies'] as List? ?? [];
+                              final favFoods = friend['favorite_foods'] as List? ?? [];
                               final allergyText = allergies.isEmpty ? 'No allergies' : allergies.join(', ');
+                              final foodText = favFoods.isEmpty ? '' : ' • Likes: ${favFoods.join(', ')}';
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 child: ListTile(
@@ -378,7 +395,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                     child: friend['image_path'] == null ? const Icon(Icons.person, color: Colors.blue) : null,
                                   ),
                                   title: Text(friend['display_name'] ?? ''),
-                                  subtitle: Text('${friend['relation'] ?? 'Friend'} • $allergyText'),
+                                  subtitle: Text('${friend['relation'] ?? 'Friend'} • $allergyText$foodText'),
                                 ),
                               );
                             },

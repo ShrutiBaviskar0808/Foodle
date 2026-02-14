@@ -10,8 +10,21 @@ $input = json_decode(file_get_contents('php://input'), true);
 
 $member_id = $input['member_id'] ?? null;
 $display_name = $input['display_name'] ?? null;
+$nickname = $input['nickname'] ?? null;
+$photo_path = $input['photo_path'] ?? null;
+$dob_input = $input['dob'] ?? null;
+$age = $input['age'] ?? null;
 $relation = $input['relation'] ?? null;
 $image_path = $input['image_path'] ?? null;
+
+// Convert DOB from DD/MM/YYYY to YYYY-MM-DD
+$dob = null;
+if ($dob_input) {
+    $parts = explode('/', $dob_input);
+    if (count($parts) == 3) {
+        $dob = $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+    }
+}
 
 if (empty($member_id)) {
     echo json_encode(['success' => false, 'message' => 'Member ID is required']);
@@ -28,6 +41,26 @@ try {
     if ($display_name !== null) {
         $updates[] = "display_name = ?";
         $params[] = $display_name;
+    }
+    
+    if ($nickname !== null) {
+        $updates[] = "nickname = ?";
+        $params[] = $nickname;
+    }
+    
+    if ($photo_path !== null) {
+        $updates[] = "photo_path = ?";
+        $params[] = $photo_path;
+    }
+    
+    if ($dob !== null) {
+        $updates[] = "dob = ?";
+        $params[] = $dob;
+    }
+    
+    if ($age !== null) {
+        $updates[] = "age = ?";
+        $params[] = $age;
     }
     
     if ($relation !== null) {
