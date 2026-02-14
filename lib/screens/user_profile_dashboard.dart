@@ -113,22 +113,18 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           final allergyData = json.decode(allergyResponse.body);
           if (allergyData['success']) {
             final allergyList = allergyData['allergies'] as List;
-            setState(() {
-              allergies = allergyList
-                  .where((item) => item['allergy_name'] != 'None')
-                  .map((item) => item['allergy_name'] as String)
-                  .toList();
-              
-              // Extract favorite foods from the allergies table
-              for (var item in allergyList) {
-                if (item['favorite_foods'] != null && item['favorite_foods'].toString().isNotEmpty) {
-                  final foods = item['favorite_foods'].toString().split(',').map((e) => e.trim()).toList();
-                  favoriteFoods.addAll(foods);
-                }
-              }
-              // Remove duplicates
-              favoriteFoods = favoriteFoods.toSet().toList();
-            });
+            if (allergyList.isNotEmpty) {
+              final firstEntry = allergyList[0];
+              setState(() {
+                // Split comma-separated allergies
+                final allergyNames = firstEntry['allergy_name']?.toString() ?? '';
+                allergies = allergyNames.isEmpty ? [] : allergyNames.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+                
+                // Split comma-separated favorite foods
+                final foodNames = firstEntry['favorite_foods']?.toString() ?? '';
+                favoriteFoods = foodNames.isEmpty ? [] : foodNames.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+              });
+            }
           }
         } catch (e) {
           debugPrint('Error loading member data: $e');
@@ -442,18 +438,52 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
       
       if (memberId != null && userId != null) {
         try {
-          // Save each allergy to database
-          for (final allergy in newAllergies) {
-            await http.post(
-              Uri.parse(AppConfig.addAllergyEndpoint),
-              headers: AppConfig.jsonHeaders,
-              body: json.encode({
-                'member_id': memberId,
-                'allergy_name': allergy,
-                'created_by_user_id': userId,
-              }),
-            ).timeout(AppConfig.requestTimeout);
+          // Check if entry exists
+          final checkResponse = await http.post(
+            Uri.parse(AppConfig.getAllergiesEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'member_id': memberId}),
+          ).timeout(AppConfig.requestTimeout);
+          
+          final checkData = json.decode(checkResponse.body);
+          if (checkData['success']) {
+            final allergyList = checkData['allergies'] as List;
+            
+            if (allergyList.isNotEmpty) {
+              // Update existing entry
+              final firstEntry = allergyList[0];
+              await http.post(
+                Uri.parse('${AppConfig.baseUrl}/update_allergy.php'),
+                headers: AppConfig.jsonHeaders,
+                body: json.encode({
+                  'allergy_id': firstEntry['id'],
+                  'allergy_name': newAllergies.join(', '),
+                  'favorite_foods': firstEntry['favorite_foods'],
+                }),
+              ).timeout(AppConfig.requestTimeout);
+              
+              // Delete other entries
+              for (int i = 1; i < allergyList.length; i++) {
+                await http.post(
+                  Uri.parse('${AppConfig.baseUrl}/delete_allergy.php'),
+                  headers: AppConfig.jsonHeaders,
+                  body: json.encode({'allergy_id': allergyList[i]['id']}),
+                ).timeout(AppConfig.requestTimeout);
+              }
+            } else {
+              // Create new entry
+              await http.post(
+                Uri.parse(AppConfig.addAllergyEndpoint),
+                headers: AppConfig.jsonHeaders,
+                body: json.encode({
+                  'member_id': memberId,
+                  'allergy_name': newAllergies.join(', '),
+                  'created_by_user_id': userId,
+                }),
+              ).timeout(AppConfig.requestTimeout);
+            }
           }
+          
           setState(() {
             allergies = newAllergies;
           });
@@ -475,7 +505,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
       
       if (memberId != null && userId != null) {
         try {
-          // First, try to update existing 'None' allergy entry with favorite foods
+          // Check if entry exists
           final checkResponse = await http.post(
             Uri.parse(AppConfig.getAllergiesEndpoint),
             headers: AppConfig.jsonHeaders,
@@ -485,18 +515,16 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           final checkData = json.decode(checkResponse.body);
           if (checkData['success']) {
             final allergyList = checkData['allergies'] as List;
-            final noneEntry = allergyList.firstWhere(
-              (item) => item['allergy_name'] == 'None',
-              orElse: () => null,
-            );
             
-            if (noneEntry != null) {
+            if (allergyList.isNotEmpty) {
               // Update existing entry
+              final firstEntry = allergyList[0];
               await http.post(
                 Uri.parse('${AppConfig.baseUrl}/update_allergy.php'),
                 headers: AppConfig.jsonHeaders,
                 body: json.encode({
-                  'allergy_id': noneEntry['id'],
+                  'allergy_id': firstEntry['id'],
+                  'allergy_name': firstEntry['allergy_name'],
                   'favorite_foods': newFoods.join(', '),
                 }),
               ).timeout(AppConfig.requestTimeout);
@@ -507,7 +535,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                 headers: AppConfig.jsonHeaders,
                 body: json.encode({
                   'member_id': memberId,
-                  'allergy_name': 'None',
+                  'allergy_name': '',
                   'favorite_foods': newFoods.join(', '),
                   'created_by_user_id': userId,
                 }),
