@@ -67,6 +67,17 @@ class PrivacyPolicyScreen extends StatelessWidget {
               ),
               
               _buildSection(
+                'Third-Party Services',
+                'Foodle may use third-party services for:\n\n'
+                '• Cloud Storage: Secure data backup and synchronization\n'
+                '• Analytics: Understanding app usage patterns (anonymized data)\n'
+                '• Maps & Location: Restaurant location services\n'
+                '• Authentication: Secure login and account management\n\n'
+                'These services are bound by their own privacy policies and we ensure they meet our security standards. '
+                'No personally identifiable information is shared without your explicit consent.'
+              ),
+              
+              _buildSection(
                 'Your Rights',
                 'You have the right to:\n\n'
                 '• Access your personal data\n'

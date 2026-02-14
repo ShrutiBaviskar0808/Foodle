@@ -76,6 +76,18 @@ class TermsConditionsScreen extends StatelessWidget {
               ),
               
               _buildSection(
+                'Third-Party Services and Content',
+                'The app may integrate with third-party services including:\n\n'
+                '• Restaurant APIs: For location and menu information\n'
+                '• Map Services: For navigation and location features\n'
+                '• Cloud Services: For data backup and storage\n'
+                '• Payment Processors: For premium features (if applicable)\n\n'
+                'These third-party services operate under their own terms and privacy policies. '
+                'Foodle is not responsible for the practices or content of these external services. '
+                'Users should review third-party terms before using integrated features.'
+              ),
+              
+              _buildSection(
                 'Account Termination',
                 'We reserve the right to terminate accounts that:\n\n'
                 '• Violate these terms of service\n'
