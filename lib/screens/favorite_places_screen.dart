@@ -34,7 +34,7 @@ class _FavoritePlacesScreenState extends State<FavoritePlacesScreen> {
       final response = await http.post(
         Uri.parse(AppConfig.getFoodsEndpoint),
         headers: AppConfig.jsonHeaders,
-        body: json.encode({'member_id': userId}),
+        body: json.encode({'user_id': userId}),
       ).timeout(AppConfig.requestTimeout);
       
       final data = json.decode(response.body);
