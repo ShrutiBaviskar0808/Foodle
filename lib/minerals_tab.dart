@@ -73,14 +73,6 @@ class _MineralsTabState extends State<MineralsTab> {
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'Page Collections',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
-          ),
-        ),
-        const SizedBox(height: 12),
         SizedBox(
           height: 50,
           child: ListView.builder(

@@ -84,14 +84,6 @@ class _StonesTabState extends State<StonesTab> {
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            'All Stones',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
-          ),
-        ),
-        const SizedBox(height: 8),
         Expanded(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator(color: Colors.brown))
