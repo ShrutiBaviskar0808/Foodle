@@ -16,7 +16,24 @@ class MineralDetailScreen extends StatelessWidget {
               expandedHeight: 300,
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
-                title: Text(mineral.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                title: Text(
+                  mineral.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(0, 1),
+                        blurRadius: 3.0,
+                        color: Colors.black,
+                      ),
+                      Shadow(
+                        offset: Offset(0, -1),
+                        blurRadius: 3.0,
+                        color: Colors.black,
+                      ),
+                    ],
+                  ),
+                ),
                 background: Stack(
                   fit: StackFit.expand,
                   children: [
