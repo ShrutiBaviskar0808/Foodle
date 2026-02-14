@@ -79,6 +79,28 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
     }
   }
 
+  Future<String?> _uploadPhoto(String imagePath, int memberId) async {
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${AppConfig.baseUrl}/upload_photo.php'),
+      );
+      request.fields['member_id'] = memberId.toString();
+      request.files.add(await http.MultipartFile.fromPath('photo', imagePath));
+      
+      var response = await request.send();
+      var responseData = await response.stream.bytesToString();
+      var result = json.decode(responseData);
+      
+      if (result['success'] == true) {
+        return result['photo_url'];
+      }
+    } catch (e) {
+      debugPrint('Error uploading photo: $e');
+    }
+    return null;
+  }
+
   void _showImageSourceDialog() {
     showDialog(
       context: context,
@@ -234,6 +256,23 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
           final result = json.decode(response.body);
           if (result['success'] == true) {
             final memberId = result['member_id'];
+            
+            // Upload photo if exists
+            String? photoUrl;
+            if (_imagePath != null && memberId != null) {
+              photoUrl = await _uploadPhoto(_imagePath!, memberId);
+              if (photoUrl != null) {
+                await http.post(
+                  Uri.parse(AppConfig.updateMemberEndpoint),
+                  headers: AppConfig.jsonHeaders,
+                  body: json.encode({
+                    'member_id': memberId,
+                    'photo_path': photoUrl,
+                  }),
+                ).timeout(AppConfig.requestTimeout);
+              }
+            }
+            
             if (_selectedAllergies.isNotEmpty && memberId != null) {
               await _saveAllergies(memberId);
             }
@@ -262,6 +301,9 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
 
   Future<void> _saveAllergies(int memberId) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+      
       for (final allergy in _selectedAllergies) {
         await http.post(
           Uri.parse(AppConfig.addAllergyEndpoint),
@@ -270,6 +312,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             'member_id': memberId,
             'allergy_name': allergy,
             'favorite_foods': _favoriteFoods.isNotEmpty ? _favoriteFoods.join(', ') : null,
+            'created_by_user_id': userId,
           }),
         ).timeout(AppConfig.requestTimeout);
       }

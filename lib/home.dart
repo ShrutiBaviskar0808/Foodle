@@ -472,14 +472,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Widget _buildFamilyMember(String name, String? imagePath) {
-    final imageExists = imagePath != null && File(imagePath).existsSync();
     return Column(
       children: [
         CircleAvatar(
           radius: 30,
           backgroundColor: Colors.orange.withValues(alpha: 0.2),
-          backgroundImage: imageExists ? FileImage(File(imagePath)) : null,
-          child: !imageExists ? Text(
+          backgroundImage: imagePath != null && imagePath.startsWith('http') 
+              ? NetworkImage(imagePath) 
+              : (imagePath != null && File(imagePath).existsSync() ? FileImage(File(imagePath)) : null) as ImageProvider?,
+          child: imagePath == null || (!imagePath.startsWith('http') && !File(imagePath).existsSync()) ? Text(
             name.isNotEmpty ? name[0].toUpperCase() : '?',
             style: const TextStyle(fontSize: 24, color: Colors.orange, fontWeight: FontWeight.bold),
           ) : null,
@@ -519,14 +520,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Widget _buildFriend(String name, String? imagePath) {
-    final imageExists = imagePath != null && File(imagePath).existsSync();
     return Column(
       children: [
         CircleAvatar(
           radius: 30,
           backgroundColor: Colors.grey[200],
-          backgroundImage: imageExists ? FileImage(File(imagePath)) : null,
-          child: !imageExists ? Text(
+          backgroundImage: imagePath != null && imagePath.startsWith('http') 
+              ? NetworkImage(imagePath) 
+              : (imagePath != null && File(imagePath).existsSync() ? FileImage(File(imagePath)) : null) as ImageProvider?,
+          child: imagePath == null || (!imagePath.startsWith('http') && !File(imagePath).existsSync()) ? Text(
             name.isNotEmpty ? name[0].toUpperCase() : '?',
             style: const TextStyle(fontSize: 24, color: Colors.grey, fontWeight: FontWeight.bold),
           ) : null,
