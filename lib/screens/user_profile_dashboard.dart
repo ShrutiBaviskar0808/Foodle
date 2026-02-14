@@ -112,27 +112,22 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           debugPrint('Allergy response: ${allergyResponse.body}');
           final allergyData = json.decode(allergyResponse.body);
           if (allergyData['success']) {
+            final allergyList = allergyData['allergies'] as List;
             setState(() {
-              allergies = (allergyData['allergies'] as List)
+              allergies = allergyList
+                  .where((item) => item['allergy_name'] != 'None')
                   .map((item) => item['allergy_name'] as String)
                   .toList();
-            });
-          }
-          
-          // Load favorite foods from database
-          final foodResponse = await http.post(
-            Uri.parse(AppConfig.getFoodsEndpoint),
-            headers: AppConfig.jsonHeaders,
-            body: json.encode({'member_id': memberId}),
-          ).timeout(AppConfig.requestTimeout);
-          
-          debugPrint('Food response: ${foodResponse.body}');
-          final foodData = json.decode(foodResponse.body);
-          if (foodData['success']) {
-            setState(() {
-              favoriteFoods = (foodData['foods'] as List)
-                  .map((item) => item['food_name'] as String)
-                  .toList();
+              
+              // Extract favorite foods from the allergies table
+              for (var item in allergyList) {
+                if (item['favorite_foods'] != null && item['favorite_foods'].toString().isNotEmpty) {
+                  final foods = item['favorite_foods'].toString().split(',').map((e) => e.trim()).toList();
+                  favoriteFoods.addAll(foods);
+                }
+              }
+              // Remove duplicates
+              favoriteFoods = favoriteFoods.toSet().toList();
             });
           }
         } catch (e) {
@@ -179,10 +174,14 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       color: Colors.white,
                     ),
                   ),
-                  widget.memberData?['image_path'] != null && File(widget.memberData!['image_path']).existsSync()
+                  widget.memberData?['photo_path'] != null && 
+                  (widget.memberData!['photo_path'].toString().startsWith('http') || 
+                   File(widget.memberData!['photo_path']).existsSync())
                       ? CircleAvatar(
                           radius: 18,
-                          backgroundImage: FileImage(File(widget.memberData!['image_path'])),
+                          backgroundImage: widget.memberData!['photo_path'].toString().startsWith('http')
+                              ? NetworkImage(widget.memberData!['photo_path']) as ImageProvider
+                              : FileImage(File(widget.memberData!['photo_path'])),
                         )
                       : CircleAvatar(
                           radius: 18,
@@ -225,10 +224,14 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
             SizedBox(
               height: 350,
               child: Container(
-              decoration: widget.memberData?['image_path'] != null && File(widget.memberData!['image_path']).existsSync()
+              decoration: widget.memberData?['photo_path'] != null && 
+                  (widget.memberData!['photo_path'].toString().startsWith('http') || 
+                   File(widget.memberData!['photo_path']).existsSync())
                   ? BoxDecoration(
                       image: DecorationImage(
-                        image: FileImage(File(widget.memberData!['image_path'])),
+                        image: widget.memberData!['photo_path'].toString().startsWith('http')
+                            ? NetworkImage(widget.memberData!['photo_path']) as ImageProvider
+                            : FileImage(File(widget.memberData!['photo_path'])),
                         fit: BoxFit.cover,
                         alignment: Alignment.center,
                       ),
@@ -242,7 +245,9 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                     ),
               child: Stack(
                 children: [
-                  if (widget.memberData?['image_path'] != null && File(widget.memberData!['image_path']).existsSync())
+                  if (widget.memberData?['photo_path'] != null && 
+                      (widget.memberData!['photo_path'].toString().startsWith('http') || 
+                       File(widget.memberData!['photo_path']).existsSync()))
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -252,7 +257,9 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                         ),
                       ),
                     ),
-                  if (widget.memberData?['image_path'] == null || !File(widget.memberData!['image_path']).existsSync())
+                  if (widget.memberData?['photo_path'] == null || 
+                      (!widget.memberData!['photo_path'].toString().startsWith('http') && 
+                       !File(widget.memberData!['photo_path']).existsSync()))
                     Center(
                       child: Text(
                         (widget.memberData?['display_name'] ?? 'U')[0].toUpperCase(),
