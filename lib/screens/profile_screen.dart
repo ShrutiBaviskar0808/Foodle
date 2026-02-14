@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../config.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? onBackPressed;
@@ -30,17 +33,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    
+    if (userId != null) {
+      try {
+        final response = await http.post(
+          Uri.parse(AppConfig.getUserProfileEndpoint),
+          headers: AppConfig.jsonHeaders,
+          body: json.encode({'user_id': userId}),
+        ).timeout(AppConfig.requestTimeout);
+        
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['success'] == true) {
+            final user = data['user'];
+            setState(() {
+              userName = user['name'] ?? 'User';
+              userEmail = user['email'] ?? '';
+              userPhone = user['phone'] ?? '';
+              userDob = user['dob'] ?? '';
+              userGender = user['gender'];
+              _nameController.text = userName;
+              _emailController.text = userEmail;
+              _phoneController.text = userPhone;
+              _dobController.text = userDob;
+            });
+            return;
+          }
+        }
+      } catch (e) {
+        debugPrint('Error loading profile: $e');
+      }
+    }
+    
     setState(() {
       userName = prefs.getString('user_name') ?? 'User';
-      userEmail = prefs.getString('user_email') ?? 'user@example.com';
-      userPhone = prefs.getString('user_phone') ?? '';
-      userDob = prefs.getString('user_dob') ?? '';
-      final savedGender = prefs.getString('user_gender');
-      userGender = (savedGender == null || savedGender.isEmpty) ? null : savedGender;
+      userEmail = prefs.getString('user_email') ?? '';
       _nameController.text = userName;
       _emailController.text = userEmail;
-      _phoneController.text = userPhone;
-      _dobController.text = userDob;
     });
   }
 
@@ -187,13 +217,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _saveProfile() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_phone', _phoneController.text);
-    await prefs.setString('user_dob', _dobController.text);
-    await prefs.setString('user_gender', userGender ?? '');
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile saved successfully')),
-      );
+    final userId = prefs.getInt('user_id');
+    
+    if (userId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not logged in')),
+        );
+      }
+      return;
+    }
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.updateUserProfileEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({
+          'user_id': userId,
+          'phone': _phoneController.text.trim(),
+          'dob': _dobController.text.trim(),
+          'gender': userGender,
+        }),
+      ).timeout(AppConfig.requestTimeout);
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Profile updated successfully')),
+            );
+          }
+          return;
+        }
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update profile')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     }
   }
 }

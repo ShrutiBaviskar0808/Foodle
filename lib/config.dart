@@ -25,6 +25,8 @@ class AppConfig {
   static const String linkMemberEndpoint = '$baseUrl/link_member.php';
   static const String updateMemberSettingsEndpoint = '$baseUrl/update_member_settings.php';
   static const String getMemberSettingsEndpoint = '$baseUrl/get_member_settings.php';
+  static const String updateUserProfileEndpoint = '$baseUrl/update_user_profile.php';
+  static const String getUserProfileEndpoint = '$baseUrl/get_user_profile.php';
   
   // Request timeout
   static const Duration requestTimeout = Duration(seconds: 15);
