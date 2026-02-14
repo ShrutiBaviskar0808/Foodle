@@ -14,6 +14,7 @@ class MineralsTab extends StatefulWidget {
 class _MineralsTabState extends State<MineralsTab> {
   int _currentPage = 1;
   List<MineralModel> _minerals = [];
+  List<MineralModel> _filteredMinerals = [];
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
 
@@ -31,12 +32,23 @@ class _MineralsTabState extends State<MineralsTab> {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
           _minerals = data.map((json) => MineralModel.fromJson(json)).toList();
+          _filteredMinerals = _minerals;
           _isLoading = false;
         });
       }
     } catch (e) {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _filterMinerals(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredMinerals = _minerals;
+      } else {
+        _filteredMinerals = _minerals.where((mineral) => mineral.name.toLowerCase().contains(query.toLowerCase())).toList();
+      }
+    });
   }
 
   @override
@@ -54,6 +66,7 @@ class _MineralsTabState extends State<MineralsTab> {
               Expanded(
                 child: TextField(
                   controller: _searchController,
+                  onChanged: _filterMinerals,
                   decoration: InputDecoration(
                     hintText: 'Search minerals',
                     prefixIcon: const Icon(Icons.search, color: Colors.grey),
@@ -117,9 +130,9 @@ class _MineralsTabState extends State<MineralsTab> {
                     mainAxisSpacing: 12,
                     childAspectRatio: 0.75,
                   ),
-                  itemCount: _minerals.length,
+                  itemCount: _filteredMinerals.length,
                   itemBuilder: (context, index) {
-                    final mineral = _minerals[index];
+                    final mineral = _filteredMinerals[index];
                     return _buildMineralCard(mineral);
                   },
                 ),
