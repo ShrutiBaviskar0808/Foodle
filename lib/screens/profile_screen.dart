@@ -47,11 +47,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final data = json.decode(response.body);
           if (data['success'] == true) {
             final user = data['user'];
+            
+            // Convert DOB from YYYY-MM-DD to DD/MM/YYYY
+            String dobDisplay = '';
+            if (user['dob'] != null && user['dob'].toString().isNotEmpty && user['dob'] != '0000-00-00') {
+              try {
+                final parts = user['dob'].toString().split('-');
+                if (parts.length == 3 && parts[0] != '0000') {
+                  dobDisplay = '${parts[2]}/${parts[1]}/${parts[0]}';
+                }
+              } catch (e) {
+                dobDisplay = '';
+              }
+            }
+            
             setState(() {
               userName = user['name'] ?? 'User';
               userEmail = user['email'] ?? '';
               userPhone = user['phone'] ?? '';
-              userDob = user['dob'] ?? '';
+              userDob = dobDisplay;
               userGender = user['gender'];
               _nameController.text = userName;
               _emailController.text = userEmail;
@@ -228,14 +242,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
     
+    // Convert DOB from DD/MM/YYYY to YYYY-MM-DD
+    String? dobFormatted;
+    if (_dobController.text.trim().isNotEmpty) {
+      try {
+        final parts = _dobController.text.trim().split('/');
+        if (parts.length == 3) {
+          dobFormatted = '${parts[2]}-${parts[1].padLeft(2, '0')}-${parts[0].padLeft(2, '0')}';
+        }
+      } catch (e) {
+        dobFormatted = null;
+      }
+    }
+    
     try {
       final response = await http.post(
         Uri.parse(AppConfig.updateUserProfileEndpoint),
         headers: AppConfig.jsonHeaders,
         body: json.encode({
           'user_id': userId,
-          'phone': _phoneController.text.trim(),
-          'dob': _dobController.text.trim(),
+          'phone': _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+          'dob': dobFormatted,
           'gender': userGender,
         }),
       ).timeout(AppConfig.requestTimeout);
