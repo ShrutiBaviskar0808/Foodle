@@ -160,6 +160,7 @@ class _CollectionDetailScreenState extends State<CollectionDetailScreen> {
               Text(
                 widget.stoneData!.stoneDescription,
                 style: const TextStyle(fontSize: 15, color: Colors.black87, height: 1.5),
+                textAlign: TextAlign.justify,
               ),
               const SizedBox(height: 20),
               

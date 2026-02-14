@@ -86,18 +86,9 @@ class _StonesTabState extends State<StonesTab> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Text(
-                'All Stones',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
-              ),
-              const Spacer(),
-              Text(
-                '${_filteredStones.length} items',
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-              ),
-            ],
+          child: Text(
+            'All Stones',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
           ),
         ),
         const SizedBox(height: 8),

@@ -75,18 +75,9 @@ class _MineralsTabState extends State<MineralsTab> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Text(
-                'Page Collections',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
-              ),
-              const Spacer(),
-              Text(
-                '${_minerals.length} items',
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-              ),
-            ],
+          child: Text(
+            'Page Collections',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
           ),
         ),
         const SizedBox(height: 12),

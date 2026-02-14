@@ -73,7 +73,7 @@ class StoneDetailScreen extends StatelessWidget {
       children: [
         Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Text(content, style: const TextStyle(fontSize: 16, height: 1.5)),
+        Text(content, style: const TextStyle(fontSize: 16, height: 1.5), textAlign: TextAlign.justify),
       ],
     );
   }
