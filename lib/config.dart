@@ -7,8 +7,8 @@ class AppConfig {
   
   // API endpoints
   static const String loginEndpoint = '$baseUrl/login.php';
-  static const String signupEndpoint = '$baseUrl/test_signup.php';
-  static const String verifyOtpEndpoint = '$baseUrl/test_verify_otp.php';
+  static const String signupEndpoint = '$baseUrl/signup.php';
+  static const String verifyOtpEndpoint = '$baseUrl/verify_otp.php';
   static const String testEndpoint = '$baseUrl/test.php';
   static const String addFoodEndpoint = '$baseUrl/add_food.php';
   static const String getFoodsEndpoint = '$baseUrl/get_foods.php';
