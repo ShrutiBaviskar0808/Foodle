@@ -38,11 +38,33 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
         if (data['success'] == true) {
           setState(() {
             mealPlans = (data['meals'] as List).map((meal) {
+              // Convert date from YYYY-MM-DD to DD/MM/YYYY
+              String displayDate = meal['meal_date'].toString();
+              try {
+                final parts = displayDate.split('-');
+                if (parts.length == 3) {
+                  displayDate = '${parts[2]}/${parts[1]}/${parts[0]}';
+                }
+              } catch (e) {
+                displayDate = meal['meal_date'].toString();
+              }
+              
+              // Format time from HH:MM:SS to HH:MM
+              String displayTime = meal['meal_time'].toString();
+              try {
+                final parts = displayTime.split(':');
+                if (parts.length >= 2) {
+                  displayTime = '${parts[0]}:${parts[1]}';
+                }
+              } catch (e) {
+                displayTime = meal['meal_time'].toString();
+              }
+              
               return {
                 'id': meal['id'].toString(),
                 'meal': meal['meal_name'].toString(),
-                'date': meal['meal_date'].toString(),
-                'time': meal['meal_time'].toString(),
+                'date': displayDate,
+                'time': displayTime,
               };
             }).toList();
           });
