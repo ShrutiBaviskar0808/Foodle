@@ -255,7 +255,7 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
         if (response.statusCode == 200) {
           final result = json.decode(response.body);
           if (result['success'] == true) {
-            final memberId = result['member_id'];
+            final memberId = int.tryParse(result['member_id'].toString());
             
             // Upload photo if exists
             String? photoUrl;
@@ -274,6 +274,9 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
             }
             
             if (_selectedAllergies.isNotEmpty && memberId != null) {
+              await _saveAllergies(memberId);
+            } else if (_favoriteFoods.isNotEmpty && memberId != null) {
+              // Save favorite foods even if no allergies selected
               await _saveAllergies(memberId);
             }
             if (!mounted) return;
@@ -304,17 +307,36 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
       
-      for (final allergy in _selectedAllergies) {
-        await http.post(
+      debugPrint('Saving ${_selectedAllergies.length} allergies for member $memberId');
+      debugPrint('Favorite foods: ${_favoriteFoods.join(", ")}');
+      
+      if (_selectedAllergies.isEmpty && _favoriteFoods.isNotEmpty) {
+        // Save only favorite foods with a placeholder allergy
+        final response = await http.post(
           Uri.parse(AppConfig.addAllergyEndpoint),
           headers: AppConfig.jsonHeaders,
           body: json.encode({
             'member_id': memberId,
-            'allergy_name': allergy,
-            'favorite_foods': _favoriteFoods.isNotEmpty ? _favoriteFoods.join(', ') : null,
+            'allergy_name': 'None',
+            'favorite_foods': _favoriteFoods.join(', '),
             'created_by_user_id': userId,
           }),
         ).timeout(AppConfig.requestTimeout);
+        debugPrint('Favorite foods save response: ${response.body}');
+      } else {
+        for (final allergy in _selectedAllergies) {
+          final response = await http.post(
+            Uri.parse(AppConfig.addAllergyEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({
+              'member_id': memberId,
+              'allergy_name': allergy,
+              'favorite_foods': _favoriteFoods.isNotEmpty ? _favoriteFoods.join(', ') : null,
+              'created_by_user_id': userId,
+            }),
+          ).timeout(AppConfig.requestTimeout);
+          debugPrint('Allergy save response: ${response.body}');
+        }
       }
     } catch (e) {
       debugPrint('Error saving allergies: $e');

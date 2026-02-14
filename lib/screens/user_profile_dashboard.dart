@@ -429,17 +429,30 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
 
   Future<void> _saveAllergies(List<String> newAllergies) async {
     if (widget.memberData != null) {
+      final memberId = widget.memberData!['id'];
       final prefs = await SharedPreferences.getInstance();
-      final String? membersJson = prefs.getString('all_members');
-      if (membersJson != null) {
-        final List<dynamic> members = json.decode(membersJson);
-        for (int i = 0; i < members.length; i++) {
-          if (members[i]['name'] == widget.memberData!['name']) {
-            members[i]['allergies'] = newAllergies;
-            break;
+      final userId = prefs.getInt('user_id');
+      
+      if (memberId != null && userId != null) {
+        try {
+          // Save each allergy to database
+          for (final allergy in newAllergies) {
+            await http.post(
+              Uri.parse(AppConfig.addAllergyEndpoint),
+              headers: AppConfig.jsonHeaders,
+              body: json.encode({
+                'member_id': memberId,
+                'allergy_name': allergy,
+                'created_by_user_id': userId,
+              }),
+            ).timeout(AppConfig.requestTimeout);
           }
+          setState(() {
+            allergies = newAllergies;
+          });
+        } catch (e) {
+          debugPrint('Error saving allergies: $e');
         }
-        await prefs.setString('all_members', json.encode(members));
       }
     } else {
       final prefs = await SharedPreferences.getInstance();
@@ -449,17 +462,29 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
 
   Future<void> _saveFoods(List<String> newFoods) async {
     if (widget.memberData != null) {
+      final memberId = widget.memberData!['id'];
       final prefs = await SharedPreferences.getInstance();
-      final String? membersJson = prefs.getString('all_members');
-      if (membersJson != null) {
-        final List<dynamic> members = json.decode(membersJson);
-        for (int i = 0; i < members.length; i++) {
-          if (members[i]['name'] == widget.memberData!['name']) {
-            members[i]['likes'] = newFoods;
-            break;
-          }
+      final userId = prefs.getInt('user_id');
+      
+      if (memberId != null && userId != null) {
+        try {
+          // Save favorite foods to allergies table with favorite_foods column
+          await http.post(
+            Uri.parse(AppConfig.addAllergyEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({
+              'member_id': memberId,
+              'allergy_name': 'None',
+              'favorite_foods': newFoods.join(', '),
+              'created_by_user_id': userId,
+            }),
+          ).timeout(AppConfig.requestTimeout);
+          setState(() {
+            favoriteFoods = newFoods;
+          });
+        } catch (e) {
+          debugPrint('Error saving favorite foods: $e');
         }
-        await prefs.setString('all_members', json.encode(members));
       }
     } else {
       final prefs = await SharedPreferences.getInstance();
