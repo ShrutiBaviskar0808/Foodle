@@ -475,17 +475,46 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
       
       if (memberId != null && userId != null) {
         try {
-          // Save favorite foods to allergies table with favorite_foods column
-          await http.post(
-            Uri.parse(AppConfig.addAllergyEndpoint),
+          // First, try to update existing 'None' allergy entry with favorite foods
+          final checkResponse = await http.post(
+            Uri.parse(AppConfig.getAllergiesEndpoint),
             headers: AppConfig.jsonHeaders,
-            body: json.encode({
-              'member_id': memberId,
-              'allergy_name': 'None',
-              'favorite_foods': newFoods.join(', '),
-              'created_by_user_id': userId,
-            }),
+            body: json.encode({'member_id': memberId}),
           ).timeout(AppConfig.requestTimeout);
+          
+          final checkData = json.decode(checkResponse.body);
+          if (checkData['success']) {
+            final allergyList = checkData['allergies'] as List;
+            final noneEntry = allergyList.firstWhere(
+              (item) => item['allergy_name'] == 'None',
+              orElse: () => null,
+            );
+            
+            if (noneEntry != null) {
+              // Update existing entry
+              await http.post(
+                Uri.parse('${AppConfig.baseUrl}/update_allergy.php'),
+                headers: AppConfig.jsonHeaders,
+                body: json.encode({
+                  'allergy_id': noneEntry['id'],
+                  'favorite_foods': newFoods.join(', '),
+                }),
+              ).timeout(AppConfig.requestTimeout);
+            } else {
+              // Create new entry
+              await http.post(
+                Uri.parse(AppConfig.addAllergyEndpoint),
+                headers: AppConfig.jsonHeaders,
+                body: json.encode({
+                  'member_id': memberId,
+                  'allergy_name': 'None',
+                  'favorite_foods': newFoods.join(', '),
+                  'created_by_user_id': userId,
+                }),
+              ).timeout(AppConfig.requestTimeout);
+            }
+          }
+          
           setState(() {
             favoriteFoods = newFoods;
           });
