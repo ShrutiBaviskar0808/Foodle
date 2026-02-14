@@ -20,15 +20,26 @@ class MineralDetailScreen extends StatelessWidget {
                   mineral.name,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
+                    color: Colors.white,
                     shadows: [
                       Shadow(
-                        offset: Offset(0, 1),
-                        blurRadius: 3.0,
+                        offset: Offset(0, 2),
+                        blurRadius: 8.0,
                         color: Colors.black,
                       ),
                       Shadow(
-                        offset: Offset(0, -1),
-                        blurRadius: 3.0,
+                        offset: Offset(0, -2),
+                        blurRadius: 8.0,
+                        color: Colors.black,
+                      ),
+                      Shadow(
+                        offset: Offset(2, 0),
+                        blurRadius: 8.0,
+                        color: Colors.black,
+                      ),
+                      Shadow(
+                        offset: Offset(-2, 0),
+                        blurRadius: 8.0,
                         color: Colors.black,
                       ),
                     ],
@@ -46,9 +57,9 @@ class MineralDetailScreen extends StatelessWidget {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.black.withValues(alpha: 0.3),
+                            Colors.black.withValues(alpha: 0.4),
                             Colors.transparent,
-                            Colors.black.withValues(alpha: 0.7),
+                            Colors.black.withValues(alpha: 0.9),
                           ],
                         ),
                       ),
