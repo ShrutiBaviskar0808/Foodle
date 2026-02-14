@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:http/http.dart' as http;
+import '../config.dart';
 
 class MealPlannerScreen extends StatefulWidget {
   const MealPlannerScreen({super.key});
@@ -32,18 +34,64 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
 
   Future<void> _loadMealPlans() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('meal_plans');
-    if (saved != null) {
-      final List<dynamic> decoded = json.decode(saved);
-      setState(() {
-        mealPlans = decoded.map((item) => Map<String, String>.from(item)).toList();
-      });
+    final userId = prefs.getInt('user_id');
+    
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.getMealsEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'user_id': userId}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          setState(() {
+            mealPlans = (data['meals'] as List).map((meal) {
+              return {
+                'id': meal['id'].toString(),
+                'meal': meal['meal_name'].toString(),
+                'date': meal['meal_date'].toString(),
+                'time': meal['meal_time'].toString(),
+              };
+            }).toList();
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error loading meals: $e');
     }
   }
 
-  Future<void> _saveMealPlans() async {
+  Future<void> _saveMealPlan(String mealName, String date, String time) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('meal_plans', json.encode(mealPlans));
+    final userId = prefs.getInt('user_id');
+    
+    if (userId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.addMealEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({
+          'user_id': userId,
+          'meal_name': mealName,
+          'meal_date': date,
+          'meal_time': time,
+        }),
+      ).timeout(AppConfig.requestTimeout);
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          await _loadMealPlans();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error saving meal: $e');
+    }
   }
 
   void _addMealPlan() {
@@ -95,16 +143,10 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
             TextButton(
               onPressed: () {
                 if (mealController.text.isNotEmpty && selectedDate != null && selectedTime != null) {
+                  final dateStr = '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}';
+                  final timeStr = '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}:00';
+                  _saveMealPlan(mealController.text, dateStr, timeStr);
                   final mealDateTime = DateTime(selectedDate!.year, selectedDate!.month, selectedDate!.day, selectedTime!.hour, selectedTime!.minute);
-                  setState(() {
-                    mealPlans.add({
-                      'meal': mealController.text,
-                      'date': '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
-                      'time': '${selectedTime!.hour}:${selectedTime!.minute.toString().padLeft(2, '0')}',
-                      'dateTime': mealDateTime.toIso8601String(),
-                    });
-                  });
-                  _saveMealPlans();
                   _scheduleNotification(mealController.text, mealDateTime);
                   Navigator.pop(context);
                 }
@@ -145,11 +187,23 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
     }
   }
 
-  void _deleteMealPlan(int index) {
-    setState(() {
-      mealPlans.removeAt(index);
-    });
-    _saveMealPlans();
+  void _deleteMealPlan(int index) async {
+    final mealId = mealPlans[index]['id'];
+    if (mealId == null) return;
+    
+    try {
+      final response = await http.post(
+        Uri.parse(AppConfig.deleteMealEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({'meal_id': int.parse(mealId)}),
+      ).timeout(AppConfig.requestTimeout);
+      
+      if (response.statusCode == 200) {
+        await _loadMealPlans();
+      }
+    } catch (e) {
+      debugPrint('Error deleting meal: $e');
+    }
   }
 
   @override

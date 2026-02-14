@@ -27,6 +27,9 @@ class AppConfig {
   static const String getMemberSettingsEndpoint = '$baseUrl/get_member_settings.php';
   static const String updateUserProfileEndpoint = '$baseUrl/update_user_profile.php';
   static const String getUserProfileEndpoint = '$baseUrl/get_user_profile.php';
+  static const String addMealEndpoint = '$baseUrl/add_meal.php';
+  static const String getMealsEndpoint = '$baseUrl/get_meals.php';
+  static const String deleteMealEndpoint = '$baseUrl/delete_meal.php';
   
   // Request timeout
   static const Duration requestTimeout = Duration(seconds: 15);
