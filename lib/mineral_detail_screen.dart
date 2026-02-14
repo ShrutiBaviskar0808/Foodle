@@ -17,9 +17,27 @@ class MineralDetailScreen extends StatelessWidget {
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(mineral.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                background: mineral.images.isNotEmpty
-                    ? Image.network(mineral.images[0], fit: BoxFit.cover)
-                    : Container(color: Colors.grey.shade300, child: const Icon(Icons.diamond, size: 100)),
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    mineral.images.isNotEmpty
+                        ? Image.network(mineral.images[0], fit: BoxFit.cover)
+                        : Container(color: Colors.grey.shade300, child: const Icon(Icons.diamond, size: 100)),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.3),
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.7),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             SliverToBoxAdapter(

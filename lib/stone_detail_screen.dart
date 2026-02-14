@@ -17,13 +17,31 @@ class StoneDetailScreen extends StatelessWidget {
               pinned: true,
               flexibleSpace: FlexibleSpaceBar(
                 title: Text(stone.stoneName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                background: Image.network(
-                  stone.images.isNotEmpty ? stone.images.first : stone.thumbImageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    color: Colors.brown.shade300,
-                    child: const Icon(Icons.landscape, size: 100, color: Colors.white),
-                  ),
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      stone.images.isNotEmpty ? stone.images.first : stone.thumbImageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.brown.shade300,
+                        child: const Icon(Icons.landscape, size: 100, color: Colors.white),
+                      ),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.3),
+                            Colors.transparent,
+                            Colors.black.withValues(alpha: 0.7),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
