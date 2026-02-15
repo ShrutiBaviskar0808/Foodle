@@ -60,19 +60,30 @@ class _MineralsScreenState extends State<MineralsScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.brown))
-          : GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.75,
-              ),
-              itemCount: _minerals.length,
-              itemBuilder: (context, index) {
-                final mineral = _minerals[index];
-                return _buildMineralCard(mineral);
+          : GestureDetector(
+              onHorizontalDragEnd: (details) {
+                if (details.primaryVelocity! > 0 && _currentPage > 1) {
+                  setState(() => _currentPage--);
+                  _fetchMinerals(_currentPage);
+                } else if (details.primaryVelocity! < 0 && _currentPage < 7) {
+                  setState(() => _currentPage++);
+                  _fetchMinerals(_currentPage);
+                }
               },
+              child: GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.75,
+                ),
+                itemCount: _minerals.length,
+                itemBuilder: (context, index) {
+                  final mineral = _minerals[index];
+                  return _buildMineralCard(mineral);
+                },
+              ),
             ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.center,

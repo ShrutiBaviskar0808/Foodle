@@ -122,19 +122,30 @@ class _MineralsTabState extends State<MineralsTab> {
         Expanded(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator(color: Colors.brown))
-              : GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: _filteredMinerals.length,
-                  itemBuilder: (context, index) {
-                    final mineral = _filteredMinerals[index];
-                    return _buildMineralCard(mineral);
+              : GestureDetector(
+                  onHorizontalDragEnd: (details) {
+                    if (details.primaryVelocity! > 0 && _currentPage > 1) {
+                      setState(() => _currentPage--);
+                      _fetchMinerals(_currentPage);
+                    } else if (details.primaryVelocity! < 0 && _currentPage < 7) {
+                      setState(() => _currentPage++);
+                      _fetchMinerals(_currentPage);
+                    }
                   },
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.75,
+                    ),
+                    itemCount: _filteredMinerals.length,
+                    itemBuilder: (context, index) {
+                      final mineral = _filteredMinerals[index];
+                      return _buildMineralCard(mineral);
+                    },
+                  ),
                 ),
         ),
       ],
