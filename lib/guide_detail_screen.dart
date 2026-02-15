@@ -30,42 +30,41 @@ class GuideDetailScreen extends StatelessWidget {
     final icon = _getIcon();
 
     return Scaffold(
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              expandedHeight: 150,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 150,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [color.withValues(alpha: 0.8), color],
+                  ),
                 ),
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [color.withValues(alpha: 0.8), color],
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -50,
+                      top: -50,
+                      child: Icon(icon, size: 200, color: Colors.white.withValues(alpha: 0.1)),
                     ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: -50,
-                        top: -50,
-                        child: Icon(icon, size: 200, color: Colors.white.withValues(alpha: 0.1)),
-                      ),
-                      Positioned(
-                        left: -30,
-                        bottom: -30,
-                        child: Icon(icon, size: 150, color: Colors.white.withValues(alpha: 0.1)),
-                      ),
-                    ],
-                  ),
+                    Positioned(
+                      left: -30,
+                      bottom: -30,
+                      child: Icon(icon, size: 150, color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                  ],
                 ),
               ),
             ),
+          ),
             SliverToBoxAdapter(
               child: Container(
                 decoration: BoxDecoration(

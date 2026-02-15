@@ -97,11 +97,11 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
     const WelcomeScreen(),
+    const HomeScreen(),
   ];
 
   @override
@@ -118,8 +118,8 @@ class _HomePageState extends State<HomePage> {
         selectedItemColor: Colors.brown,
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.landscape), label: 'Welcome'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         ],
       ),
     );
