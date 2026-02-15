@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'home_screen.dart';
 import 'camera_screens.dart';
 import 'geology_database_screen.dart';
 import 'learn_guides_screen.dart';
@@ -104,10 +105,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const CameraScreen(),
-    const GeologyDatabaseScreen(),
-    const LearnGuidesScreen(),
-    const SettingsAboutScreen(),
+    const WelcomeScreen(),
   ];
 
   @override
@@ -115,7 +113,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
@@ -126,24 +123,15 @@ class _HomePageState extends State<HomePage> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt),
-            label: 'Identify',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.collections),
-            label: 'Collection',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.school), label: 'Learn'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'More'),
+          BottomNavigationBarItem(icon: Icon(Icons.landscape), label: 'Welcome'),
         ],
       ),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +152,7 @@ class HomeScreen extends StatelessWidget {
                   colors: [
                     Colors.black.withValues(alpha: 0.3),
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.5),
+                    Colors.black.withValues(alpha: 0.7),
                   ],
                 ),
               ),
@@ -172,7 +160,7 @@ class HomeScreen extends StatelessWidget {
           ),
           // 3D Title with Shadow Effects
           Positioned(
-            top: 100,
+            top: 80,
             left: 0,
             right: 0,
             child: Column(
@@ -266,7 +254,83 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
+          // 3D Action Buttons
+          Positioned(
+            bottom: 100,
+            left: 20,
+            right: 20,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(child: _build3DButton(context, 'Identify', Icons.camera_alt, Colors.brown, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CameraScreen())))),
+                    const SizedBox(width: 12),
+                    Expanded(child: _build3DButton(context, 'Collection', Icons.collections, Colors.purple, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const GeologyDatabaseScreen())))),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(child: _build3DButton(context, 'Learn', Icons.school, Colors.blue, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const LearnGuidesScreen())))),
+                    const SizedBox(width: 12),
+                    Expanded(child: _build3DButton(context, 'Settings', Icons.settings, Colors.orange, () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsAboutScreen())))),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _build3DButton(BuildContext context, String label, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [color.withValues(alpha: 0.9), color.withValues(alpha: 0.7)],
+          ),
+          boxShadow: [
+            BoxShadow(color: color.withValues(alpha: 0.6), offset: const Offset(0, 8), blurRadius: 15),
+            BoxShadow(color: Colors.black.withValues(alpha: 0.3), offset: const Offset(0, 4), blurRadius: 10),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              top: -20,
+              right: -20,
+              child: Icon(icon, size: 100, color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 8)],
+                    ),
+                    child: Icon(icon, size: 32, color: Colors.white),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    label,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, shadows: [Shadow(color: Colors.black, blurRadius: 4)]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
