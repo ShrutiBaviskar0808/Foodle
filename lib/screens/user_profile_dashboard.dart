@@ -142,51 +142,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60),
-        child: Container(
-          color: const Color(0xFFFF9800),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white, size: 22),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Text(
-                    "Foodle",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  widget.memberData?['photo_path'] != null && 
-                  (widget.memberData!['photo_path'].toString().startsWith('http') || 
-                   File(widget.memberData!['photo_path']).existsSync())
-                      ? CircleAvatar(
-                          radius: 14,
-                          backgroundImage: widget.memberData!['photo_path'].toString().startsWith('http')
-                              ? NetworkImage(widget.memberData!['photo_path']) as ImageProvider
-                              : FileImage(File(widget.memberData!['photo_path'])),
-                        )
-                      : CircleAvatar(
-                          radius: 14,
-                          backgroundColor: Colors.white,
-                          child: Text(
-                            (widget.memberData?['display_name'] ?? 'U')[0].toUpperCase(),
-                            style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 14),
-                          ),
-                        ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
@@ -207,77 +163,112 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
         backgroundColor: Colors.orange,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Header with profile image
-            SizedBox(
-              height: 350,
-              child: Container(
-              decoration: widget.memberData?['photo_path'] != null && 
-                  (widget.memberData!['photo_path'].toString().startsWith('http') || 
-                   File(widget.memberData!['photo_path']).existsSync())
-                  ? BoxDecoration(
-                      image: DecorationImage(
-                        image: widget.memberData!['photo_path'].toString().startsWith('http')
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 350,
+            pinned: true,
+            backgroundColor: const Color(0xFFFF9800),
+            leading: IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white, size: 22),
+              onPressed: () => Navigator.pop(context),
+            ),
+            title: const Text(
+              "Foodle",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: widget.memberData?['photo_path'] != null && 
+                (widget.memberData!['photo_path'].toString().startsWith('http') || 
+                 File(widget.memberData!['photo_path']).existsSync())
+                    ? CircleAvatar(
+                        radius: 14,
+                        backgroundImage: widget.memberData!['photo_path'].toString().startsWith('http')
                             ? NetworkImage(widget.memberData!['photo_path']) as ImageProvider
                             : FileImage(File(widget.memberData!['photo_path'])),
-                        fit: BoxFit.cover,
-                        alignment: Alignment.center,
+                      )
+                    : CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.white,
+                        child: Text(
+                          (widget.memberData?['display_name'] ?? 'U')[0].toUpperCase(),
+                          style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
                       ),
-                    )
-                  : BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.orange.shade400, Colors.orange.shade600],
-                      ),
-                    ),
-              child: Stack(
-                children: [
-                  if (widget.memberData?['photo_path'] != null && 
-                      (widget.memberData!['photo_path'].toString().startsWith('http') || 
-                       File(widget.memberData!['photo_path']).existsSync()))
-                    Container(
-                      decoration: BoxDecoration(
+              ),
+            ],
+            flexibleSpace: FlexibleSpaceBar(
+              background: Container(
+                decoration: widget.memberData?['photo_path'] != null && 
+                    (widget.memberData!['photo_path'].toString().startsWith('http') || 
+                     File(widget.memberData!['photo_path']).existsSync())
+                    ? BoxDecoration(
+                        image: DecorationImage(
+                          image: widget.memberData!['photo_path'].toString().startsWith('http')
+                              ? NetworkImage(widget.memberData!['photo_path']) as ImageProvider
+                              : FileImage(File(widget.memberData!['photo_path'])),
+                          fit: BoxFit.cover,
+                          alignment: Alignment.center,
+                        ),
+                      )
+                    : BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
+                          colors: [Colors.orange.shade400, Colors.orange.shade600],
+                        ),
+                      ),
+                child: Stack(
+                  children: [
+                    if (widget.memberData?['photo_path'] != null && 
+                        (widget.memberData!['photo_path'].toString().startsWith('http') || 
+                         File(widget.memberData!['photo_path']).existsSync()))
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.transparent, Colors.black.withValues(alpha: 0.6)],
+                          ),
+                        ),
+                      ),
+                    if (widget.memberData?['photo_path'] == null || 
+                        (!widget.memberData!['photo_path'].toString().startsWith('http') && 
+                         !File(widget.memberData!['photo_path']).existsSync()))
+                      Center(
+                        child: Text(
+                          (widget.memberData?['display_name'] ?? 'U')[0].toUpperCase(),
+                          style: const TextStyle(fontSize: 120, color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    Positioned(
+                      bottom: 40,
+                      left: 20,
+                      child: Text(
+                        widget.memberData?['display_name'] ?? 'User',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 2)),
+                          ],
                         ),
                       ),
                     ),
-                  if (widget.memberData?['photo_path'] == null || 
-                      (!widget.memberData!['photo_path'].toString().startsWith('http') && 
-                       !File(widget.memberData!['photo_path']).existsSync()))
-                    Center(
-                      child: Text(
-                        (widget.memberData?['display_name'] ?? 'U')[0].toUpperCase(),
-                        style: const TextStyle(fontSize: 120, color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  Positioned(
-                    bottom: 40,
-                    left: 20,
-                    child: Text(
-                      widget.memberData?['display_name'] ?? 'User',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(color: Colors.black54, blurRadius: 10, offset: Offset(0, 2)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-          // Content
-            Padding(
+          SliverToBoxAdapter(
+            child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,8 +322,8 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -499,7 +490,6 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
       
       if (memberId != null && userId != null) {
         try {
-          // Check if entry exists
           final checkResponse = await http.post(
             Uri.parse(AppConfig.getAllergiesEndpoint),
             headers: AppConfig.jsonHeaders,
@@ -511,7 +501,6 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
             final allergyList = checkData['allergies'] as List;
             
             if (allergyList.isNotEmpty) {
-              // Update existing entry
               final firstEntry = allergyList[0];
               await http.post(
                 Uri.parse('${AppConfig.baseUrl}/update_allergy.php'),
@@ -523,7 +512,6 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                 }),
               ).timeout(AppConfig.requestTimeout);
             } else {
-              // Create new entry
               await http.post(
                 Uri.parse(AppConfig.addAllergyEndpoint),
                 headers: AppConfig.jsonHeaders,

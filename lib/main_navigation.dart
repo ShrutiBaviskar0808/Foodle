@@ -4,7 +4,6 @@ import 'home.dart';
 
 import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/my_profile_screen.dart';
 import 'screens/meal_planner_screen.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -39,40 +38,33 @@ class _MainNavigationState extends State<MainNavigation> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: _screens[_currentIndex],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const MyProfileScreen()),
-          );
-        },
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(Icons.home, 0),
-            _buildNavItem(FontAwesomeIcons.xmark, 1),
-            const SizedBox(width: 40),
-            _buildNavItem(Icons.person, 2),
-            _buildNavItem(Icons.settings, 3),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, int index) {
-    return IconButton(
-      onPressed: () => setState(() => _currentIndex = index),
-      icon: Icon(
-        icon,
-        color: _currentIndex == index ? Colors.orange : Colors.grey,
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.orange,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, size: 28),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.xmark, size: 28),
+            label: 'Close',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person, size: 28),
+            label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings, size: 28),
+            label: 'Settings',
+          ),
+        ],
       ),
     );
   }
