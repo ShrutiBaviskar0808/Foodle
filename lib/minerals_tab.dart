@@ -15,13 +15,43 @@ class _MineralsTabState extends State<MineralsTab> {
   int _currentPage = 1;
   List<MineralModel> _minerals = [];
   List<MineralModel> _filteredMinerals = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
+  bool _isLoadingMore = false;
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final int _maxPages = 7;
 
   @override
   void initState() {
     super.initState();
     _fetchMinerals(_currentPage);
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadingMore && _currentPage < _maxPages && _searchController.text.isEmpty) {
+      _loadNextPage();
+    }
+  }
+
+  Future<void> _loadNextPage() async {
+    if (_isLoadingMore || _currentPage >= _maxPages) return;
+    setState(() => _isLoadingMore = true);
+    _currentPage++;
+    try {
+      final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/minerals_database/minerals_part_$_currentPage.json'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _minerals.addAll(data.map((json) => MineralModel.fromJson(json)).toList());
+          _filteredMinerals = _minerals;
+          _isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoadingMore = false);
+    }
   }
 
   Future<void> _fetchMinerals(int page) async {
@@ -91,26 +121,17 @@ class _MineralsTabState extends State<MineralsTab> {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: 7,
+            itemCount: _currentPage,
             itemBuilder: (context, index) {
               final page = index + 1;
-              final isSelected = page == _currentPage;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: ChoiceChip(
+                child: Chip(
                   label: Text('Page $page'),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() => _currentPage = page);
-                      _fetchMinerals(page);
-                    }
-                  },
-                  selectedColor: Colors.brown,
-                  backgroundColor: Colors.grey.shade200,
-                  labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : Colors.grey.shade700,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  backgroundColor: Colors.brown.shade100,
+                  labelStyle: const TextStyle(
+                    color: Colors.brown,
+                    fontWeight: FontWeight.w600,
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
@@ -122,30 +143,28 @@ class _MineralsTabState extends State<MineralsTab> {
         Expanded(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator(color: Colors.brown))
-              : GestureDetector(
-                  onHorizontalDragEnd: (details) {
-                    if (details.primaryVelocity! > 0 && _currentPage > 1) {
-                      setState(() => _currentPage--);
-                      _fetchMinerals(_currentPage);
-                    } else if (details.primaryVelocity! < 0 && _currentPage < 7) {
-                      setState(() => _currentPage++);
-                      _fetchMinerals(_currentPage);
-                    }
-                  },
-                  child: GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemCount: _filteredMinerals.length,
-                    itemBuilder: (context, index) {
-                      final mineral = _filteredMinerals[index];
-                      return _buildMineralCard(mineral);
-                    },
+              : GridView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.75,
                   ),
+                  itemCount: _filteredMinerals.length + (_isLoadingMore ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == _filteredMinerals.length) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(color: Colors.brown),
+                        ),
+                      );
+                    }
+                    final mineral = _filteredMinerals[index];
+                    return _buildMineralCard(mineral);
+                  },
                 ),
         ),
       ],
@@ -261,6 +280,7 @@ class _MineralsTabState extends State<MineralsTab> {
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 }

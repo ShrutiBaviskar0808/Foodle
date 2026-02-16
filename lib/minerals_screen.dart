@@ -14,12 +14,41 @@ class MineralsScreen extends StatefulWidget {
 class _MineralsScreenState extends State<MineralsScreen> {
   int _currentPage = 1;
   List<MineralModel> _minerals = [];
-  bool _isLoading = true;
+  bool _isLoading = false;
+  bool _isLoadingMore = false;
+  final ScrollController _scrollController = ScrollController();
+  final int _maxPages = 7;
 
   @override
   void initState() {
     super.initState();
     _fetchMinerals(_currentPage);
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+        !_isLoadingMore && _currentPage < _maxPages) {
+      _loadNextPage();
+    }
+  }
+
+  Future<void> _loadNextPage() async {
+    if (_isLoadingMore || _currentPage >= _maxPages) return;
+    setState(() => _isLoadingMore = true);
+    _currentPage++;
+    try {
+      final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/minerals_database/minerals_part_$_currentPage.json'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _minerals.addAll(data.map((json) => MineralModel.fromJson(json)).toList());
+          _isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isLoadingMore = false);
+    }
   }
 
   Future<void> _fetchMinerals(int page) async {
@@ -39,6 +68,12 @@ class _MineralsScreenState extends State<MineralsScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -46,74 +81,58 @@ class _MineralsScreenState extends State<MineralsScreen> {
         backgroundColor: Colors.white,
         title: const Text('Minerals Database'),
         elevation: 0,
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Text(
-                'Page $_currentPage/7',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: SizedBox(
+            height: 50,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: _currentPage,
+              itemBuilder: (context, index) {
+                final page = index + 1;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Chip(
+                    label: Text('Page $page'),
+                    backgroundColor: Colors.brown.shade100,
+                    labelStyle: const TextStyle(
+                      color: Colors.brown,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  ),
+                );
+              },
             ),
           ),
-        ],
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.brown))
-          : GestureDetector(
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity! > 0 && _currentPage > 1) {
-                  setState(() => _currentPage--);
-                  _fetchMinerals(_currentPage);
-                } else if (details.primaryVelocity! < 0 && _currentPage < 7) {
-                  setState(() => _currentPage++);
-                  _fetchMinerals(_currentPage);
-                }
-              },
-              child: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.75,
-                ),
-                itemCount: _minerals.length,
-                itemBuilder: (context, index) {
-                  final mineral = _minerals[index];
-                  return _buildMineralCard(mineral);
-                },
+          : GridView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.75,
               ),
-            ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (_currentPage > 1)
-            FloatingActionButton(
-              heroTag: 'prev',
-              mini: true,
-              backgroundColor: Colors.brown,
-              onPressed: () {
-                setState(() => _currentPage--);
-                _fetchMinerals(_currentPage);
+              itemCount: _minerals.length + (_isLoadingMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == _minerals.length) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(color: Colors.brown),
+                    ),
+                  );
+                }
+                final mineral = _minerals[index];
+                return _buildMineralCard(mineral);
               },
-              child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
-          const SizedBox(width: 16),
-          if (_currentPage < 7)
-            FloatingActionButton(
-              heroTag: 'next',
-              mini: true,
-              backgroundColor: Colors.brown,
-              onPressed: () {
-                setState(() => _currentPage++);
-                _fetchMinerals(_currentPage);
-              },
-              child: const Icon(Icons.arrow_forward, color: Colors.white),
-            ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
