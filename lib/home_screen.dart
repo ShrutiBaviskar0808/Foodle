@@ -4,7 +4,7 @@ import 'geology_database_screen.dart';
 import 'learn_guides_screen.dart';
 import 'settings_about_screen.dart';
 import 'field_notes_screen.dart';
-import 'community_forum_screen.dart';
+import 'rock_formation_timeline_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -79,10 +79,10 @@ class HomeScreen extends StatelessWidget {
                       ),
                       _build3DButton(
                         context,
-                        'Community\nForum',
-                        Icons.forum,
+                        'Formation\nTimeline',
+                        Icons.timeline,
                         Colors.indigo,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CommunityForumScreen())),
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RockFormationTimelineScreen())),
                       ),
                     ],
                   ),
