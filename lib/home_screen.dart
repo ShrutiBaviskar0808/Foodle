@@ -3,6 +3,8 @@ import 'camera_screens.dart';
 import 'geology_database_screen.dart';
 import 'learn_guides_screen.dart';
 import 'settings_about_screen.dart';
+import 'field_notes_screen.dart';
+import 'community_forum_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -67,6 +69,20 @@ class HomeScreen extends StatelessWidget {
                         Icons.settings,
                         Colors.orange,
                         () => Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsAboutScreen())),
+                      ),
+                      _build3DButton(
+                        context,
+                        'Field\nNotes',
+                        Icons.note_add,
+                        Colors.teal,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FieldNotesScreen())),
+                      ),
+                      _build3DButton(
+                        context,
+                        'Community\nForum',
+                        Icons.forum,
+                        Colors.indigo,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CommunityForumScreen())),
                       ),
                     ],
                   ),
