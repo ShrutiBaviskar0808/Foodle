@@ -48,26 +48,51 @@ class _MineralsTabState extends State<MineralsTab> {
     
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore && _currentPage < _maxPages && _searchController.text.isEmpty) {
-      _loadNextPage();
+      _loadPagesUpTo(_currentPage + 1);
     }
   }
 
-  Future<void> _loadNextPage() async {
-    if (_isLoadingMore || _currentPage >= _maxPages) return;
+  Future<void> _loadPagesUpTo(int targetPage) async {
+    if (_isLoadingMore || targetPage <= _currentPage) return;
     setState(() => _isLoadingMore = true);
-    _currentPage++;
-    try {
-      final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/minerals_database/minerals_part_$_currentPage.json'));
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        setState(() {
-          _minerals.addAll(data.map((json) => MineralModel.fromJson(json)).toList());
-          _filteredMinerals = _minerals;
-          _isLoadingMore = false;
-        });
+    
+    for (int page = _currentPage + 1; page <= targetPage; page++) {
+      try {
+        final response = await http.get(Uri.parse('https://publicassetsdata.sfo3.cdn.digitaloceanspaces.com/smit/MockAPI/minerals_database/minerals_part_$page.json'));
+        if (response.statusCode == 200) {
+          final List<dynamic> data = json.decode(response.body);
+          setState(() {
+            _minerals.addAll(data.map((json) => MineralModel.fromJson(json)).toList());
+            _filteredMinerals = _minerals;
+            _currentPage = page;
+          });
+        }
+      } catch (e) {
+        break;
       }
-    } catch (e) {
-      setState(() => _isLoadingMore = false);
+    }
+    
+    setState(() => _isLoadingMore = false);
+  }
+
+  void _scrollToPage(int page) async {
+    if (page > _currentPage) {
+      await _loadPagesUpTo(page);
+    }
+    
+    if (_scrollController.hasClients) {
+      final itemsPerPage = 50;
+      final itemsPerRow = 2;
+      final itemHeight = 200.0;
+      final targetIndex = (page - 1) * itemsPerPage;
+      final targetRow = targetIndex ~/ itemsPerRow;
+      final targetPosition = targetRow * itemHeight;
+      
+      _scrollController.animateTo(
+        targetPosition,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
     }
   }
 
@@ -145,14 +170,17 @@ class _MineralsTabState extends State<MineralsTab> {
               final isVisible = page == _visiblePage;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
-                child: Chip(
-                  label: Text('Page $page'),
-                  backgroundColor: isVisible ? Colors.brown : (isLoaded ? Colors.brown.shade100 : Colors.grey.shade200),
-                  labelStyle: TextStyle(
-                    color: isVisible ? Colors.white : (isLoaded ? Colors.brown : Colors.grey.shade500),
-                    fontWeight: isVisible ? FontWeight.bold : FontWeight.w600,
+                child: GestureDetector(
+                  onTap: () => _scrollToPage(page),
+                  child: Chip(
+                    label: Text('Page $page'),
+                    backgroundColor: isVisible ? Colors.brown : (isLoaded ? Colors.brown.shade100 : Colors.grey.shade200),
+                    labelStyle: TextStyle(
+                      color: isVisible ? Colors.white : (isLoaded ? Colors.brown : Colors.grey.shade500),
+                      fontWeight: isVisible ? FontWeight.bold : FontWeight.w600,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
               );
             },
