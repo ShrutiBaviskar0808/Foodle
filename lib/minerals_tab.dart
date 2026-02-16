@@ -13,6 +13,7 @@ class MineralsTab extends StatefulWidget {
 
 class _MineralsTabState extends State<MineralsTab> {
   int _currentPage = 1;
+  int _visiblePage = 1;
   List<MineralModel> _minerals = [];
   List<MineralModel> _filteredMinerals = [];
   bool _isLoading = false;
@@ -29,6 +30,22 @@ class _MineralsTabState extends State<MineralsTab> {
   }
 
   void _onScroll() {
+    if (_scrollController.hasClients) {
+      final position = _scrollController.position.pixels;
+      final itemHeight = 200.0;
+      final itemsPerRow = 2;
+      final totalRows = (_filteredMinerals.length / itemsPerRow).ceil();
+      final scrollableHeight = totalRows * itemHeight;
+      
+      if (_filteredMinerals.isNotEmpty) {
+        final progress = position / scrollableHeight;
+        final newVisiblePage = (progress * _currentPage).ceil().clamp(1, _currentPage);
+        if (newVisiblePage != _visiblePage) {
+          setState(() => _visiblePage = newVisiblePage);
+        }
+      }
+    }
+    
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
         !_isLoadingMore && _currentPage < _maxPages && _searchController.text.isEmpty) {
       _loadNextPage();
@@ -121,17 +138,19 @@ class _MineralsTabState extends State<MineralsTab> {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _currentPage,
+            itemCount: _maxPages,
             itemBuilder: (context, index) {
               final page = index + 1;
+              final isLoaded = page <= _currentPage;
+              final isVisible = page == _visiblePage;
               return Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Chip(
                   label: Text('Page $page'),
-                  backgroundColor: Colors.brown.shade100,
-                  labelStyle: const TextStyle(
-                    color: Colors.brown,
-                    fontWeight: FontWeight.w600,
+                  backgroundColor: isVisible ? Colors.brown : (isLoaded ? Colors.brown.shade100 : Colors.grey.shade200),
+                  labelStyle: TextStyle(
+                    color: isVisible ? Colors.white : (isLoaded ? Colors.brown : Colors.grey.shade500),
+                    fontWeight: isVisible ? FontWeight.bold : FontWeight.w600,
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 ),
