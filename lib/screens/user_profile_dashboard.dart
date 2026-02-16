@@ -143,29 +143,23 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
+        preferredSize: const Size.fromHeight(60),
         child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFFF9800),
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-          ),
+          color: const Color(0xFFFF9800),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                    icon: const Icon(Icons.menu, color: Colors.white, size: 22),
                     onPressed: () => Navigator.pop(context),
                   ),
                   const Text(
                     "Foodle",
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -174,17 +168,17 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                   (widget.memberData!['photo_path'].toString().startsWith('http') || 
                    File(widget.memberData!['photo_path']).existsSync())
                       ? CircleAvatar(
-                          radius: 18,
+                          radius: 14,
                           backgroundImage: widget.memberData!['photo_path'].toString().startsWith('http')
                               ? NetworkImage(widget.memberData!['photo_path']) as ImageProvider
                               : FileImage(File(widget.memberData!['photo_path'])),
                         )
                       : CircleAvatar(
-                          radius: 18,
+                          radius: 14,
                           backgroundColor: Colors.white,
                           child: Text(
                             (widget.memberData?['display_name'] ?? 'U')[0].toUpperCase(),
-                            style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(color: Color(0xFFFF8C00), fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                         ),
                 ],
@@ -214,7 +208,8 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       backgroundColor: Colors.white,
-      body: Column(
+      body: SingleChildScrollView(
+        child: Column(
           children: [
             // Header with profile image
             SizedBox(
@@ -282,11 +277,10 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
             ),
           ),
           // Content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -334,13 +328,13 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                             child: _buildFoodItem(foodData['name']!, foodData['restaurant']!, foodData['calories']!, foodData['image']!),
                           );
                         }).toList()),
-                  ],
-                ),
+                ],
               ),
             ),
           ],
         ),
-      );
+      ),
+    );
   }
 
   Widget _buildAllergyChip(String label) {
