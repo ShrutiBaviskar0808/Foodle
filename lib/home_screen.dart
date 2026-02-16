@@ -3,7 +3,7 @@ import 'camera_screens.dart';
 import 'geology_database_screen.dart';
 import 'learn_guides_screen.dart';
 import 'settings_about_screen.dart';
-import 'field_notes_screen.dart';
+import 'mohs_hardness_scale_screen.dart';
 import 'rock_formation_timeline_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -72,10 +72,10 @@ class HomeScreen extends StatelessWidget {
                       ),
                       _build3DButton(
                         context,
-                        'Field\nNotes',
-                        Icons.note_add,
+                        'Mohs\nScale',
+                        Icons.speed,
                         Colors.teal,
-                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FieldNotesScreen())),
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MohsHardnessScaleScreen())),
                       ),
                       _build3DButton(
                         context,
