@@ -10,7 +10,7 @@ class PrivacyPolicyScreen extends StatefulWidget {
 
 class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   Future<void> _launchURL() async {
-    final Uri url = Uri.parse('https://www.termsfeed.com/live/privacy-policy-generator');
+    final Uri url = Uri.parse('https://www.freeprivacypolicy.com/blog/privacy-policy-template/');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not launch $url');
     }
@@ -20,14 +20,11 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _launchURL().then((_) {
-        if (mounted) Navigator.pop(context);
-      }).catchError((error) {
+      _launchURL().catchError((error) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Could not open Privacy Policy')),
           );
-          Navigator.pop(context);
         }
       });
     });

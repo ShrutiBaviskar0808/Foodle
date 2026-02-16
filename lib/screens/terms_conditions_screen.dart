@@ -10,7 +10,7 @@ class TermsConditionsScreen extends StatefulWidget {
 
 class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
   Future<void> _launchURL() async {
-    final Uri url = Uri.parse('https://www.termsfeed.com/live/terms-and-conditions-generator');
+    final Uri url = Uri.parse('https://www.termsandconditionsgenerator.com/live.php');
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not launch $url');
     }
@@ -20,14 +20,11 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _launchURL().then((_) {
-        if (mounted) Navigator.pop(context);
-      }).catchError((error) {
+      _launchURL().catchError((error) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Could not open Terms & Conditions')),
           );
-          Navigator.pop(context);
         }
       });
     });
