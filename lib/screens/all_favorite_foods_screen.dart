@@ -150,6 +150,7 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
                   builder: (context) => SelectFoodsScreen(
                     initialFoods: selectedFoods.toList(),
                     availableFoods: allFoods,
+                    memberId: widget.memberData?['id'],
                   ),
                 ),
               );

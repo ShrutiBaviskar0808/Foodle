@@ -151,6 +151,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
               builder: (context) => SelectFoodsScreen(
                 initialFoods: favoriteFoods,
                 availableFoods: allFoodsData,
+                memberId: widget.memberData?['id'],
               ),
             ),
           );

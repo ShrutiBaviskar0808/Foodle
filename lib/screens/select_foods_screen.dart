@@ -9,8 +9,9 @@ import '../config.dart';
 class SelectFoodsScreen extends StatefulWidget {
   final List<String>? initialFoods;
   final List<Map<String, String>> availableFoods;
+  final int? memberId;
   
-  const SelectFoodsScreen({super.key, this.initialFoods, required this.availableFoods});
+  const SelectFoodsScreen({super.key, this.initialFoods, required this.availableFoods, this.memberId});
 
   @override
   State<SelectFoodsScreen> createState() => _SelectFoodsScreenState();
@@ -43,15 +44,8 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
     allFoods = List.from(widget.availableFoods);
     selectedFoods = (widget.initialFoods ?? []).toSet();
     filteredFoods = allFoods;
-    _loadMemberId();
+    memberId = widget.memberId;
     _loadCustomFoods();
-  }
-
-  Future<void> _loadMemberId() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      memberId = prefs.getInt('current_member_id');
-    });
   }
 
   @override
