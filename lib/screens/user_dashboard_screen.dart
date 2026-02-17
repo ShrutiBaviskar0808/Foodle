@@ -142,16 +142,15 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
             member['favorite_foods'] = [];
           }
           
-          // Extract custom foods data (where is_custom_food = 1)
+          // Extract custom foods data (where food_name is not null)
           final customFoods = allergyList
-              .where((item) => item['is_custom_food'] == 1 || item['is_custom_food'] == '1')
+              .where((item) => item['food_name'] != null && item['food_name'].toString().trim().isNotEmpty)
               .map((item) => {
                 'name': item['food_name']?.toString() ?? '',
                 'restaurant': item['restaurant']?.toString() ?? 'Custom',
                 'calories': item['calories']?.toString() ?? '0',
                 'image': item['image_path']?.toString() ?? '',
               })
-              .where((food) => food['name']!.isNotEmpty)
               .toList();
           
           member['custom_foods_data'] = customFoods;

@@ -114,10 +114,10 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
               
               final customFoods = allergyList
                   .where((item) {
-                    final isCustom = item['is_custom_food'] == 1 || item['is_custom_food'] == '1';
-                    final hasName = item['food_name'] != null && item['food_name'].toString().isNotEmpty;
-                    debugPrint('Entry ${item['id']}: is_custom_food=${item['is_custom_food']}, food_name=${item['food_name']}, hasName=$hasName, isCustom=$isCustom');
-                    return isCustom && hasName;
+                    // A custom food has food_name filled (not null and not empty)
+                    final hasName = item['food_name'] != null && item['food_name'].toString().trim().isNotEmpty;
+                    debugPrint('Entry ${item['id']}: food_name=${item['food_name']}, hasName=$hasName');
+                    return hasName;
                   })
                   .map((item) => {
                     'name': item['food_name']?.toString() ?? '',

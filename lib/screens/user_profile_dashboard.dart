@@ -111,14 +111,13 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
             if (data['success'] == true) {
               final allergyList = data['allergies'] as List? ?? [];
               final customFoods = allergyList
-                  .where((item) => item['is_custom_food'] == 1 || item['is_custom_food'] == '1')
+                  .where((item) => item['food_name'] != null && item['food_name'].toString().trim().isNotEmpty)
                   .map((item) => {
                     'name': item['food_name']?.toString() ?? '',
                     'restaurant': item['restaurant']?.toString() ?? 'Custom',
                     'calories': item['calories']?.toString() ?? '0',
                     'image': item['image_path']?.toString() ?? '',
                   })
-                  .where((food) => food['name']!.isNotEmpty)
                   .toList();
               
               for (var food in customFoods) {
