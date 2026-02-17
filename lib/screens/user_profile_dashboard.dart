@@ -94,6 +94,46 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
         }
       }
     }
+    
+    // Also load custom foods from database if member exists
+    if (widget.memberData != null) {
+      final memberId = widget.memberData!['id'];
+      if (memberId != null) {
+        try {
+          final response = await http.post(
+            Uri.parse(AppConfig.getAllergiesEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'member_id': memberId}),
+          ).timeout(AppConfig.requestTimeout);
+          
+          if (response.statusCode == 200) {
+            final data = json.decode(response.body);
+            if (data['success'] == true) {
+              final allergyList = data['allergies'] as List? ?? [];
+              final customFoods = allergyList
+                  .where((item) => item['is_custom_food'] == 1 || item['is_custom_food'] == '1')
+                  .map((item) => {
+                    'name': item['food_name']?.toString() ?? '',
+                    'restaurant': item['restaurant']?.toString() ?? 'Custom',
+                    'calories': item['calories']?.toString() ?? '0',
+                    'image': item['image_path']?.toString() ?? '',
+                  })
+                  .where((food) => food['name']!.isNotEmpty)
+                  .toList();
+              
+              for (var food in customFoods) {
+                if (!allFoodsData.any((f) => f['name'] == food['name'])) {
+                  allFoodsData.add(Map<String, String>.from(food));
+                }
+              }
+              debugPrint('Loaded ${customFoods.length} custom foods from database');
+            }
+          }
+        } catch (e) {
+          debugPrint('Error loading custom foods from database: $e');
+        }
+      }
+    }
   }
 
   Future<void> _loadData() async {

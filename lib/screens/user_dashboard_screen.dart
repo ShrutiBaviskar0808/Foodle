@@ -111,10 +111,12 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     if (memberId == null) {
       member['allergies'] = [];
       member['favorite_foods'] = [];
+      member['custom_foods_data'] = <Map<String, String>>[];
       return;
     }
 
     try {
+      // Load allergies and favorite foods
       final allergyResponse = await http.post(
         Uri.parse(AppConfig.getAllergiesEndpoint),
         headers: AppConfig.jsonHeaders,
@@ -125,29 +127,50 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
         final allergyData = json.decode(allergyResponse.body);
         if (allergyData['success'] == true) {
           final allergyList = allergyData['allergies'] as List? ?? [];
+          
+          // Extract allergies (non-null allergy_name)
           member['allergies'] = allergyList
-              .where((item) => item['allergy_name'] != null)
-              .map((item) => (item['allergy_name'] ?? '').toString())
-              .where((name) => name.isNotEmpty)
+              .where((item) => item['allergy_name'] != null && item['allergy_name'].toString().isNotEmpty)
+              .map((item) => item['allergy_name'].toString())
               .toList();
           
+          // Extract favorite food names
           if (allergyList.isNotEmpty && allergyList[0]['favorite_foods'] != null) {
             final favFoods = allergyList[0]['favorite_foods'].toString();
             member['favorite_foods'] = favFoods.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
           } else {
             member['favorite_foods'] = [];
           }
+          
+          // Extract custom foods data (where is_custom_food = 1)
+          final customFoods = allergyList
+              .where((item) => item['is_custom_food'] == 1 || item['is_custom_food'] == '1')
+              .map((item) => {
+                'name': item['food_name']?.toString() ?? '',
+                'restaurant': item['restaurant']?.toString() ?? 'Custom',
+                'calories': item['calories']?.toString() ?? '0',
+                'image': item['image_path']?.toString() ?? '',
+              })
+              .where((food) => food['name']!.isNotEmpty)
+              .toList();
+          
+          member['custom_foods_data'] = customFoods;
+          debugPrint('Loaded ${customFoods.length} custom foods for member $memberId');
         } else {
           member['allergies'] = [];
           member['favorite_foods'] = [];
+          member['custom_foods_data'] = <Map<String, String>>[];
         }
       } else {
         member['allergies'] = [];
         member['favorite_foods'] = [];
+        member['custom_foods_data'] = <Map<String, String>>[];
       }
     } catch (e) {
+      debugPrint('Error loading member details: $e');
       member['allergies'] = [];
       member['favorite_foods'] = [];
+      member['custom_foods_data'] = <Map<String, String>>[];
     }
   }
 
