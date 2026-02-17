@@ -29,6 +29,11 @@ try {
     $columnInfo = $checkColumn->fetch(PDO::FETCH_ASSOC);
     error_log("Column info: " . json_encode($columnInfo));
     
+    // Delete any existing custom food with the same name for this member
+    $deleteStmt = $pdo->prepare("DELETE FROM allergies WHERE member_id = ? AND food_name = ? AND is_custom_food = 1");
+    $deleteStmt->execute([$member_id, $food_name]);
+    error_log("Deleted " . $deleteStmt->rowCount() . " existing rows with same food name");
+    
     $image_path = null;
     if ($image_base64) {
         $image_path = $image_base64;
