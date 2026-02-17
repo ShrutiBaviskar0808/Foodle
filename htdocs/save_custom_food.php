@@ -24,27 +24,8 @@ if (empty($member_id) || empty($food_name)) {
 try {
     $pdo = getDBConnection();
     
-    // Check if columns exist
-    $columns = $pdo->query("SHOW COLUMNS FROM allergies")->fetchAll(PDO::FETCH_COLUMN);
-    $hasCustomColumn = in_array('is_custom_food', $columns);
-    $hasCreatedAt = in_array('created_at', $columns);
-    
-    // Build INSERT query based on available columns
-    $fields = "member_id, food_name, restaurant, calories, image_path";
-    $placeholders = "?, ?, ?, ?, ?";
-    $values = [$member_id, $food_name, $restaurant, $calories, $image_base64];
-    
-    if ($hasCustomColumn) {
-        $fields .= ", is_custom_food";
-        $placeholders .= ", 1";
-    }
-    if ($hasCreatedAt) {
-        $fields .= ", created_at";
-        $placeholders .= ", NOW()";
-    }
-    
-    $stmt = $pdo->prepare("INSERT INTO allergies ($fields) VALUES ($placeholders)");
-    $result = $stmt->execute($values);
+    $stmt = $pdo->prepare("INSERT INTO allergies (member_id, allergy_name, food_name, restaurant, calories, image_path, is_custom_food) VALUES (?, NULL, ?, ?, ?, ?, 1)");
+    $result = $stmt->execute([$member_id, $food_name, $restaurant, $calories, $image_base64]);
     
     if ($result) {
         echo json_encode(['success' => true, 'message' => 'Custom food saved successfully', 'id' => $pdo->lastInsertId()]);

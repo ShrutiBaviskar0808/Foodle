@@ -118,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               const Text('Name', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextFormField(
@@ -131,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fillColor: Colors.grey[100],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               const Text('Email', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextFormField(
@@ -144,7 +144,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fillColor: Colors.grey[100],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               const Text('Phone Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextFormField(
@@ -157,7 +157,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fillColor: Colors.grey[100],
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               const Text('Date of Birth', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               TextFormField(
@@ -172,7 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   suffixIcon: const Icon(Icons.calendar_today, color: Colors.orange),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               const Text('Gender', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Container(
@@ -194,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
