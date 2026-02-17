@@ -223,8 +223,7 @@ class _StonesTabState extends State<StonesTab> {
       }
     }
     
-    final searchTerm = stoneName.replaceAll(' ', '+');
-    return 'https://source.unsplash.com/400x300/?${searchTerm},mineral,gemstone,crystal';
+    return 'https://via.placeholder.com/400x300/8B4513/FFFFFF?text=${Uri.encodeComponent(stoneName)}';
   }
 
   @override
