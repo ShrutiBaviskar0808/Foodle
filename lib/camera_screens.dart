@@ -27,15 +27,12 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _requestPermissionsAndInitialize() async {
-    final cameraStatus = await Permission.camera.status;
+    final cameraStatus = await Permission.camera.request();
     
     if (cameraStatus.isGranted) {
       await _initializeCamera();
-    } else {
-      final result = await Permission.camera.request();
-      if (result.isGranted) {
-        await _initializeCamera();
-      } else if (mounted) {
+    } else if (cameraStatus.isDenied || cameraStatus.isPermanentlyDenied) {
+      if (mounted) {
         _showPermissionDialog();
       }
     }
