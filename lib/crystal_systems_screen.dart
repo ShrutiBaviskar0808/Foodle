@@ -32,7 +32,7 @@ class CrystalSystemsScreen extends StatelessWidget {
             'Highest symmetry system',
             Colors.red,
             ['Halite (Salt)', 'Pyrite', 'Galena', 'Fluorite', 'Diamond', 'Garnet'],
-            'a = b = c, α = β = γ = 90°',
+            'a = b = c\nα = β = γ = 90°',
           ),
           _buildCrystalSystemCard(
             'Tetragonal',
@@ -40,7 +40,7 @@ class CrystalSystemsScreen extends StatelessWidget {
             'Square cross-section',
             Colors.orange,
             ['Zircon', 'Rutile', 'Cassiterite', 'Wulfenite', 'Scheelite'],
-            'a = b ≠ c, α = β = γ = 90°',
+            'a = b ≠ c\nα = β = γ = 90°',
           ),
           _buildCrystalSystemCard(
             'Orthorhombic',
@@ -48,7 +48,7 @@ class CrystalSystemsScreen extends StatelessWidget {
             'Rectangular cross-section',
             Colors.yellow.shade700,
             ['Olivine', 'Aragonite', 'Topaz', 'Barite', 'Sulfur'],
-            'a ≠ b ≠ c, α = β = γ = 90°',
+            'a ≠ b ≠ c\nα = β = γ = 90°',
           ),
           _buildCrystalSystemCard(
             'Hexagonal',
@@ -56,7 +56,7 @@ class CrystalSystemsScreen extends StatelessWidget {
             'Six-fold symmetry',
             Colors.green,
             ['Quartz', 'Beryl', 'Apatite', 'Calcite', 'Corundum'],
-            'a = b ≠ c, α = β = 90°, γ = 120°',
+            'a = b ≠ c\nα = β = 90°, γ = 120°',
           ),
           _buildCrystalSystemCard(
             'Trigonal (Rhombohedral)',
@@ -64,7 +64,7 @@ class CrystalSystemsScreen extends StatelessWidget {
             'Three-fold symmetry',
             Colors.blue,
             ['Calcite', 'Dolomite', 'Tourmaline', 'Cinnabar', 'Hematite'],
-            'a = b = c, α = β = γ ≠ 90°',
+            'a = b = c\nα = β = γ ≠ 90°',
           ),
           _buildCrystalSystemCard(
             'Monoclinic',
@@ -72,7 +72,7 @@ class CrystalSystemsScreen extends StatelessWidget {
             'Tilted rectangular shape',
             Colors.purple,
             ['Gypsum', 'Orthoclase', 'Mica', 'Azurite', 'Malachite'],
-            'a ≠ b ≠ c, α = γ = 90° ≠ β',
+            'a ≠ b ≠ c\nα = γ = 90° ≠ β',
           ),
           _buildCrystalSystemCard(
             'Triclinic',
@@ -80,7 +80,7 @@ class CrystalSystemsScreen extends StatelessWidget {
             'Lowest symmetry system',
             Colors.pink,
             ['Plagioclase Feldspar', 'Kyanite', 'Turquoise', 'Rhodonite'],
-            'a ≠ b ≠ c, α ≠ β ≠ γ ≠ 90°',
+            'a ≠ b ≠ c\nα ≠ β ≠ γ ≠ 90°',
           ),
         ],
       ),
