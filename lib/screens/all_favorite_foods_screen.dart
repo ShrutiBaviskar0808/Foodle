@@ -82,22 +82,12 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
   }
 
   Future<void> _loadCustomFoods() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? customFoodsJson = prefs.getString('custom_foods');
-    if (customFoodsJson != null) {
-      final List<dynamic> customFoods = json.decode(customFoodsJson);
-      setState(() {
-        for (var food in customFoods) {
-          if (!allFoods.any((f) => f['name'] == food['name'])) {
-            allFoods.add(Map<String, String>.from(food));
-          }
-        }
-      });
-    }
+    debugPrint('=== LOADING CUSTOM FOODS ===');
     
-    // Also load custom foods from database if member exists
+    // Load from database FIRST for members
     if (widget.memberData != null) {
       final memberId = widget.memberData!['id'];
+      debugPrint('Loading custom foods for member_id: $memberId');
       if (memberId != null) {
         try {
           final response = await http.post(
@@ -106,43 +96,56 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
             body: json.encode({'member_id': memberId}),
           ).timeout(AppConfig.requestTimeout);
           
+          debugPrint('Response status: ${response.statusCode}');
           if (response.statusCode == 200) {
             final data = json.decode(response.body);
+            debugPrint('Response data: $data');
             if (data['success'] == true) {
               final allergyList = data['allergies'] as List? ?? [];
-              debugPrint('Total allergies entries: ${allergyList.length}');
-              
+              debugPrint('Total allergy entries: ${allergyList.length}');
               final customFoods = allergyList
-                  .where((item) {
-                    // A custom food has food_name filled (not null and not empty)
-                    final hasName = item['food_name'] != null && item['food_name'].toString().trim().isNotEmpty;
-                    debugPrint('Entry ${item['id']}: food_name=${item['food_name']}, hasName=$hasName');
-                    return hasName;
-                  })
-                  .map((item) => {
-                    'name': item['food_name']?.toString() ?? '',
-                    'restaurant': item['restaurant']?.toString() ?? 'Custom',
-                    'calories': item['calories']?.toString() ?? '0',
-                    'image': item['image_path']?.toString() ?? '',
+                  .where((item) => item['food_name'] != null && item['food_name'].toString().trim().isNotEmpty)
+                  .map((item) {
+                    debugPrint('Custom food: ${item['food_name']} - ${item['restaurant']} - ${item['calories']} cal - Image: ${item['image_path']?.toString().length ?? 0} chars');
+                    return {
+                      'name': item['food_name']?.toString().trim() ?? '',
+                      'restaurant': item['restaurant']?.toString().trim() ?? 'Custom',
+                      'calories': item['calories']?.toString() ?? '0',
+                      'image': item['image_path']?.toString() ?? '',
+                    };
                   })
                   .toList();
               
               debugPrint('Found ${customFoods.length} custom foods from database');
-              
               setState(() {
-                for (var food in customFoods) {
-                  if (!allFoods.any((f) => f['name'] == food['name'])) {
-                    allFoods.add(Map<String, String>.from(food));
-                    debugPrint('Added custom food: ${food['name']} - ${food['restaurant']} - ${food['calories']} cal');
-                  }
-                }
+                // Remove only the foods that exist in database response to avoid duplicates
+                final dbFoodNames = customFoods.map((f) => f['name']).toSet();
+                allFoods.removeWhere((f) => dbFoodNames.contains(f['name']));
+                // Add all foods from database
+                allFoods.addAll(customFoods.map((f) => Map<String, String>.from(f)));
               });
+              debugPrint('Total foods in allFoods after database load: ${allFoods.length}');
             }
           }
         } catch (e) {
           debugPrint('Error loading custom foods from database: $e');
         }
       }
+    }
+    
+    // Then load from SharedPreferences as fallback
+    final prefs = await SharedPreferences.getInstance();
+    final String? customFoodsJson = prefs.getString('custom_foods');
+    if (customFoodsJson != null) {
+      final List<dynamic> customFoods = json.decode(customFoodsJson);
+      debugPrint('Loaded ${customFoods.length} foods from SharedPreferences');
+      setState(() {
+        for (var food in customFoods) {
+          if (!allFoods.any((f) => f['name'] == food['name'])) {
+            allFoods.add(Map<String, String>.from(food));
+          }
+        }
+      });
     }
   }
 
@@ -196,17 +199,30 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
         actions: [
           IconButton(
             onPressed: () async {
-              final result = await Navigator.push(
-                context,
+              await _loadCustomFoods();
+              if (!mounted) return;
+              
+              final selectedList = selectedFoods.toList();
+              final foodsList = List<Map<String, String>>.from(allFoods);
+              final memId = widget.memberData?['id'];
+              
+              // ignore: use_build_context_synchronously
+              final navigator = Navigator.of(context);
+              
+              final result = await navigator.push(
                 MaterialPageRoute(
-                  builder: (context) => SelectFoodsScreen(
-                    initialFoods: selectedFoods.toList(),
-                    availableFoods: allFoods,
-                    memberId: widget.memberData?['id'],
+                  builder: (_) => SelectFoodsScreen(
+                    initialFoods: selectedList,
+                    availableFoods: foodsList,
+                    memberId: memId,
                   ),
                 ),
               );
+              
+              if (!mounted) return;
               if (result != null) {
+                await _loadCustomFoods();
+                if (!mounted) return;
                 setState(() => selectedFoods = (result as List<String>).toSet());
                 await _saveFoods();
               }
@@ -223,7 +239,11 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
           final food = allFoods[index];
           final isSelected = selectedFoods.contains(food['name']);
           final imageUrl = food['image']!;
-          final isLocalImage = imageUrl.startsWith('/');
+          debugPrint('Food: ${food['name']}, Image URL length: ${imageUrl.length}, Starts with: ${imageUrl.isEmpty ? 'empty' : imageUrl.substring(0, imageUrl.length > 20 ? 20 : imageUrl.length)}');
+          final isBase64Image = imageUrl.isNotEmpty && !imageUrl.startsWith('http') && !imageUrl.startsWith('/');
+          final isLocalImage = imageUrl.startsWith('/') && !imageUrl.startsWith('http');
+          debugPrint('isBase64: $isBase64Image, isLocal: $isLocalImage');
+          
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
@@ -233,7 +253,33 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
             ),
             child: Row(
               children: [
-                isLocalImage
+                isBase64Image
+                    ? Builder(
+                        builder: (context) {
+                          try {
+                            return ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.memory(
+                                base64Decode(imageUrl),
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                              ),
+                            );
+                          } catch (e) {
+                            return Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.fastfood, color: Colors.orange, size: 30),
+                            );
+                          }
+                        },
+                      )
+                    : isLocalImage
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.file(

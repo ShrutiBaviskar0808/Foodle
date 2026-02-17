@@ -364,8 +364,24 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                               final member = familyMembers[index];
                               final allergies = member['allergies'] as List? ?? [];
                               final favFoods = member['favorite_foods'] as List? ?? [];
+                              final customFoodsData = member['custom_foods_data'] as List<Map<String, String>>? ?? [];
                               final allergyText = allergies.isEmpty ? 'No allergies' : allergies.join(', ');
-                              final foodText = favFoods.isEmpty ? '' : ' • Likes: ${favFoods.join(', ')}';
+                              
+                              // Build food text with custom food details
+                              String foodText = '';
+                              if (favFoods.isNotEmpty) {
+                                final foodDetails = favFoods.map((foodName) {
+                                  final customFood = customFoodsData.firstWhere(
+                                    (f) => f['name'] == foodName,
+                                    orElse: () => {},
+                                  );
+                                  if (customFood.isNotEmpty) {
+                                    return '$foodName (${customFood['restaurant']}, ${customFood['calories']} cal)';
+                                  }
+                                  return foodName;
+                                }).join(', ');
+                                foodText = ' • Likes: $foodDetails';
+                              }
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 child: ListTile(
@@ -375,7 +391,11 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                     child: member['image_path'] == null ? const Icon(Icons.person, color: Colors.orange) : null,
                                   ),
                                   title: Text(member['display_name'] ?? ''),
-                                  subtitle: Text('${member['relation'] ?? 'Family'} • $allergyText$foodText'),
+                                  subtitle: Text(
+                                    '${member['relation'] ?? 'Family'} • $allergyText$foodText',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               );
                             },
@@ -406,8 +426,24 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                               final friend = friends[index];
                               final allergies = friend['allergies'] as List? ?? [];
                               final favFoods = friend['favorite_foods'] as List? ?? [];
+                              final customFoodsData = friend['custom_foods_data'] as List<Map<String, String>>? ?? [];
                               final allergyText = allergies.isEmpty ? 'No allergies' : allergies.join(', ');
-                              final foodText = favFoods.isEmpty ? '' : ' • Likes: ${favFoods.join(', ')}';
+                              
+                              // Build food text with custom food details
+                              String foodText = '';
+                              if (favFoods.isNotEmpty) {
+                                final foodDetails = favFoods.map((foodName) {
+                                  final customFood = customFoodsData.firstWhere(
+                                    (f) => f['name'] == foodName,
+                                    orElse: () => {},
+                                  );
+                                  if (customFood.isNotEmpty) {
+                                    return '$foodName (${customFood['restaurant']}, ${customFood['calories']} cal)';
+                                  }
+                                  return foodName;
+                                }).join(', ');
+                                foodText = ' • Likes: $foodDetails';
+                              }
                               return Card(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 child: ListTile(
@@ -417,7 +453,11 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                                     child: friend['image_path'] == null ? const Icon(Icons.person, color: Colors.blue) : null,
                                   ),
                                   title: Text(friend['display_name'] ?? ''),
-                                  subtitle: Text('${friend['relation'] ?? 'Friend'} • $allergyText$foodText'),
+                                  subtitle: Text(
+                                    '${friend['relation'] ?? 'Friend'} • $allergyText$foodText',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               );
                             },

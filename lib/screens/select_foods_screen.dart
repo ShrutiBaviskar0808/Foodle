@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import '../config.dart';
 
 class SelectFoodsScreen extends StatefulWidget {
@@ -26,6 +27,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   List<Map<String, String>> filteredCustomFoods = [];
   late TabController _tabController;
   bool showAddForm = false;
+  bool isLoading = true;
   final TextEditingController nameController = TextEditingController();
   final TextEditingController restaurantController = TextEditingController();
   final TextEditingController caloriesController = TextEditingController();
@@ -45,7 +47,11 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
     selectedFoods = (widget.initialFoods ?? []).toSet();
     filteredFoods = allFoods;
     memberId = widget.memberId;
-    _loadCustomFoods();
+    _loadCustomFoods().then((_) {
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
   @override
@@ -60,12 +66,61 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   }
 
   Future<void> _loadCustomFoods() async {
+    // Load from database FIRST for members
+    if (memberId != null) {
+      try {
+        final response = await http.post(
+          Uri.parse(AppConfig.getAllergiesEndpoint),
+          headers: AppConfig.jsonHeaders,
+          body: json.encode({'member_id': memberId}),
+        ).timeout(AppConfig.requestTimeout);
+        
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['success'] == true) {
+            final allergyList = data['allergies'] as List? ?? [];
+            final dbCustomFoods = allergyList
+                .where((item) => item['food_name'] != null && item['food_name'].toString().trim().isNotEmpty)
+                .map((item) => {
+                  'name': item['food_name']?.toString().trim() ?? '',
+                  'restaurant': item['restaurant']?.toString().trim() ?? 'Custom',
+                  'calories': item['calories']?.toString() ?? '0',
+                  'image': item['image_path']?.toString() ?? '',
+                })
+                .toList();
+            
+            setState(() {
+              // Remove only the foods that exist in database response to avoid duplicates
+              final dbFoodNames = dbCustomFoods.map((f) => f['name']).toSet();
+              customFoods.removeWhere((f) => dbFoodNames.contains(f['name']));
+              allFoods.removeWhere((f) => dbFoodNames.contains(f['name']));
+              
+              // Add all foods from database
+              customFoods.addAll(dbCustomFoods.map((f) => Map<String, String>.from(f)));
+              allFoods.addAll(dbCustomFoods.map((f) => Map<String, String>.from(f)));
+              
+              filteredCustomFoods = customFoods;
+              filteredFoods = allFoods;
+            });
+            debugPrint('Loaded ${dbCustomFoods.length} custom foods from database');
+          }
+        }
+      } catch (e) {
+        debugPrint('Error loading custom foods: $e');
+      }
+    }
+    
+    // Then load from SharedPreferences as fallback
     final prefs = await SharedPreferences.getInstance();
     final String? customFoodsJson = prefs.getString('custom_foods');
     if (customFoodsJson != null) {
       final List<dynamic> decoded = json.decode(customFoodsJson);
       setState(() {
-        customFoods = decoded.map((f) => Map<String, String>.from(f)).toList();
+        for (var food in decoded) {
+          if (!customFoods.any((f) => f['name'] == food['name'])) {
+            customFoods.add(Map<String, String>.from(food));
+          }
+        }
         filteredCustomFoods = customFoods;
       });
     }
@@ -88,7 +143,12 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final XFile? image = await _picker.pickImage(source: source);
+    final XFile? image = await _picker.pickImage(
+      source: source,
+      maxWidth: 800,
+      maxHeight: 800,
+      imageQuality: 70,
+    );
     if (image != null) {
       setState(() {
         _selectedImage = File(image.path);
@@ -458,15 +518,42 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                         
                         String? imageBase64;
                         if (_selectedImage != null) {
-                          final bytes = await _selectedImage!.readAsBytes();
-                          imageBase64 = base64Encode(bytes);
+                          debugPrint('📸 Processing image: ${_selectedImage!.path}');
+                          try {
+                            final compressedBytes = await FlutterImageCompress.compressWithFile(
+                              _selectedImage!.path,
+                              quality: 30,
+                              minWidth: 400,
+                              minHeight: 400,
+                            );
+                            if (compressedBytes != null) {
+                              imageBase64 = base64Encode(compressedBytes);
+                              debugPrint('✅ Image compressed: ${imageBase64.length} chars (${(imageBase64.length / 1024).toStringAsFixed(2)} KB)');
+                            } else {
+                              debugPrint('⚠️ Compression returned null, reading raw bytes');
+                              final bytes = await _selectedImage!.readAsBytes();
+                              imageBase64 = base64Encode(bytes);
+                              debugPrint('✅ Raw image encoded: ${imageBase64.length} chars (${(imageBase64.length / 1024).toStringAsFixed(2)} KB)');
+                            }
+                          } catch (e) {
+                            debugPrint('❌ Image compression failed: $e');
+                            try {
+                              final bytes = await _selectedImage!.readAsBytes();
+                              imageBase64 = base64Encode(bytes);
+                              debugPrint('✅ Fallback encoding successful: ${imageBase64.length} chars (${(imageBase64.length / 1024).toStringAsFixed(2)} KB)');
+                            } catch (e2) {
+                              debugPrint('❌ Fallback encoding also failed: $e2');
+                            }
+                          }
+                        } else {
+                          debugPrint('ℹ️ No image selected');
                         }
                         
                         final newFood = {
                           'name': nameController.text,
                           'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
                           'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
-                          'image': _selectedImage?.path ?? '',
+                          'image': imageBase64 ?? '',
                         };
                         
                         if (memberId != null) {
@@ -500,11 +587,12 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                             final data = json.decode(response.body);
                             if (data['success'] == true) {
                               debugPrint('✅ Custom food saved successfully to database!');
-                              customFoods.add(newFood);
-                              selectedFoods.add(nameController.text);
-                              final prefs = await SharedPreferences.getInstance();
-                              await prefs.setString('custom_foods', json.encode(customFoods));
+                              // Wait a moment for database to commit
+                              await Future.delayed(const Duration(milliseconds: 500));
+                              // Reload from database to get the latest data
+                              await _loadCustomFoods();
                               if (!mounted) return;
+                              selectedFoods.add(nameController.text);
                               scaffoldMessenger.showSnackBar(
                                 const SnackBar(content: Text('Custom food saved successfully!'), backgroundColor: Colors.green),
                               );

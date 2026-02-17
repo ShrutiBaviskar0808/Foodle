@@ -384,6 +384,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
 
   Widget _buildFoodItem(String name, String restaurant, String calories, String imageUrl) {
     final hasImage = imageUrl.isNotEmpty;
+    final isBase64Image = imageUrl.startsWith('/9j/') || imageUrl.startsWith('iVBOR');
     final isLocalFile = imageUrl.startsWith('/') || imageUrl.contains('cache');
     
     return Padding(
@@ -393,7 +394,25 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
           hasImage
               ? ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: isLocalFile
+                  child: isBase64Image
+                      ? Builder(
+                          builder: (context) {
+                            try {
+                              return Image.memory(base64Decode(imageUrl), width: 80, height: 80, fit: BoxFit.cover);
+                            } catch (e) {
+                              return Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(Icons.fastfood, color: Colors.orange, size: 32),
+                              );
+                            }
+                          },
+                        )
+                      : isLocalFile
                       ? Image.file(File(imageUrl), width: 80, height: 80, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) {
                           return Container(
                             width: 80,

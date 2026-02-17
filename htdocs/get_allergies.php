@@ -17,7 +17,8 @@ if (empty($member_id)) {
 try {
     $pdo = getDBConnection();
     
-    $stmt = $pdo->prepare("SELECT * FROM allergies WHERE member_id = ? ORDER BY created_at DESC");
+    // Get all custom food rows for this member
+    $stmt = $pdo->prepare("SELECT * FROM allergies WHERE member_id = ? AND food_name IS NOT NULL AND food_name != '' ORDER BY created_at DESC");
     $stmt->execute([$member_id]);
     $allergies = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
