@@ -11,9 +11,10 @@ class RockCycleScreen extends StatelessWidget {
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -86,6 +87,7 @@ class RockCycleScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

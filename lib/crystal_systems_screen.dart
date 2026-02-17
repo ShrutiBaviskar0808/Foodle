@@ -11,9 +11,10 @@ class CrystalSystemsScreen extends StatelessWidget {
         backgroundColor: Colors.cyan,
         foregroundColor: Colors.white,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
           Card(
             color: Colors.cyan.shade50,
             child: const Padding(
@@ -83,6 +84,7 @@ class CrystalSystemsScreen extends StatelessWidget {
             'a ≠ b ≠ c\nα ≠ β ≠ γ ≠ 90°',
           ),
         ],
+      ),
       ),
     );
   }

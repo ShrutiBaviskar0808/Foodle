@@ -11,9 +11,10 @@ class FieldToolsScreen extends StatelessWidget {
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
           _buildToolCard(
             'Streak Test',
             'Rub mineral on unglazed porcelain to see powder color',
@@ -95,6 +96,7 @@ class FieldToolsScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }

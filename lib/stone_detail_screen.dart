@@ -66,10 +66,16 @@ class StoneDetailScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        color: Colors.brown.shade300,
-                        child: const Icon(Icons.landscape, size: 100, color: Colors.white),
-                      ),
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.network(
+                          'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=600&fit=crop',
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            color: Colors.brown.shade300,
+                            child: const Icon(Icons.landscape, size: 100, color: Colors.white),
+                          ),
+                        );
+                      },
                     ),
                     Container(
                       decoration: BoxDecoration(

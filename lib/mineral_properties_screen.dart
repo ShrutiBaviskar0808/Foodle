@@ -11,9 +11,10 @@ class MineralPropertiesScreen extends StatelessWidget {
         backgroundColor: Colors.pink,
         foregroundColor: Colors.white,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
           Card(
             color: Colors.pink.shade50,
             child: const Padding(
@@ -131,6 +132,7 @@ class MineralPropertiesScreen extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

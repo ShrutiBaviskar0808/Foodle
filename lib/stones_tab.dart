@@ -151,7 +151,14 @@ class _StonesTabState extends State<StonesTab> {
                     if (loadingProgress == null) return child;
                     return Center(child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null, color: Colors.white, strokeWidth: 2));
                   },
-                  errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))),
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.network(
+                      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=300&fit=crop',
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))),
+                    );
+                  },
                 ),
               ),
             ),
