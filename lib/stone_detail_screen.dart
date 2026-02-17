@@ -67,8 +67,9 @@ class StoneDetailScreen extends StatelessWidget {
                         );
                       },
                       errorBuilder: (context, error, stackTrace) {
+                        String fallbackUrl = _getFallbackImageUrl(stone.stoneName);
                         return Image.network(
-                          'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=600&fit=crop',
+                          fallbackUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) => Container(
                             color: Colors.brown.shade300,
@@ -132,6 +133,18 @@ class StoneDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getFallbackImageUrl(String stoneName) {
+    final name = stoneName.toLowerCase();
+    if (name.contains('spinel')) {
+      return 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=800&h=600&fit=crop';
+    } else if (name.contains('turquoise')) {
+      return 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=800&h=600&fit=crop';
+    } else if (name.contains('tugtupite')) {
+      return 'https://images.unsplash.com/photo-1583937443569-f14a5c1b6e9e?w=800&h=600&fit=crop';
+    }
+    return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&h=600&fit=crop';
   }
 
   Widget _buildSection(String title, String content) {

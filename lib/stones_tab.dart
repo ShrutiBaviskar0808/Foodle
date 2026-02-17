@@ -152,8 +152,9 @@ class _StonesTabState extends State<StonesTab> {
                     return Center(child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null, color: Colors.white, strokeWidth: 2));
                   },
                   errorBuilder: (context, error, stackTrace) {
+                    String fallbackUrl = _getFallbackImageUrl(stone.stoneName);
                     return Image.network(
-                      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=300&fit=crop',
+                      fallbackUrl,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))),
@@ -205,6 +206,18 @@ class _StonesTabState extends State<StonesTab> {
         ),
       ),
     );
+  }
+
+  String _getFallbackImageUrl(String stoneName) {
+    final name = stoneName.toLowerCase();
+    if (name.contains('spinel')) {
+      return 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400&h=300&fit=crop';
+    } else if (name.contains('turquoise')) {
+      return 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=400&h=300&fit=crop';
+    } else if (name.contains('tugtupite')) {
+      return 'https://images.unsplash.com/photo-1583937443569-f14a5c1b6e9e?w=400&h=300&fit=crop';
+    }
+    return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=300&fit=crop';
   }
 
   @override
