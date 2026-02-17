@@ -24,59 +24,35 @@ if (empty($member_id) || empty($food_name)) {
 try {
     $pdo = getDBConnection();
     
-    // Check if column exists and its type
-    $checkColumn = $pdo->query("SHOW COLUMNS FROM allergies LIKE 'image_path'");
-    $columnInfo = $checkColumn->fetch(PDO::FETCH_ASSOC);
-    error_log("Column info: " . json_encode($columnInfo));
+    // Check if columns exist
+    $columns = $pdo->query("SHOW COLUMNS FROM allergies")->fetchAll(PDO::FETCH_COLUMN);
+    $hasCustomColumn = in_array('is_custom_food', $columns);
+    $hasCreatedAt = in_array('created_at', $columns);
     
-    // Delete any existing custom food with the same name for this member
-    $deleteStmt = $pdo->prepare("DELETE FROM allergies WHERE member_id = ? AND food_name = ? AND is_custom_food = 1");
-    $deleteStmt->execute([$member_id, $food_name]);
-    error_log("Deleted " . $deleteStmt->rowCount() . " existing rows with same food name");
+    // Build INSERT query based on available columns
+    $fields = "member_id, food_name, restaurant, calories, image_path";
+    $placeholders = "?, ?, ?, ?, ?";
+    $values = [$member_id, $food_name, $restaurant, $calories, $image_base64];
     
-    $image_path = null;
-    if ($image_base64) {
-        $image_path = $image_base64;
-        error_log("Image data length: " . strlen($image_path) . " characters");
-        
-        // If image is too large, truncate or skip
-        if (strlen($image_path) > 16777215) { // MEDIUMTEXT limit
-            error_log("WARNING: Image too large, truncating");
-            $image_path = substr($image_path, 0, 16777215);
-        }
+    if ($hasCustomColumn) {
+        $fields .= ", is_custom_food";
+        $placeholders .= ", 1";
+    }
+    if ($hasCreatedAt) {
+        $fields .= ", created_at";
+        $placeholders .= ", NOW()";
     }
     
-    $stmt = $pdo->prepare("INSERT INTO allergies (member_id, food_name, restaurant, calories, image_path, is_custom_food, created_at) VALUES (?, ?, ?, ?, ?, 1, NOW())");
-    $result = $stmt->execute([$member_id, $food_name, $restaurant, $calories, $image_path]);
+    $stmt = $pdo->prepare("INSERT INTO allergies ($fields) VALUES ($placeholders)");
+    $result = $stmt->execute($values);
     
     if ($result) {
-        $custom_food_id = $pdo->lastInsertId();
-        
-        // Verify the data was actually saved
-        $verify = $pdo->prepare("SELECT id, food_name, restaurant, calories, LENGTH(image_path) as img_len FROM allergies WHERE id = ?");
-        $verify->execute([$custom_food_id]);
-        $saved = $verify->fetch(PDO::FETCH_ASSOC);
-        error_log("Verified saved data: " . json_encode($saved));
-        
-        echo json_encode([
-            'success' => true, 
-            'message' => 'Custom food saved successfully', 
-            'custom_food_id' => $custom_food_id,
-            'debug' => [
-                'member_id' => $member_id,
-                'food_name' => $food_name,
-                'restaurant' => $restaurant,
-                'calories' => $calories,
-                'image_saved' => $image_path ? true : false,
-                'image_length_saved' => $saved['img_len'] ?? 0
-            ]
-        ]);
+        echo json_encode(['success' => true, 'message' => 'Custom food saved successfully', 'id' => $pdo->lastInsertId()]);
     } else {
-        error_log("Failed to execute insert statement");
-        echo json_encode(['success' => false, 'message' => 'Failed to save custom food']);
+        echo json_encode(['success' => false, 'message' => 'Failed to save']);
     }
 } catch (PDOException $e) {
     error_log("Database error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>
