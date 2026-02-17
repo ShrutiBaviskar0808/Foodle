@@ -30,6 +30,8 @@ class AppConfig {
   static const String addMealEndpoint = '$baseUrl/add_meal.php';
   static const String getMealsEndpoint = '$baseUrl/get_meals.php';
   static const String deleteMealEndpoint = '$baseUrl/delete_meal.php';
+  static const String saveCustomFoodEndpoint = '$baseUrl/save_custom_food.php';
+  static const String getCustomFoodsEndpoint = '$baseUrl/get_custom_foods.php';
   
   // Request timeout
   static const Duration requestTimeout = Duration(seconds: 15);

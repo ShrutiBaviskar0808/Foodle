@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'select_foods_screen.dart';
 
@@ -168,7 +169,8 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
           itemBuilder: (context, index) {
           final food = allFoods[index];
           final isSelected = selectedFoods.contains(food['name']);
-          final hasImage = food['image']!.isNotEmpty;
+          final imageUrl = food['image']!;
+          final isLocalImage = imageUrl.startsWith('/');
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
@@ -178,25 +180,62 @@ class _AllFavoriteFoodsScreenState extends State<AllFavoriteFoodsScreen> {
             ),
             child: Row(
               children: [
-                hasImage
+                isLocalImage
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: Image.network(food['image']!, width: 60, height: 60, fit: BoxFit.cover),
+                        child: Image.file(
+                          File(imageUrl),
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 60,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.fastfood, color: Colors.orange, size: 30),
+                            );
+                          },
+                        ),
                       )
-                    : Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Center(
-                          child: Text(
-                            food['name']![0].toUpperCase(),
-                            style: const TextStyle(fontSize: 24, color: Colors.orange, fontWeight: FontWeight.bold),
+                    : imageUrl.isNotEmpty
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              imageUrl,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.withValues(alpha: 0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(Icons.fastfood, color: Colors.orange, size: 30),
+                                );
+                              },
+                            ),
+                          )
+                        : Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: Text(
+                                food['name']![0].toUpperCase(),
+                                style: const TextStyle(fontSize: 24, color: Colors.orange, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

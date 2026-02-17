@@ -126,11 +126,11 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
         if (allergyData['success'] == true) {
           final allergyList = allergyData['allergies'] as List? ?? [];
           member['allergies'] = allergyList
+              .where((item) => item['allergy_name'] != null)
               .map((item) => (item['allergy_name'] ?? '').toString())
               .where((name) => name.isNotEmpty)
               .toList();
           
-          // Extract favorite foods from first allergy entry
           if (allergyList.isNotEmpty && allergyList[0]['favorite_foods'] != null) {
             final favFoods = allergyList[0]['favorite_foods'].toString();
             member['favorite_foods'] = favFoods.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();

@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:http/http.dart' as http;
+import '../config.dart';
 
 class SelectFoodsScreen extends StatefulWidget {
   final List<String>? initialFoods;
@@ -26,8 +28,10 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   final TextEditingController nameController = TextEditingController();
   final TextEditingController restaurantController = TextEditingController();
   final TextEditingController caloriesController = TextEditingController();
+  final TextEditingController notesController = TextEditingController();
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
+  int? memberId;
 
   @override
   void initState() {
@@ -39,7 +43,15 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
     allFoods = List.from(widget.availableFoods);
     selectedFoods = (widget.initialFoods ?? []).toSet();
     filteredFoods = allFoods;
+    _loadMemberId();
     _loadCustomFoods();
+  }
+
+  Future<void> _loadMemberId() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      memberId = prefs.getInt('current_member_id');
+    });
   }
 
   @override
@@ -49,6 +61,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
     nameController.dispose();
     restaurantController.dispose();
     caloriesController.dispose();
+    notesController.dispose();
     super.dispose();
   }
 
@@ -174,18 +187,6 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                       ),
                     ),
                   ],
-                ),
-              ),
-            if (_tabController.index == 1)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  'Tag Your Own Food',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[700],
-                  ),
                 ),
               ),
             Expanded(
@@ -426,10 +427,23 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                 const SizedBox(height: 8),
                 Text('Optional, but makes memories sweeter', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
                 const SizedBox(height: 20),
-                const Text('How do they like it made?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const Text('Calories (Optional)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 const SizedBox(height: 10),
                 TextField(
                   controller: caloriesController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: 'Enter calories (e.g., 295)',
+                    filled: true,
+                    fillColor: Colors.grey[100],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text('How do they like it made?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: notesController,
                   maxLines: 4,
                   decoration: InputDecoration(
                     hintText: 'Extra cheese, No onions, Gluten-free crust,\nLight sauce etc..',
@@ -446,18 +460,64 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                     onPressed: () async {
                       if (nameController.text.isNotEmpty) {
                         final navigator = Navigator.of(context);
+                        final scaffoldMessenger = ScaffoldMessenger.of(context);
+                        
+                        String? imageBase64;
+                        if (_selectedImage != null) {
+                          final bytes = await _selectedImage!.readAsBytes();
+                          imageBase64 = base64Encode(bytes);
+                        }
+                        
                         final newFood = {
                           'name': nameController.text,
                           'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                          'calories': '0',
+                          'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
                           'image': _selectedImage?.path ?? '',
                         };
-                        customFoods.add(newFood);
-                        selectedFoods.add(nameController.text);
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('custom_foods', json.encode(customFoods));
-                        if (!mounted) return;
-                        navigator.pop(selectedFoods.toList());
+                        
+                        if (memberId != null) {
+                          try {
+                            final response = await http.post(
+                              Uri.parse(AppConfig.saveCustomFoodEndpoint),
+                              headers: AppConfig.jsonHeaders,
+                              body: json.encode({
+                                'member_id': memberId,
+                                'food_name': nameController.text,
+                                'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                                'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                                'image_base64': imageBase64,
+                              }),
+                            ).timeout(AppConfig.requestTimeout);
+                            
+                            final data = json.decode(response.body);
+                            if (data['success'] == true) {
+                              customFoods.add(newFood);
+                              selectedFoods.add(nameController.text);
+                              final prefs = await SharedPreferences.getInstance();
+                              await prefs.setString('custom_foods', json.encode(customFoods));
+                              if (!mounted) return;
+                              navigator.pop(selectedFoods.toList());
+                            } else {
+                              scaffoldMessenger.showSnackBar(
+                                SnackBar(content: Text('Error: ${data['message']}')),
+                              );
+                            }
+                          } catch (e) {
+                            customFoods.add(newFood);
+                            selectedFoods.add(nameController.text);
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setString('custom_foods', json.encode(customFoods));
+                            if (!mounted) return;
+                            navigator.pop(selectedFoods.toList());
+                          }
+                        } else {
+                          customFoods.add(newFood);
+                          selectedFoods.add(nameController.text);
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString('custom_foods', json.encode(customFoods));
+                          if (!mounted) return;
+                          navigator.pop(selectedFoods.toList());
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(
