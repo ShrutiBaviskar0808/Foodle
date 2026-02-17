@@ -211,10 +211,10 @@ class _StonesTabState extends State<StonesTab> {
   String _getFallbackImageUrl(String stoneName) {
     final name = stoneName.toLowerCase();
     final Map<String, String> specificFallbacks = {
-      'spinel': 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400&h=300&fit=crop&q=80',
-      'gahnospinel': 'https://images.unsplash.com/photo-1611085583191-a3b181a88401?w=400&h=300&fit=crop&q=80',
-      'tugtupite': 'https://images.unsplash.com/photo-1583937443569-f14a5c1b6e9e?w=400&h=300&fit=crop&q=80',
-      'turquoise': 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=400&h=300&fit=crop&q=80',
+      'gahnospinel': 'https://www.gemsociety.org/wp-content/uploads/2013/09/blue-spinel-300x300.jpg',
+      'spinel': 'https://www.gemsociety.org/wp-content/uploads/2013/09/Spinel1-Sri-Lanka-300x300.png',
+      'tugtupite': 'https://www.gemsociety.org/wp-content/uploads/2013/12/6845451035_268f7c39f0_z-300x300.jpg',
+      'turquoise': 'https://www.gemsociety.org/wp-content/uploads/2016/05/Turquoise-in-silver-jewelry-Arizona-and-New-Mexico-300x300.jpg',
     };
     
     for (var key in specificFallbacks.keys) {
