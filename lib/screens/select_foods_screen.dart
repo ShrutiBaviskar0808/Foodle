@@ -470,38 +470,61 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                         };
                         
                         if (memberId != null) {
+                          debugPrint('=== CUSTOM FOOD SAVE DEBUG ===');
+                          debugPrint('Member ID: $memberId');
+                          debugPrint('Food Name: ${nameController.text}');
+                          debugPrint('Restaurant: ${restaurantController.text.isEmpty ? 'Custom' : restaurantController.text}');
+                          debugPrint('Calories: ${caloriesController.text.isEmpty ? '0' : caloriesController.text}');
+                          debugPrint('Has Image: ${_selectedImage != null}');
+                          debugPrint('Endpoint: ${AppConfig.saveCustomFoodEndpoint}');
+                          
                           try {
+                            final requestBody = {
+                              'member_id': memberId,
+                              'food_name': nameController.text,
+                              'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
+                              'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
+                              'image_base64': imageBase64,
+                            };
+                            debugPrint('Request Body: ${json.encode(requestBody)}');
+                            
                             final response = await http.post(
                               Uri.parse(AppConfig.saveCustomFoodEndpoint),
                               headers: AppConfig.jsonHeaders,
-                              body: json.encode({
-                                'member_id': memberId,
-                                'food_name': nameController.text,
-                                'restaurant': restaurantController.text.isEmpty ? 'Custom' : restaurantController.text,
-                                'calories': caloriesController.text.isEmpty ? '0' : caloriesController.text,
-                                'image_base64': imageBase64,
-                              }),
+                              body: json.encode(requestBody),
                             ).timeout(AppConfig.requestTimeout);
+                            
+                            debugPrint('Response Status: ${response.statusCode}');
+                            debugPrint('Response Body: ${response.body}');
                             
                             final data = json.decode(response.body);
                             if (data['success'] == true) {
+                              debugPrint('✅ Custom food saved successfully to database!');
                               customFoods.add(newFood);
                               selectedFoods.add(nameController.text);
                               final prefs = await SharedPreferences.getInstance();
                               await prefs.setString('custom_foods', json.encode(customFoods));
                               if (!mounted) return;
+                              scaffoldMessenger.showSnackBar(
+                                const SnackBar(content: Text('Custom food saved successfully!'), backgroundColor: Colors.green),
+                              );
                               navigator.pop(selectedFoods.toList());
                             } else {
+                              debugPrint('❌ Database save failed: ${data['message']}');
                               scaffoldMessenger.showSnackBar(
                                 SnackBar(content: Text('Error: ${data['message']}')),
                               );
                             }
                           } catch (e) {
+                            debugPrint('❌ Exception during save: $e');
                             customFoods.add(newFood);
                             selectedFoods.add(nameController.text);
                             final prefs = await SharedPreferences.getInstance();
                             await prefs.setString('custom_foods', json.encode(customFoods));
                             if (!mounted) return;
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(content: Text('Saved locally (offline): $e')),
+                            );
                             navigator.pop(selectedFoods.toList());
                           }
                         } else {
