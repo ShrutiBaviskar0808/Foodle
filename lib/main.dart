@@ -7,8 +7,11 @@ import 'forgot_password.dart';
 import 'reset_password.dart';
 import 'server_test.dart';
 import 'debug_page.dart';
+import 'services/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().initialize();
   runApp(const MyApp());
 }
 

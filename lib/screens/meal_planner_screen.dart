@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config.dart';
+import '../services/notification_service.dart';
 
 class MealPlannerScreen extends StatefulWidget {
   const MealPlannerScreen({super.key});
@@ -17,6 +18,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   @override
   void initState() {
     super.initState();
+    NotificationService().initialize();
     _loadMealPlans();
   }
 
@@ -96,6 +98,38 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
+          final mealId = data['meal_id'] ?? DateTime.now().millisecondsSinceEpoch;
+          
+          // Schedule notification
+          try {
+            final dateParts = date.split('-');
+            final timeParts = time.split(':');
+            final mealDateTime = DateTime(
+              int.parse(dateParts[0]),
+              int.parse(dateParts[1]),
+              int.parse(dateParts[2]),
+              int.parse(timeParts[0]),
+              int.parse(timeParts[1]),
+            );
+            
+            await NotificationService().scheduleMealReminder(
+              id: mealId is int ? mealId : int.parse(mealId.toString()),
+              mealName: mealName,
+              mealDateTime: mealDateTime,
+            );
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('✅ Meal planned! You\'ll get a reminder 2 hours before.'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } catch (e) {
+            debugPrint('Error scheduling notification: $e');
+          }
+          
           await _loadMealPlans();
         }
       }
@@ -172,6 +206,9 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
     if (mealId == null) return;
     
     try {
+      // Cancel notification
+      await NotificationService().cancelNotification(int.parse(mealId));
+      
       final response = await http.post(
         Uri.parse(AppConfig.deleteMealEndpoint),
         headers: AppConfig.jsonHeaders,
@@ -180,6 +217,11 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
       
       if (response.statusCode == 200) {
         await _loadMealPlans();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Meal deleted'), backgroundColor: Colors.orange),
+          );
+        }
       }
     } catch (e) {
       debugPrint('Error deleting meal: $e');
