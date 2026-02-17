@@ -5,6 +5,10 @@ import 'learn_guides_screen.dart';
 import 'settings_about_screen.dart';
 import 'mohs_hardness_scale_screen.dart';
 import 'rock_formation_timeline_screen.dart';
+import 'rock_cycle_screen.dart';
+import 'field_tools_screen.dart';
+import 'crystal_systems_screen.dart';
+import 'mineral_properties_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -83,6 +87,34 @@ class HomeScreen extends StatelessWidget {
                         Icons.timeline,
                         Colors.indigo,
                         () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RockFormationTimelineScreen())),
+                      ),
+                      _build3DButton(
+                        context,
+                        'Rock\nCycle',
+                        Icons.autorenew,
+                        Colors.green,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const RockCycleScreen())),
+                      ),
+                      _build3DButton(
+                        context,
+                        'Field\nTools',
+                        Icons.construction,
+                        Colors.red,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const FieldToolsScreen())),
+                      ),
+                      _build3DButton(
+                        context,
+                        'Crystal\nSystems',
+                        Icons.diamond,
+                        Colors.cyan,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CrystalSystemsScreen())),
+                      ),
+                      _build3DButton(
+                        context,
+                        'Mineral\nProperties',
+                        Icons.science,
+                        Colors.pink,
+                        () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MineralPropertiesScreen())),
                       ),
                     ],
                   ),
