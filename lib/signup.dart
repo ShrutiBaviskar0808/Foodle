@@ -325,23 +325,23 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-                const Center(
-                  child: Text(
-                    'Or sign in with',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildSocialButton('G', Colors.red),
-                    const SizedBox(width: 16),
-                    _buildSocialButton('f', Colors.blue),
-                    const SizedBox(width: 16),
-                    _buildSocialButton('', Colors.black),
-                  ],
-                ),
+                // const Center(
+                //   child: Text(
+                //     'Or sign in with',
+                //     style: TextStyle(fontSize: 14, color: Colors.grey),
+                //   ),
+                // ),
+                // const SizedBox(height: 20),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     _buildSocialButton('G', Colors.red),
+                //     const SizedBox(width: 16),
+                //     _buildSocialButton('f', Colors.blue),
+                //     const SizedBox(width: 16),
+                //     _buildSocialButton('', Colors.black),
+                //   ],
+                // ),
                 const SizedBox(height: 30),
                 Center(
                   child: Row(
@@ -388,26 +388,26 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  Widget _buildSocialButton(String text, Color color) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Center(
-        child: text.isEmpty 
-          ? Icon(Icons.apple, color: color, size: 24)
-          : Text(
-              text,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-            ),
-      ),
-    );
-  }
+  // Widget _buildSocialButton(String text, Color color) {
+  //   return Container(
+  //     width: 56,
+  //     height: 56,
+  //     decoration: BoxDecoration(
+  //       border: Border.all(color: Colors.grey.shade300),
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Center(
+  //       child: text.isEmpty 
+  //         ? Icon(Icons.apple, color: color, size: 24)
+  //         : Text(
+  //             text,
+  //             style: TextStyle(
+  //               fontSize: 20,
+  //               fontWeight: FontWeight.bold,
+  //               color: color,
+  //             ),
+  //           ),
+  //     ),
+  //   );
+  // }
 }

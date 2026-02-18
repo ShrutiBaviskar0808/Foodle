@@ -274,26 +274,26 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               const SizedBox(height: 32),
-              const Center(
-                child: Text(
-                  'Or sign in with',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildSocialButton(Icons.g_mobiledata, Colors.red),
-                  const SizedBox(width: 16),
-                  _buildSocialButton(Icons.facebook, Colors.blue),
-                  const SizedBox(width: 16),
-                  _buildSocialButton(Icons.apple, Colors.black),
-                ],
-              ),
+              // const Center(
+              //   child: Text(
+              //     'Or sign in with',
+              //     style: TextStyle(
+              //       color: Colors.grey,
+              //       fontSize: 14,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(height: 20),
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: [
+              //     _buildSocialButton(Icons.g_mobiledata, Colors.red),
+              //     const SizedBox(width: 16),
+              //     _buildSocialButton(Icons.facebook, Colors.blue),
+              //     const SizedBox(width: 16),
+              //     _buildSocialButton(Icons.apple, Colors.black),
+              //   ],
+              // ),
               const SizedBox(height: 40),
               Center(
                 child: Row(
@@ -325,15 +325,15 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildSocialButton(IconData icon, Color color) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(icon, color: color, size: 24),
-    );
-  }
+  // Widget _buildSocialButton(IconData icon, Color color) {
+  //   return Container(
+  //     width: 56,
+  //     height: 56,
+  //     decoration: BoxDecoration(
+  //       border: Border.all(color: Colors.grey.shade300),
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Icon(icon, color: color, size: 24),
+  //   );
+  // }
 }
