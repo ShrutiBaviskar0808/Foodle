@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'login.dart';
 import 'signup.dart';
 import 'main_navigation.dart';
@@ -18,6 +19,12 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+  Future<String> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    return userId != null ? '/home' : '/onboarding';
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,7 +34,17 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFFF8C00)),
         textTheme: GoogleFonts.interTextTheme(),
       ),
-      initialRoute: '/onboarding',
+      home: FutureBuilder<String>(
+        future: _checkLoginStatus(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator(color: Color(0xFFFF8C00))),
+            );
+          }
+          return snapshot.data == '/home' ? const MainNavigation() : const OnboardingPage();
+        },
+      ),
       routes: {
         '/onboarding': (context) => const OnboardingPage(),
         '/login': (context) => const LoginPage(),
