@@ -334,7 +334,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                       ),
                     ],
                   ),
-                  const Divider(thickness: 1, color: Colors.grey),
+                  const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -345,7 +345,7 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
                   ),
                   const SizedBox(height: 24),
                   const Text('Favorite Food', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const Divider(thickness: 1, color: Colors.grey),
+                  const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
                   const SizedBox(height: 12),
                   ...(favoriteFoods.isEmpty
                       ? [const Text('No favorite foods added', style: TextStyle(color: Colors.grey))]

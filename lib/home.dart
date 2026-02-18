@@ -251,12 +251,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
               Container(
                 height: 90,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFE8D00),
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(40),
-                    bottomRight: Radius.circular(40),
-                  ),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFE8D00),
                 ),
               ),
               SafeArea(
