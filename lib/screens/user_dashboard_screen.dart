@@ -399,6 +399,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                           child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ),
+                    ],
                   ),
                 ),
               ),
