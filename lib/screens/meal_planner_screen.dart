@@ -241,28 +241,32 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.orange.shade400, Colors.deepOrange.shade300],
-                ),
-              ),
-              child: const Row(
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.restaurant_menu, color: Colors.white, size: 32),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Plan meals that everyone will love',
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.orange.shade400, Colors.deepOrange.shade300],
+                      ),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.restaurant_menu, color: Colors.white, size: 32),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Plan meals that everyone will love',
+                            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: mealPlans.isEmpty
+                  Expanded(
+                    child: mealPlans.isEmpty
                   ? Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -358,6 +362,9 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                         );
                       },
                     ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
