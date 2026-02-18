@@ -166,150 +166,145 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
       extendBodyBehindAppBar: true,
       backgroundColor: const Color(0xFFFE8D00),
       body: SafeArea(
-        child: Column(
-        children: [
-          Stack(
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              Container(
-                height: 220,
-                decoration: const BoxDecoration(color: Color(0xFFFE8D00)),
-              ),
-              Container(
-                height: 90,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFE8D00),
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(40),
-                    bottomRight: Radius.circular(40),
+              Stack(
+                children: [
+                  Container(
+                    height: 220,
+                    decoration: const BoxDecoration(color: Color(0xFFFE8D00)),
                   ),
-                ),
-              ),
-              SafeArea(
-                bottom: false,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        top: 8,
-                        left: 16,
-                        right: 16,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                              size: 28,
-                            ),
-                            onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                          ),
-                          Text(
-                            'Foodle',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: size.width * 0.08,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.white,
-                            child: Text(
-                              userName.isNotEmpty
-                                  ? userName[0].toUpperCase()
-                                  : 'U',
-                              style: const TextStyle(
-                                color: Color(0xFFFE8D00),
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
+                  Container(
+                    height: 90,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFFE8D00),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(40),
+                        bottomRight: Radius.circular(40),
                       ),
                     ),
-                    const SizedBox(height: 50),
-                    Stack(
+                  ),
+                  SafeArea(
+                    bottom: false,
+                    child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: size.width * 0.13,
-                          backgroundColor: Colors.white,
-                          backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
-                          child: _profileImage == null
-                              ? Text(
-                                  userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                                  style: TextStyle(
-                                    fontSize: size.width * 0.12,
-                                    color: const Color(0xFFFE8D00),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: 8,
+                            left: 16,
+                            right: 16,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.arrow_back,
+                                  color: Colors.white,
+                                  size: 28,
+                                ),
+                                onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                              Text(
+                                'Foodle',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: MediaQuery.of(context).size.width * 0.08,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Colors.white,
+                                child: Text(
+                                  userName.isNotEmpty
+                                      ? userName[0].toUpperCase()
+                                      : 'U',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFE8D00),
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                )
-                              : null,
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: _showImageSourceDialog,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [Colors.orange.shade400, Colors.deepOrange.shade300],
                                 ),
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 3),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
                               ),
-                              child: const Icon(
-                                Icons.camera_alt,
-                                color: Colors.white,
-                                size: 20,
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 50),
+                        Stack(
+                          children: [
+                            CircleAvatar(
+                              radius: MediaQuery.of(context).size.width * 0.13,
+                              backgroundColor: Colors.white,
+                              backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
+                              child: _profileImage == null
+                                  ? Text(
+                                      userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                      style: TextStyle(
+                                        fontSize: MediaQuery.of(context).size.width * 0.12,
+                                        color: const Color(0xFFFE8D00),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: _showImageSourceDialog,
+                                child: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [Colors.orange.shade400, Colors.deepOrange.shade300],
+                                    ),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 3),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.2),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.camera_alt,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
                               ),
                             ),
+                          ],
+                        ),
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                        Text(
+                          userName,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: MediaQuery.of(context).size.width * 0.06,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: size.height * 0.02),
-                    Text(
-                      userName,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: size.width * 0.06,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          Expanded(
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                ),
-                child: SingleChildScrollView(
+                child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 5, 20, 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,14 +399,12 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                           child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ),
-                    ],
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
       ),
     );
   }
