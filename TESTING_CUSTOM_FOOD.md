@@ -33,7 +33,7 @@ Food Name: Test Burger
 Restaurant: Test Restaurant
 Calories: 500
 Has Image: true/false
-Endpoint: http://192.168.29.159/foodle/save_custom_food.php
+Endpoint: https://foodle.thesoftwaretoolkit.com/api/save_custom_food.php
 Request Body: {...}
 Response Status: 200
 Response Body: {...}
@@ -91,7 +91,7 @@ ADD COLUMN IF NOT EXISTS is_custom_food TINYINT(1) DEFAULT 0;
 **Symptom:** Exception during save: TimeoutException
 **Solution:** 
 1. Make sure XAMPP Apache is running
-2. Check if you can access: http://192.168.29.159/foodle/save_custom_food.php
+2. Check if you can access: https://foodle.thesoftwaretoolkit.com/api/save_custom_food.php
 3. Update IP in `lib/config.dart` if needed
 
 ## Success Indicators
