@@ -148,9 +148,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.orange, Colors.orange.withValues(alpha: 0.8)],
+                  colors: [Color(0xFFFE8D00), Color(0xFFFE8D00)],
                 ),
               ),
               child: const Column(
@@ -164,12 +164,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.home, color: Colors.orange),
+              leading: const Icon(Icons.home, color: Color(0xFFFE8D00)),
               title: const Text('Home'),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
-              leading: const Icon(Icons.person, color: Colors.orange),
+              leading: const Icon(Icons.person, color: Color(0xFFFE8D00)),
               title: const Text('My Profile'),
               onTap: () {
                 Navigator.pop(context);
@@ -177,7 +177,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.family_restroom, color: Colors.orange),
+              leading: const Icon(Icons.family_restroom, color: Color(0xFFFE8D00)),
               title: const Text('Family'),
               onTap: () {
                 Navigator.pop(context);
@@ -185,7 +185,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.place, color: Colors.orange),
+              leading: const Icon(Icons.place, color: Color(0xFFFE8D00)),
               title: const Text('Favorite Places'),
               onTap: () {
                 Navigator.pop(context);
@@ -193,7 +193,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.people, color: Colors.orange),
+              leading: const Icon(Icons.people, color: Color(0xFFFE8D00)),
               title: const Text('Friends'),
               onTap: () {
                 Navigator.pop(context);
@@ -399,7 +399,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           )).toList(),
                         ),
                       ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -428,7 +428,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           },
                         ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

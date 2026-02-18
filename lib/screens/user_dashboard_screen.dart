@@ -44,11 +44,13 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     if (userId == null) return;
 
     try {
-      final response = await http.post(
-        Uri.parse(AppConfig.getMembersEndpoint),
-        headers: AppConfig.jsonHeaders,
-        body: json.encode({'owner_user_id': userId}),
-      ).timeout(AppConfig.requestTimeout);
+      final response = await http
+          .post(
+            Uri.parse(AppConfig.getMembersEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'owner_user_id': userId}),
+          )
+          .timeout(AppConfig.requestTimeout);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -57,11 +59,11 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
               .map((item) => Map<String, dynamic>.from(item))
               .where((member) => (member['relation'] ?? 'Family') == 'Family')
               .toList();
-          
+
           for (var member in members) {
             await _loadMemberDetails(member);
           }
-          
+
           setState(() {
             familyMembers = members;
           });
@@ -78,11 +80,13 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     if (userId == null) return;
 
     try {
-      final response = await http.post(
-        Uri.parse(AppConfig.getMembersEndpoint),
-        headers: AppConfig.jsonHeaders,
-        body: json.encode({'owner_user_id': userId}),
-      ).timeout(AppConfig.requestTimeout);
+      final response = await http
+          .post(
+            Uri.parse(AppConfig.getMembersEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'owner_user_id': userId}),
+          )
+          .timeout(AppConfig.requestTimeout);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -91,11 +95,11 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
               .map((item) => Map<String, dynamic>.from(item))
               .where((member) => (member['relation'] ?? 'Family') != 'Family')
               .toList();
-          
+
           for (var friend in friendsList) {
             await _loadMemberDetails(friend);
           }
-          
+
           setState(() {
             friends = friendsList;
           });
@@ -117,44 +121,63 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
 
     try {
       // Load allergies and favorite foods
-      final allergyResponse = await http.post(
-        Uri.parse(AppConfig.getAllergiesEndpoint),
-        headers: AppConfig.jsonHeaders,
-        body: json.encode({'member_id': memberId}),
-      ).timeout(AppConfig.requestTimeout);
+      final allergyResponse = await http
+          .post(
+            Uri.parse(AppConfig.getAllergiesEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'member_id': memberId}),
+          )
+          .timeout(AppConfig.requestTimeout);
 
       if (allergyResponse.statusCode == 200) {
         final allergyData = json.decode(allergyResponse.body);
         if (allergyData['success'] == true) {
           final allergyList = allergyData['allergies'] as List? ?? [];
-          
+
           // Extract allergies (non-null allergy_name)
           member['allergies'] = allergyList
-              .where((item) => item['allergy_name'] != null && item['allergy_name'].toString().isNotEmpty)
+              .where(
+                (item) =>
+                    item['allergy_name'] != null &&
+                    item['allergy_name'].toString().isNotEmpty,
+              )
               .map((item) => item['allergy_name'].toString())
               .toList();
-          
+
           // Extract favorite food names
-          if (allergyList.isNotEmpty && allergyList[0]['favorite_foods'] != null) {
+          if (allergyList.isNotEmpty &&
+              allergyList[0]['favorite_foods'] != null) {
             final favFoods = allergyList[0]['favorite_foods'].toString();
-            member['favorite_foods'] = favFoods.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+            member['favorite_foods'] = favFoods
+                .split(',')
+                .map((e) => e.trim())
+                .where((e) => e.isNotEmpty)
+                .toList();
           } else {
             member['favorite_foods'] = [];
           }
-          
+
           // Extract custom foods data (where food_name is not null)
           final customFoods = allergyList
-              .where((item) => item['food_name'] != null && item['food_name'].toString().trim().isNotEmpty)
-              .map((item) => {
-                'name': item['food_name']?.toString() ?? '',
-                'restaurant': item['restaurant']?.toString() ?? 'Custom',
-                'calories': item['calories']?.toString() ?? '0',
-                'image': item['image_path']?.toString() ?? '',
-              })
+              .where(
+                (item) =>
+                    item['food_name'] != null &&
+                    item['food_name'].toString().trim().isNotEmpty,
+              )
+              .map(
+                (item) => {
+                  'name': item['food_name']?.toString() ?? '',
+                  'restaurant': item['restaurant']?.toString() ?? 'Custom',
+                  'calories': item['calories']?.toString() ?? '0',
+                  'image': item['image_path']?.toString() ?? '',
+                },
+              )
               .toList();
-          
+
           member['custom_foods_data'] = customFoods;
-          debugPrint('Loaded ${customFoods.length} custom foods for member $memberId');
+          debugPrint(
+            'Loaded ${customFoods.length} custom foods for member $memberId',
+          );
         } else {
           member['allergies'] = [];
           member['favorite_foods'] = [];
@@ -179,11 +202,13 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
     if (userId == null) return;
 
     try {
-      final response = await http.post(
-        Uri.parse(AppConfig.getFoodsEndpoint),
-        headers: AppConfig.jsonHeaders,
-        body: json.encode({'user_id': userId}),
-      ).timeout(AppConfig.requestTimeout);
+      final response = await http
+          .post(
+            Uri.parse(AppConfig.getFoodsEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'user_id': userId}),
+          )
+          .timeout(AppConfig.requestTimeout);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -203,20 +228,18 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final padding = size.width * 0.05;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: const Color(0xFFFE8D00),
-      body: Column(
+      body: SafeArea(
+        child: Column(
         children: [
           Stack(
             children: [
               Container(
                 height: 280,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFE8D00),
-                ),
+                decoration: const BoxDecoration(color: Color(0xFFFE8D00)),
               ),
               Container(
                 height: 90,
@@ -233,12 +256,20 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.only(top: 8, left: 16, right: 16),
+                      padding: const EdgeInsets.only(
+                        top: 8,
+                        left: 16,
+                        right: 16,
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.menu, color: Colors.white, size: 28),
+                            icon: const Icon(
+                              Icons.menu,
+                              color: Colors.white,
+                              size: 28,
+                            ),
                             onPressed: () => Navigator.pop(context),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
@@ -255,7 +286,9 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                             radius: 20,
                             backgroundColor: Colors.white,
                             child: Text(
-                              userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                              userName.isNotEmpty
+                                  ? userName[0].toUpperCase()
+                                  : 'U',
                               style: const TextStyle(
                                 color: Color(0xFFFE8D00),
                                 fontSize: 20,
@@ -316,196 +349,329 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                   topRight: Radius.circular(40),
                 ),
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.all(padding),
+                  padding: const EdgeInsets.fromLTRB(20, 5, 20, 20),
                   child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Card(
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Personal Information', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                            const SizedBox(height: 15),
-                            _buildInfoRow(Icons.person, 'Name', userName),
-                            const SizedBox(height: 10),
-                            _buildInfoRow(Icons.email, 'Email', userEmail),
-                            if (userId != null) const SizedBox(height: 10),
-                            if (userId != null) _buildInfoRow(Icons.badge, 'User ID', userId.toString()),
-                          ],
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Personal Information',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              _buildInfoRow(Icons.person, 'Name', userName),
+                              const SizedBox(height: 6),
+                              _buildInfoRow(Icons.email, 'Email', userEmail),
+                              if (userId != null) const SizedBox(height: 6),
+                              if (userId != null)
+                                _buildInfoRow(
+                                  Icons.badge,
+                                  'User ID',
+                                  userId.toString(),
+                                ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Family Members', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        TextButton.icon(
-                          onPressed: () async {
-                            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
-                            _loadUserData();
-                          },
-                          icon: const Icon(Icons.add, color: Colors.orange),
-                          label: const Text('Add', style: TextStyle(color: Colors.orange)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    familyMembers.isEmpty
-                        ? const Text('No family members added yet', style: TextStyle(color: Colors.grey))
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: familyMembers.length,
-                            itemBuilder: (context, index) {
-                              final member = familyMembers[index];
-                              final allergies = member['allergies'] as List? ?? [];
-                              final favFoods = member['favorite_foods'] as List? ?? [];
-                              final customFoodsData = member['custom_foods_data'] as List<Map<String, String>>? ?? [];
-                              final allergyText = allergies.isEmpty ? 'No allergies' : allergies.join(', ');
-                              
-                              // Build food text with custom food details
-                              String foodText = '';
-                              if (favFoods.isNotEmpty) {
-                                final foodDetails = favFoods.map((foodName) {
-                                  final customFood = customFoodsData.firstWhere(
-                                    (f) => f['name'] == foodName,
-                                    orElse: () => {},
-                                  );
-                                  if (customFood.isNotEmpty) {
-                                    return '$foodName (${customFood['restaurant']}, ${customFood['calories']} cal)';
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Family Members',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AddMemberScreen(),
+                                ),
+                              );
+                              _loadUserData();
+                            },
+                            icon: const Icon(Icons.add, color: Colors.orange),
+                            label: const Text(
+                              'Add',
+                              style: TextStyle(color: Colors.orange),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 0),
+
+                      familyMembers.isEmpty
+                          ? const Text('No family members added yet')
+                          : MediaQuery.removePadding(
+                              context: context,
+                              removeTop: true,
+                              removeBottom: true,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: familyMembers.length,
+                                itemBuilder: (context, index) {
+                                  final member = familyMembers[index];
+                                  final allergies =
+                                      member['allergies'] as List? ?? [];
+                                  final favFoods =
+                                      member['favorite_foods'] as List? ?? [];
+                                  final customFoodsData =
+                                      member['custom_foods_data']
+                                          as List<Map<String, String>>? ??
+                                      [];
+                                  final allergyText = allergies.isEmpty
+                                      ? 'No allergies'
+                                      : allergies.join(', ');
+
+                                  // Build food text with custom food details
+                                  String foodText = '';
+                                  if (favFoods.isNotEmpty) {
+                                    final foodDetails = favFoods
+                                        .map((foodName) {
+                                          final customFood = customFoodsData
+                                              .firstWhere(
+                                                (f) => f['name'] == foodName,
+                                                orElse: () => {},
+                                              );
+                                          if (customFood.isNotEmpty) {
+                                            return '$foodName (${customFood['restaurant']}, ${customFood['calories']} cal)';
+                                          }
+                                          return foodName;
+                                        })
+                                        .join(', ');
+                                    foodText = ' • Likes: $foodDetails';
                                   }
-                                  return foodName;
-                                }).join(', ');
-                                foodText = ' • Likes: $foodDetails';
-                              }
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: Colors.orange.withValues(alpha: 0.2),
-                                    backgroundImage: member['image_path'] != null ? FileImage(File(member['image_path'])) : null,
-                                    child: member['image_path'] == null ? const Icon(Icons.person, color: Colors.orange) : null,
-                                  ),
-                                  title: Text(member['display_name'] ?? ''),
-                                  subtitle: Text(
-                                    '${member['relation'] ?? 'Family'} • $allergyText$foodText',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Friends', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        TextButton.icon(
-                          onPressed: () async {
-                            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemberScreen()));
-                            _loadUserData();
-                          },
-                          icon: const Icon(Icons.add, color: Colors.orange),
-                          label: const Text('Add', style: TextStyle(color: Colors.orange)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    friends.isEmpty
-                        ? const Text('No friends added yet', style: TextStyle(color: Colors.grey))
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: friends.length,
-                            itemBuilder: (context, index) {
-                              final friend = friends[index];
-                              final allergies = friend['allergies'] as List? ?? [];
-                              final favFoods = friend['favorite_foods'] as List? ?? [];
-                              final customFoodsData = friend['custom_foods_data'] as List<Map<String, String>>? ?? [];
-                              final allergyText = allergies.isEmpty ? 'No allergies' : allergies.join(', ');
-                              
-                              // Build food text with custom food details
-                              String foodText = '';
-                              if (favFoods.isNotEmpty) {
-                                final foodDetails = favFoods.map((foodName) {
-                                  final customFood = customFoodsData.firstWhere(
-                                    (f) => f['name'] == foodName,
-                                    orElse: () => {},
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 4),
+                                    child: ListTile(
+                                      minVerticalPadding: 0,
+                                      minLeadingWidth: 0,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 2,
+                                          ),
+                                      leading: CircleAvatar(
+                                        backgroundColor: Colors.orange
+                                            .withValues(alpha: 0.2),
+                                        backgroundImage:
+                                            member['image_path'] != null
+                                            ? FileImage(
+                                                File(member['image_path']),
+                                              )
+                                            : null,
+                                        child: member['image_path'] == null
+                                            ? const Icon(
+                                                Icons.person,
+                                                color: Colors.orange,
+                                              )
+                                            : null,
+                                      ),
+                                      title: Text(member['display_name'] ?? ''),
+                                      subtitle: Text(
+                                        '${member['relation'] ?? 'Family'} • $allergyText$foodText',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
                                   );
-                                  if (customFood.isNotEmpty) {
-                                    return '$foodName (${customFood['restaurant']}, ${customFood['calories']} cal)';
+                                },
+                              ),
+                            ),
+                      const SizedBox(height: 0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Friends',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AddMemberScreen(),
+                                ),
+                              );
+                              _loadUserData();
+                            },
+                            icon: const Icon(Icons.add, color: Colors.orange),
+                            label: const Text(
+                              'Add',
+                              style: TextStyle(color: Colors.orange),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 0),
+                      friends.isEmpty
+                          ? const Text(
+                              'No friends added yet',
+                              style: TextStyle(color: Colors.grey),
+                            )
+                          : MediaQuery.removePadding(
+                              context: context,
+                              removeTop: true,
+                              removeBottom: true,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+
+                                itemCount: friends.length,
+                                itemBuilder: (context, index) {
+                                  final friend = friends[index];
+                                  final allergies =
+                                      friend['allergies'] as List? ?? [];
+                                  final favFoods =
+                                      friend['favorite_foods'] as List? ?? [];
+                                  final customFoodsData =
+                                      friend['custom_foods_data']
+                                          as List<Map<String, String>>? ??
+                                      [];
+                                  final allergyText = allergies.isEmpty
+                                      ? 'No allergies'
+                                      : allergies.join(', ');
+
+                                  // Build food text with custom food details
+                                  String foodText = '';
+                                  if (favFoods.isNotEmpty) {
+                                    final foodDetails = favFoods
+                                        .map((foodName) {
+                                          final customFood = customFoodsData
+                                              .firstWhere(
+                                                (f) => f['name'] == foodName,
+                                                orElse: () => {},
+                                              );
+                                          if (customFood.isNotEmpty) {
+                                            return '$foodName (${customFood['restaurant']}, ${customFood['calories']} cal)';
+                                          }
+                                          return foodName;
+                                        })
+                                        .join(', ');
+                                    foodText = ' • Likes: $foodDetails';
                                   }
-                                  return foodName;
-                                }).join(', ');
-                                foodText = ' • Likes: $foodDetails';
-                              }
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                child: ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: Colors.blue.withValues(alpha: 0.2),
-                                    backgroundImage: friend['image_path'] != null ? FileImage(File(friend['image_path'])) : null,
-                                    child: friend['image_path'] == null ? const Icon(Icons.person, color: Colors.blue) : null,
-                                  ),
-                                  title: Text(friend['display_name'] ?? ''),
-                                  subtitle: Text(
-                                    '${friend['relation'] ?? 'Friend'} • $allergyText$foodText',
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 4),
+                                    child: ListTile(
+                                      leading: CircleAvatar(
+                                        backgroundColor: Colors.blue.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        backgroundImage:
+                                            friend['image_path'] != null
+                                            ? FileImage(
+                                                File(friend['image_path']),
+                                              )
+                                            : null,
+                                        child: friend['image_path'] == null
+                                            ? const Icon(
+                                                Icons.person,
+                                                color: Colors.blue,
+                                              )
+                                            : null,
+                                      ),
+                                      title: Text(friend['display_name'] ?? ''),
+                                      subtitle: Text(
+                                        '${friend['relation'] ?? 'Friend'} • $allergyText$foodText',
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                      const SizedBox(height: 0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Favorite Places',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AddPlaceScreen(),
                                 ),
                               );
+                              _loadUserData();
                             },
+                            icon: const Icon(Icons.add, color: Colors.orange),
+                            label: const Text(
+                              'Add',
+                              style: TextStyle(color: Colors.orange),
+                            ),
                           ),
-                    const SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Favorite Places', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        TextButton.icon(
-                          onPressed: () async {
-                            await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
-                            _loadUserData();
-                          },
-                          icon: const Icon(Icons.add, color: Colors.orange),
-                          label: const Text('Add', style: TextStyle(color: Colors.orange)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 15),
-                    places.isEmpty
-                        ? const Text('No favorite places added yet', style: TextStyle(color: Colors.grey))
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: places.length,
-                            itemBuilder: (context, index) {
-                              final place = places[index];
-                              return Card(
-                                margin: const EdgeInsets.only(bottom: 10),
-                                child: ListTile(
-                                  leading: const CircleAvatar(
-                                    backgroundColor: Colors.green,
-                                    child: Icon(Icons.restaurant, color: Colors.white),
-                                  ),
-                                  title: Text(place['food_name'] ?? 'Unknown'),
-                                  subtitle: Text(place['food_item'] ?? ''),
-                                ),
-                              );
-                            },
-                          ),
-                  ],
-                ),
+                        ],
+                      ),
+                      const SizedBox(height: 0),
+                      places.isEmpty
+                          ? const Text(
+                              'No favorite places added yet',
+                              style: TextStyle(color: Colors.grey),
+                            )
+                          : MediaQuery.removePadding(
+                              context: context,
+                              removeTop: true,
+                              removeBottom: true,
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+
+                                itemCount: places.length,
+                                itemBuilder: (context, index) {
+                                  final place = places[index];
+                                  return Card(
+                                    margin: const EdgeInsets.only(bottom: 4),
+                                    child: ListTile(
+                                      leading: const CircleAvatar(
+                                        backgroundColor: Colors.green,
+                                        child: Icon(
+                                          Icons.restaurant,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      title: Text(
+                                        place['food_name'] ?? 'Unknown',
+                                      ),
+                                      subtitle: Text(place['food_item'] ?? ''),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ],
+      ),
       ),
     );
   }
@@ -513,15 +679,24 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, color: Colors.orange, size: 20),
-        const SizedBox(width: 12),
+        Icon(icon, color: Colors.orange, size: 18),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-              const SizedBox(height: 4),
-              Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ],
           ),
         ),
