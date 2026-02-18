@@ -39,7 +39,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
     _tabController.addListener(() {
       setState(() {});
     });
@@ -314,6 +314,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
             final isSelected = selectedFoods.contains(foodName);
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
+              color: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: ListTile(
                 contentPadding: EdgeInsets.all(screenWidth * 0.03),
@@ -384,143 +385,144 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   }
 
   Widget _buildCustomFoodTab() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-        final horizontalPadding = screenWidth * 0.04;
-        
-        return SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(horizontalPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('What\'s the dish called?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    hintText: 'Pepperoni pizza, Mac & cheese',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  ),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('What\'s the dish called?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                hintText: 'Pepperoni pizza, Mac & cheese',
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text('Where do they love it from?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: restaurantController,
+              decoration: InputDecoration(
+                hintText: 'Starbucks, Grandma\'s kitchen',
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text('How much do they love this?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                hintText: 'Select Option',
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'love', child: Text('❤️ Absolutely Love It')),
+                DropdownMenuItem(value: 'favorite', child: Text('😍 One of Their Favorites')),
+                DropdownMenuItem(value: 'enjoy', child: Text('😋 Really Enjoy It')),
+                DropdownMenuItem(value: 'good', child: Text('🙂 It\'s Pretty Good')),
+              ],
+              onChanged: (value) {},
+            ),
+            const SizedBox(height: 20),
+            const Text('When do they crave this?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                hintText: 'Select Option',
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+              items: const [
+                DropdownMenuItem(value: 'happy', child: Text('😊 When they\'re happy')),
+                DropdownMenuItem(value: 'low', child: Text('😔 When they\'re feeling low')),
+                DropdownMenuItem(value: 'celebration', child: Text('🎉 During celebrations')),
+                DropdownMenuItem(value: 'night', child: Text('🌙 Late night cravings')),
+                DropdownMenuItem(value: 'comfort', child: Text('😌 Comfort food moment')),
+                DropdownMenuItem(value: 'energy', child: Text('💪 Energy boost')),
+              ],
+              onChanged: (value) {},
+            ),
+            const SizedBox(height: 20),
+            const Text('Have a picture of it?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            InkWell(
+              onTap: _showImageSourceDialog,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(height: 20),
-                const Text('Where do they love it from?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: restaurantController,
-                  decoration: InputDecoration(
-                    hintText: 'Starbucks, Grandma\'s kitchen',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text('How much do they love this?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    hintText: 'Select Option',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'love', child: Text('❤️ Absolutely Love It')),
-                    DropdownMenuItem(value: 'favorite', child: Text('😍 One of Their Favorites')),
-                    DropdownMenuItem(value: 'enjoy', child: Text('😋 Really Enjoy It')),
-                    DropdownMenuItem(value: 'good', child: Text('🙂 It\'s Pretty Good')),
-                  ],
-                  onChanged: (value) {},
-                ),
-                const SizedBox(height: 20),
-                const Text('When do they crave this?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    hintText: 'Select Option',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  ),
-                  items: const [
-                    DropdownMenuItem(value: 'happy', child: Text('😊 When they\'re happy')),
-                    DropdownMenuItem(value: 'low', child: Text('😔 When they\'re feeling low')),
-                    DropdownMenuItem(value: 'celebration', child: Text('🎉 During celebrations')),
-                    DropdownMenuItem(value: 'night', child: Text('🌙 Late night cravings')),
-                    DropdownMenuItem(value: 'comfort', child: Text('😌 Comfort food moment')),
-                    DropdownMenuItem(value: 'energy', child: Text('💪 Energy boost')),
-                  ],
-                  onChanged: (value) {},
-                ),
-                const SizedBox(height: 20),
-                const Text('Have a picture of it?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                InkWell(
-                  onTap: _showImageSourceDialog,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: _selectedImage != null
-                        ? Row(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.file(_selectedImage!, width: 60, height: 60, fit: BoxFit.cover),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(child: Text('Image selected')),
-                              const Icon(Icons.check_circle, color: Colors.orange),
-                            ],
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Upload', style: TextStyle(color: Colors.grey[400])),
-                              const Icon(Icons.upload, color: Colors.grey),
-                            ],
+                child: _selectedImage != null
+                    ? Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(_selectedImage!, width: 60, height: 60, fit: BoxFit.cover),
                           ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text('Optional, but makes memories sweeter', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
-                const SizedBox(height: 20),
-                const Text('Calories (Optional)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: caloriesController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    hintText: 'Enter calories (e.g., 295)',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text('How do they like it made?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: notesController,
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    hintText: 'Extra cheese, No onions, Gluten-free crust,\nLight sauce etc..',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: ElevatedButton(
+                          const SizedBox(width: 12),
+                          const Expanded(child: Text('Image selected')),
+                          const Icon(Icons.check_circle, color: Colors.orange),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Upload', style: TextStyle(color: Colors.grey[400])),
+                          const Icon(Icons.upload, color: Colors.grey),
+                        ],
+                      ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text('Optional, but makes memories sweeter', style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+            const SizedBox(height: 20),
+            const Text('Calories (Optional)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: caloriesController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: 'Enter calories (e.g., 295)',
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text('How do they like it made?', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 10),
+            TextField(
+              controller: notesController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: 'Extra cheese, No onions, Gluten-free crust, Light sauce etc..',
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+            ),
+            const SizedBox(height: 30),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
                     onPressed: () async {
                       if (nameController.text.isNotEmpty) {
                         final navigator = Navigator.of(context);
@@ -635,19 +637,17 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
                         }
                       }
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    ),
-                    child: const Text('Save', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                  ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 ),
-                const SizedBox(height: 20),
-              ],
+                child: const Text('Save', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
             ),
-          ),
-        );
-      },
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
   }
 }
