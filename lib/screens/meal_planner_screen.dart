@@ -25,16 +25,18 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   Future<void> _loadMealPlans() async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
-    
+
     if (userId == null) return;
-    
+
     try {
-      final response = await http.post(
-        Uri.parse(AppConfig.getMealsEndpoint),
-        headers: AppConfig.jsonHeaders,
-        body: json.encode({'user_id': userId}),
-      ).timeout(AppConfig.requestTimeout);
-      
+      final response = await http
+          .post(
+            Uri.parse(AppConfig.getMealsEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'user_id': userId}),
+          )
+          .timeout(AppConfig.requestTimeout);
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
@@ -50,7 +52,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
               } catch (e) {
                 displayDate = meal['meal_date'].toString();
               }
-              
+
               // Format time from HH:MM:SS to HH:MM
               String displayTime = meal['meal_time'].toString();
               try {
@@ -61,7 +63,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
               } catch (e) {
                 displayTime = meal['meal_time'].toString();
               }
-              
+
               return {
                 'id': meal['id'].toString(),
                 'meal': meal['meal_name'].toString(),
@@ -80,26 +82,29 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   Future<void> _saveMealPlan(String mealName, String date, String time) async {
     final prefs = await SharedPreferences.getInstance();
     final userId = prefs.getInt('user_id');
-    
+
     if (userId == null) return;
-    
+
     try {
-      final response = await http.post(
-        Uri.parse(AppConfig.addMealEndpoint),
-        headers: AppConfig.jsonHeaders,
-        body: json.encode({
-          'user_id': userId,
-          'meal_name': mealName,
-          'meal_date': date,
-          'meal_time': time,
-        }),
-      ).timeout(AppConfig.requestTimeout);
-      
+      final response = await http
+          .post(
+            Uri.parse(AppConfig.addMealEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({
+              'user_id': userId,
+              'meal_name': mealName,
+              'meal_date': date,
+              'meal_time': time,
+            }),
+          )
+          .timeout(AppConfig.requestTimeout);
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
-          final mealId = data['meal_id'] ?? DateTime.now().millisecondsSinceEpoch;
-          
+          final mealId =
+              data['meal_id'] ?? DateTime.now().millisecondsSinceEpoch;
+
           // Schedule notification
           try {
             final dateParts = date.split('-');
@@ -111,17 +116,19 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
               int.parse(timeParts[0]),
               int.parse(timeParts[1]),
             );
-            
+
             await NotificationService().scheduleMealReminder(
               id: mealId is int ? mealId : int.parse(mealId.toString()),
               mealName: mealName,
               mealDateTime: mealDateTime,
             );
-            
+
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('✅ Meal planned! You\'ll get a reminder 2 hours before.'),
+                  content: Text(
+                    '✅ Meal planned! You\'ll get a reminder 2 hours before.',
+                  ),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -129,7 +136,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
           } catch (e) {
             debugPrint('Error scheduling notification: $e');
           }
-          
+
           await _loadMealPlans();
         }
       }
@@ -157,7 +164,11 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
               ),
               const SizedBox(height: 10),
               ListTile(
-                title: Text(selectedDate == null ? 'Select Date' : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'),
+                title: Text(
+                  selectedDate == null
+                      ? 'Select Date'
+                      : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
+                ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   final date = await showDatePicker(
@@ -170,10 +181,17 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                 },
               ),
               ListTile(
-                title: Text(selectedTime == null ? 'Select Time' : '${selectedTime!.hour}:${selectedTime!.minute.toString().padLeft(2, '0')}'),
+                title: Text(
+                  selectedTime == null
+                      ? 'Select Time'
+                      : '${selectedTime!.hour}:${selectedTime!.minute.toString().padLeft(2, '0')}',
+                ),
                 trailing: const Icon(Icons.access_time),
                 onTap: () async {
-                  final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
                   if (time != null) setDialogState(() => selectedTime = time);
                 },
               ),
@@ -186,9 +204,13 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
             ),
             TextButton(
               onPressed: () {
-                if (mealController.text.isNotEmpty && selectedDate != null && selectedTime != null) {
-                  final dateStr = '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}';
-                  final timeStr = '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}:00';
+                if (mealController.text.isNotEmpty &&
+                    selectedDate != null &&
+                    selectedTime != null) {
+                  final dateStr =
+                      '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}';
+                  final timeStr =
+                      '${selectedTime!.hour.toString().padLeft(2, '0')}:${selectedTime!.minute.toString().padLeft(2, '0')}:00';
                   _saveMealPlan(mealController.text, dateStr, timeStr);
                   Navigator.pop(context);
                 }
@@ -204,22 +226,27 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
   void _deleteMealPlan(int index) async {
     final mealId = mealPlans[index]['id'];
     if (mealId == null) return;
-    
+
     try {
       // Cancel notification
       await NotificationService().cancelNotification(int.parse(mealId));
-      
-      final response = await http.post(
-        Uri.parse(AppConfig.deleteMealEndpoint),
-        headers: AppConfig.jsonHeaders,
-        body: json.encode({'meal_id': int.parse(mealId)}),
-      ).timeout(AppConfig.requestTimeout);
-      
+
+      final response = await http
+          .post(
+            Uri.parse(AppConfig.deleteMealEndpoint),
+            headers: AppConfig.jsonHeaders,
+            body: json.encode({'meal_id': int.parse(mealId)}),
+          )
+          .timeout(AppConfig.requestTimeout);
+
       if (response.statusCode == 200) {
         await _loadMealPlans();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Meal deleted'), backgroundColor: Colors.orange),
+            const SnackBar(
+              content: Text('Meal deleted'),
+              backgroundColor: Colors.orange,
+            ),
           );
         }
       }
@@ -253,15 +280,25 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                     children: [
                       ShaderMask(
                         shaderCallback: (bounds) => LinearGradient(
-                          colors: [Colors.green.shade600, Colors.orange.shade500],
+                          colors: [
+                            Colors.green.shade600,
+                            Colors.orange.shade500,
+                          ],
                         ).createShader(bounds),
-                        child: const Icon(Icons.restaurant_menu, color: Colors.white, size: 32),
+                        child: const Icon(
+                          Icons.restaurant_menu,
+                          color: Colors.white,
+                          size: 32,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: ShaderMask(
                           shaderCallback: (bounds) => LinearGradient(
-                            colors: [Colors.green.shade600, Colors.orange.shade500],
+                            colors: [
+                              Colors.green.shade600,
+                              Colors.orange.shade500,
+                            ],
                           ).createShader(bounds),
                           child: const Text(
                             'Plan meals that everyone will love',
@@ -282,96 +319,113 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.calendar_today, size: 64, color: Colors.grey[300]),
+                              Icon(
+                                Icons.calendar_today,
+                                size: 64,
+                                color: Colors.grey[300],
+                              ),
                               const SizedBox(height: 16),
                               const Text(
                                 'No meals planned yet',
-                                style: TextStyle(color: Colors.grey, fontSize: 16),
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
                               ),
                             ],
                           ),
                         )
                       : ListView.builder(
-                      padding: const EdgeInsets.all(20),
-                      itemCount: mealPlans.length,
-                      itemBuilder: (context, index) {
-                        final plan = mealPlans[index];
-                        return Dismissible(
-                          key: Key(plan['meal']! + index.toString()),
-                          direction: DismissDirection.endToStart,
-                          onDismissed: (_) => _deleteMealPlan(index),
-                          background: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(Icons.delete, color: Colors.white),
-                          ),
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
+                          padding: const EdgeInsets.all(20),
+                          itemCount: mealPlans.length,
+                          itemBuilder: (context, index) {
+                            final plan = mealPlans[index];
+                            return Dismissible(
+                              key: Key(plan['meal']! + index.toString()),
+                              direction: DismissDirection.endToStart,
+                              onDismissed: (_) => _deleteMealPlan(index),
+                              background: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.only(right: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange.shade100,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.restaurant,
-                                    color: Colors.orange.shade700,
-                                    size: 24,
-                                  ),
+                                child: const Icon(
+                                  Icons.delete,
+                                  color: Colors.white,
                                 ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        plan['meal']!,
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                              ),
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                padding: const EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: 0.05,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Row(
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange.shade100,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.restaurant,
+                                        color: Colors.orange.shade700,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
-                                          const SizedBox(width: 4),
                                           Text(
-                                            '${plan['date']!} at ${plan['time'] ?? 'Not set'}',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey[600],
+                                            plan['meal']!,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w600,
                                             ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.calendar_today,
+                                                size: 14,
+                                                color: Colors.grey[600],
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '${plan['date']!} at ${plan['time'] ?? 'Not set'}',
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                              ),
+                            );
+                          },
                         ),
                 ),
               ],
