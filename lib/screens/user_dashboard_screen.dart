@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import '../config.dart';
-import 'add_member_screen.dart';
-import 'add_place_screen.dart';
 
 class UserDashboardScreen extends StatefulWidget {
   const UserDashboardScreen({super.key});
@@ -17,10 +16,15 @@ class UserDashboardScreen extends StatefulWidget {
 class _UserDashboardScreenState extends State<UserDashboardScreen> {
   String userName = '';
   String userEmail = '';
+  String userPhone = '';
+  String userDob = '';
+  String? userGender;
   int? userId;
-  List<Map<String, dynamic>> familyMembers = [];
-  List<Map<String, dynamic>> friends = [];
-  List<Map<String, dynamic>> places = [];
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
+  
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
 
   @override
   void initState() {
@@ -30,198 +34,127 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    
     setState(() {
       userName = prefs.getString('user_name') ?? 'User';
       userEmail = prefs.getString('user_email') ?? '';
-      userId = prefs.getInt('user_id');
+      this.userId = userId;
     });
-    await Future.wait([_loadFamilyMembers(), _loadFriends(), _loadPlaces()]);
-  }
-
-  Future<void> _loadFamilyMembers() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('user_id');
-    if (userId == null) return;
-
-    try {
-      final response = await http
-          .post(
-            Uri.parse(AppConfig.getMembersEndpoint),
-            headers: AppConfig.jsonHeaders,
-            body: json.encode({'owner_user_id': userId}),
-          )
-          .timeout(AppConfig.requestTimeout);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['success'] == true) {
-          final members = (data['members'] as List? ?? [])
-              .map((item) => Map<String, dynamic>.from(item))
-              .where((member) => (member['relation'] ?? 'Family') == 'Family')
-              .toList();
-
-          for (var member in members) {
-            await _loadMemberDetails(member);
+    
+    if (userId != null) {
+      try {
+        final response = await http.post(
+          Uri.parse(AppConfig.getUserProfileEndpoint),
+          headers: AppConfig.jsonHeaders,
+          body: json.encode({'user_id': userId}),
+        ).timeout(AppConfig.requestTimeout);
+        
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data['success'] == true) {
+            final user = data['user'];
+            
+            String dobDisplay = '';
+            if (user['dob'] != null && user['dob'].toString().isNotEmpty && user['dob'] != '0000-00-00') {
+              try {
+                final parts = user['dob'].toString().split('-');
+                if (parts.length == 3 && parts[0] != '0000') {
+                  dobDisplay = '${parts[2]}/${parts[1]}/${parts[0]}';
+                }
+              } catch (e) {
+                dobDisplay = '';
+              }
+            }
+            
+            setState(() {
+              userPhone = user['phone'] ?? '';
+              userDob = dobDisplay;
+              userGender = user['gender'];
+              _phoneController.text = userPhone;
+              _dobController.text = userDob;
+            });
           }
-
-          setState(() {
-            familyMembers = members;
-          });
         }
+      } catch (e) {
+        debugPrint('Error loading profile: $e');
       }
-    } catch (e) {
-      debugPrint('Loading family members locally');
     }
   }
 
-  Future<void> _loadFriends() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('user_id');
-    if (userId == null) return;
-
-    try {
-      final response = await http
-          .post(
-            Uri.parse(AppConfig.getMembersEndpoint),
-            headers: AppConfig.jsonHeaders,
-            body: json.encode({'owner_user_id': userId}),
-          )
-          .timeout(AppConfig.requestTimeout);
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['success'] == true) {
-          final friendsList = (data['members'] as List? ?? [])
-              .map((item) => Map<String, dynamic>.from(item))
-              .where((member) => (member['relation'] ?? 'Family') != 'Family')
-              .toList();
-
-          for (var friend in friendsList) {
-            await _loadMemberDetails(friend);
-          }
-
-          setState(() {
-            friends = friendsList;
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint('Loading friends locally');
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _dobController.text = '${picked.day}/${picked.month}/${picked.year}';
+      });
     }
   }
 
-  Future<void> _loadMemberDetails(Map<String, dynamic> member) async {
-    final memberId = member['id'];
-    if (memberId == null) {
-      member['allergies'] = [];
-      member['favorite_foods'] = [];
-      member['custom_foods_data'] = <Map<String, String>>[];
+  Future<void> _saveProfile() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+    
+    if (userId == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not logged in')),
+        );
+      }
       return;
     }
 
-    try {
-      // Load allergies and favorite foods
-      final allergyResponse = await http
-          .post(
-            Uri.parse(AppConfig.getAllergiesEndpoint),
-            headers: AppConfig.jsonHeaders,
-            body: json.encode({'member_id': memberId}),
-          )
-          .timeout(AppConfig.requestTimeout);
-
-      if (allergyResponse.statusCode == 200) {
-        final allergyData = json.decode(allergyResponse.body);
-        if (allergyData['success'] == true) {
-          final allergyList = allergyData['allergies'] as List? ?? [];
-
-          // Extract allergies (non-null allergy_name)
-          member['allergies'] = allergyList
-              .where(
-                (item) =>
-                    item['allergy_name'] != null &&
-                    item['allergy_name'].toString().isNotEmpty,
-              )
-              .map((item) => item['allergy_name'].toString())
-              .toList();
-
-          // Extract favorite food names
-          if (allergyList.isNotEmpty &&
-              allergyList[0]['favorite_foods'] != null) {
-            final favFoods = allergyList[0]['favorite_foods'].toString();
-            member['favorite_foods'] = favFoods
-                .split(',')
-                .map((e) => e.trim())
-                .where((e) => e.isNotEmpty)
-                .toList();
-          } else {
-            member['favorite_foods'] = [];
-          }
-
-          // Extract custom foods data (where food_name is not null)
-          final customFoods = allergyList
-              .where(
-                (item) =>
-                    item['food_name'] != null &&
-                    item['food_name'].toString().trim().isNotEmpty,
-              )
-              .map(
-                (item) => {
-                  'name': item['food_name']?.toString() ?? '',
-                  'restaurant': item['restaurant']?.toString() ?? 'Custom',
-                  'calories': item['calories']?.toString() ?? '0',
-                  'image': item['image_path']?.toString() ?? '',
-                },
-              )
-              .toList();
-
-          member['custom_foods_data'] = customFoods;
-          debugPrint(
-            'Loaded ${customFoods.length} custom foods for member $memberId',
-          );
-        } else {
-          member['allergies'] = [];
-          member['favorite_foods'] = [];
-          member['custom_foods_data'] = <Map<String, String>>[];
+    String dobFormatted = '';
+    if (_dobController.text.isNotEmpty) {
+      try {
+        final parts = _dobController.text.split('/');
+        if (parts.length == 3) {
+          dobFormatted = '${parts[2]}-${parts[1]}-${parts[0]}';
         }
-      } else {
-        member['allergies'] = [];
-        member['favorite_foods'] = [];
-        member['custom_foods_data'] = <Map<String, String>>[];
+      } catch (e) {
+        dobFormatted = '';
       }
-    } catch (e) {
-      debugPrint('Error loading member details: $e');
-      member['allergies'] = [];
-      member['favorite_foods'] = [];
-      member['custom_foods_data'] = <Map<String, String>>[];
     }
-  }
-
-  Future<void> _loadPlaces() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('user_id');
-    if (userId == null) return;
 
     try {
-      final response = await http
-          .post(
-            Uri.parse(AppConfig.getFoodsEndpoint),
-            headers: AppConfig.jsonHeaders,
-            body: json.encode({'user_id': userId}),
-          )
-          .timeout(AppConfig.requestTimeout);
+      final response = await http.post(
+        Uri.parse(AppConfig.updateUserProfileEndpoint),
+        headers: AppConfig.jsonHeaders,
+        body: json.encode({
+          'user_id': userId,
+          'phone': _phoneController.text,
+          'dob': dobFormatted,
+          'gender': userGender,
+        }),
+      ).timeout(AppConfig.requestTimeout);
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['success'] == true) {
-          setState(() {
-            places = (data['foods'] as List? ?? [])
-                .map((item) => Map<String, dynamic>.from(item))
-                .toList();
-          });
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Profile updated successfully'), backgroundColor: Colors.green),
+            );
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(data['message'] ?? 'Failed to update profile')),
+            );
+          }
         }
       }
     } catch (e) {
-      debugPrint('Loading places locally');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     }
   }
 
@@ -300,17 +233,53 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                       ),
                     ),
                     const SizedBox(height: 50),
-                    CircleAvatar(
-                      radius: size.width * 0.13,
-                      backgroundColor: Colors.white,
-                      child: Text(
-                        userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
-                        style: TextStyle(
-                          fontSize: size.width * 0.12,
-                          color: const Color(0xFFFE8D00),
-                          fontWeight: FontWeight.bold,
+                    Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: size.width * 0.13,
+                          backgroundColor: Colors.white,
+                          backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
+                          child: _profileImage == null
+                              ? Text(
+                                  userName.isNotEmpty ? userName[0].toUpperCase() : 'U',
+                                  style: TextStyle(
+                                    fontSize: size.width * 0.12,
+                                    color: const Color(0xFFFE8D00),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
                         ),
-                      ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: _showImageSourceDialog,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [Colors.orange.shade400, Colors.deepOrange.shade300],
+                                ),
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 3),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: size.height * 0.02),
                     Text(
@@ -384,287 +353,69 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Family Members',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextButton.icon(
-                            onPressed: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AddMemberScreen(),
-                                ),
-                              );
-                              _loadUserData();
-                            },
-                            icon: const Icon(Icons.add, color: Colors.orange),
-                            label: const Text(
-                              'Add',
-                              style: TextStyle(color: Colors.orange),
-                            ),
-                          ),
-                        ],
+                      const Text('Phone Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your phone number',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                        ),
                       ),
-                      const SizedBox(height: 0),
-
-                      familyMembers.isEmpty
-                          ? const Text('No family members added yet')
-                          : MediaQuery.removePadding(
-                              context: context,
-                              removeTop: true,
-                              removeBottom: true,
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: familyMembers.length,
-                                itemBuilder: (context, index) {
-                                  final member = familyMembers[index];
-                                  final allergies =
-                                      member['allergies'] as List? ?? [];
-                                  final favFoods =
-                                      member['favorite_foods'] as List? ?? [];
-                                  final customFoodsData =
-                                      member['custom_foods_data']
-                                          as List<Map<String, String>>? ??
-                                      [];
-                                  final allergyText = allergies.isEmpty
-                                      ? 'No allergies'
-                                      : allergies.join(', ');
-
-                                  // Build food text with custom food details
-                                  String foodText = '';
-                                  if (favFoods.isNotEmpty) {
-                                    final foodDetails = favFoods
-                                        .map((foodName) {
-                                          final customFood = customFoodsData
-                                              .firstWhere(
-                                                (f) => f['name'] == foodName,
-                                                orElse: () => {},
-                                              );
-                                          if (customFood.isNotEmpty) {
-                                            return '$foodName (${customFood['restaurant']}, ${customFood['calories']} cal)';
-                                          }
-                                          return foodName;
-                                        })
-                                        .join(', ');
-                                    foodText = ' • Likes: $foodDetails';
-                                  }
-                                  return Card(
-                                    margin: const EdgeInsets.only(bottom: 4),
-                                    child: ListTile(
-                                      minVerticalPadding: 0,
-                                      minLeadingWidth: 0,
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 2,
-                                          ),
-                                      leading: CircleAvatar(
-                                        backgroundColor: Colors.orange
-                                            .withValues(alpha: 0.2),
-                                        backgroundImage:
-                                            member['image_path'] != null
-                                            ? FileImage(
-                                                File(member['image_path']),
-                                              )
-                                            : null,
-                                        child: member['image_path'] == null
-                                            ? const Icon(
-                                                Icons.person,
-                                                color: Colors.orange,
-                                              )
-                                            : null,
-                                      ),
-                                      title: Text(member['display_name'] ?? ''),
-                                      subtitle: Text(
-                                        '${member['relation'] ?? 'Family'} • $allergyText$foodText',
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                      const SizedBox(height: 0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Friends',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextButton.icon(
-                            onPressed: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AddMemberScreen(),
-                                ),
-                              );
-                              _loadUserData();
-                            },
-                            icon: const Icon(Icons.add, color: Colors.orange),
-                            label: const Text(
-                              'Add',
-                              style: TextStyle(color: Colors.orange),
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 12),
+                      const Text('Date of Birth', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _dobController,
+                        readOnly: true,
+                        onTap: _selectDate,
+                        decoration: InputDecoration(
+                          hintText: 'Select your date of birth',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          suffixIcon: const Icon(Icons.calendar_today, color: Colors.orange),
+                        ),
                       ),
-                      const SizedBox(height: 0),
-                      friends.isEmpty
-                          ? const Text(
-                              'No friends added yet',
-                              style: TextStyle(color: Colors.grey),
-                            )
-                          : MediaQuery.removePadding(
-                              context: context,
-                              removeTop: true,
-                              removeBottom: true,
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-
-                                itemCount: friends.length,
-                                itemBuilder: (context, index) {
-                                  final friend = friends[index];
-                                  final allergies =
-                                      friend['allergies'] as List? ?? [];
-                                  final favFoods =
-                                      friend['favorite_foods'] as List? ?? [];
-                                  final customFoodsData =
-                                      friend['custom_foods_data']
-                                          as List<Map<String, String>>? ??
-                                      [];
-                                  final allergyText = allergies.isEmpty
-                                      ? 'No allergies'
-                                      : allergies.join(', ');
-
-                                  // Build food text with custom food details
-                                  String foodText = '';
-                                  if (favFoods.isNotEmpty) {
-                                    final foodDetails = favFoods
-                                        .map((foodName) {
-                                          final customFood = customFoodsData
-                                              .firstWhere(
-                                                (f) => f['name'] == foodName,
-                                                orElse: () => {},
-                                              );
-                                          if (customFood.isNotEmpty) {
-                                            return '$foodName (${customFood['restaurant']}, ${customFood['calories']} cal)';
-                                          }
-                                          return foodName;
-                                        })
-                                        .join(', ');
-                                    foodText = ' • Likes: $foodDetails';
-                                  }
-                                  return Card(
-                                    margin: const EdgeInsets.only(bottom: 4),
-                                    child: ListTile(
-                                      leading: CircleAvatar(
-                                        backgroundColor: Colors.blue.withValues(
-                                          alpha: 0.2,
-                                        ),
-                                        backgroundImage:
-                                            friend['image_path'] != null
-                                            ? FileImage(
-                                                File(friend['image_path']),
-                                              )
-                                            : null,
-                                        child: friend['image_path'] == null
-                                            ? const Icon(
-                                                Icons.person,
-                                                color: Colors.blue,
-                                              )
-                                            : null,
-                                      ),
-                                      title: Text(friend['display_name'] ?? ''),
-                                      subtitle: Text(
-                                        '${friend['relation'] ?? 'Friend'} • $allergyText$foodText',
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                      const SizedBox(height: 0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Favorite Places',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      const SizedBox(height: 12),
+                      const Text('Gender', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey[400]!),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: userGender,
+                            hint: const Text('Select your gender'),
+                            isExpanded: true,
+                            items: ['Male', 'Female', 'Other'].map((gender) {
+                              return DropdownMenuItem(value: gender, child: Text(gender));
+                            }).toList(),
+                            onChanged: (value) => setState(() => userGender = value),
                           ),
-                          TextButton.icon(
-                            onPressed: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const AddPlaceScreen(),
-                                ),
-                              );
-                              _loadUserData();
-                            },
-                            icon: const Icon(Icons.add, color: Colors.orange),
-                            label: const Text(
-                              'Add',
-                              style: TextStyle(color: Colors.orange),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 0),
-                      places.isEmpty
-                          ? const Text(
-                              'No favorite places added yet',
-                              style: TextStyle(color: Colors.grey),
-                            )
-                          : MediaQuery.removePadding(
-                              context: context,
-                              removeTop: true,
-                              removeBottom: true,
-                              child: ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-
-                                itemCount: places.length,
-                                itemBuilder: (context, index) {
-                                  final place = places[index];
-                                  return Card(
-                                    margin: const EdgeInsets.only(bottom: 4),
-                                    child: ListTile(
-                                      leading: const CircleAvatar(
-                                        backgroundColor: Colors.green,
-                                        child: Icon(
-                                          Icons.restaurant,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      title: Text(
-                                        place['food_name'] ?? 'Unknown',
-                                      ),
-                                      subtitle: Text(place['food_item'] ?? ''),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _saveProfile,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -675,6 +426,75 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
       ),
       ),
     );
+  }
+
+  Future<void> _showImageSourceDialog() async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Choose Profile Photo',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.camera_alt, color: Colors.orange),
+              ),
+              title: const Text('Camera'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.photo_library, color: Colors.orange),
+              ),
+              title: const Text('Gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? image = await _picker.pickImage(source: source);
+      if (image != null) {
+        setState(() {
+          _profileImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
   }
 
   Widget _buildInfoRow(IconData icon, String label, String value) {
