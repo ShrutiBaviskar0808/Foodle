@@ -277,7 +277,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   Stack(
                     children: [
                       Container(
-                        height: 280,
+                        height: 180,
                         decoration: const BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
@@ -287,23 +287,24 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                         child: Stack(
                           children: [
-                            Positioned(top: 100, left: 20, child: Icon(Icons.restaurant_menu, size: 40, color: Colors.black.withValues(alpha: 0.1))),
-                            Positioned(top: 120, right: 30, child: Icon(Icons.local_pizza, size: 50, color: Colors.black.withValues(alpha: 0.08))),
-                            Positioned(top: 150, left: 100, child: Icon(Icons.fastfood, size: 35, color: Colors.black.withValues(alpha: 0.1))),
-                            Positioned(top: 180, right: 80, child: Icon(Icons.cake, size: 45, color: Colors.black.withValues(alpha: 0.08))),
-                            Positioned(top: 140, left: 200, child: Icon(Icons.lunch_dining, size: 38, color: Colors.black.withValues(alpha: 0.1))),
-                            Positioned(top: 200, left: 50, child: Icon(Icons.icecream, size: 42, color: Colors.black.withValues(alpha: 0.08))),
+                            Positioned(top: 40, left: 20, child: Icon(Icons.restaurant_menu, size: 40, color: Colors.black.withValues(alpha: 0.1))),
+                            Positioned(top: 60, right: 30, child: Icon(Icons.local_pizza, size: 50, color: Colors.black.withValues(alpha: 0.08))),
+                            Positioned(top: 90, left: 100, child: Icon(Icons.fastfood, size: 35, color: Colors.black.withValues(alpha: 0.1))),
+                            Positioned(top: 120, right: 80, child: Icon(Icons.cake, size: 45, color: Colors.black.withValues(alpha: 0.08))),
+                            Positioned(top: 80, left: 200, child: Icon(Icons.lunch_dining, size: 38, color: Colors.black.withValues(alpha: 0.1))),
+                            Positioned(top: 140, left: 50, child: Icon(Icons.icecream, size: 42, color: Colors.black.withValues(alpha: 0.08))),
                           ],
                         ),
                       ),
                       Container(
-                        height: 280,
-                        alignment: Alignment.center,
+                        height: 180,
+                        alignment: Alignment.topCenter,
+                        padding: const EdgeInsets.only(top: 40),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('Every Plate,', style: GoogleFonts.poppins(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
-                            Text('Perfectly Planned', style: GoogleFonts.poppins(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
+                            Text('Every Plate,', style: GoogleFonts.poppins(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+                            Text('Perfectly Planned', style: GoogleFonts.poppins(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -331,8 +332,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     _loadData();
                                   }
                                 },
-                                icon: const Icon(Icons.add, color: Colors.orange, size: 20),
                                 label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                                icon: const Icon(Icons.add, color: Colors.orange, size: 20),
                               ),
                             ],
                           ),
@@ -361,8 +362,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
                                   _loadData();
                                 },
-                                icon: const Icon(Icons.add, color: Colors.orange, size: 20),
                                 label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                                icon: const Icon(Icons.add, color: Colors.orange, size: 20),
                               ),
                             ],
                           ),
@@ -392,8 +393,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     _loadData();
                                   }
                                 },
-                                icon: const Icon(Icons.add, color: Colors.orange, size: 20),
                                 label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                                icon: const Icon(Icons.add, color: Colors.orange, size: 20),
                               ),
                             ],
                           ),
