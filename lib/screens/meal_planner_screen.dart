@@ -235,7 +235,7 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
         ),
         title: const Text('Meal Planner'),
         backgroundColor: Colors.orange,
@@ -249,14 +249,28 @@ class _MealPlannerScreenState extends State<MealPlannerScreen> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   color: Colors.white,
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.restaurant_menu, color: Colors.orange, size: 32),
-                      SizedBox(width: 12),
+                      ShaderMask(
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: [Colors.green.shade600, Colors.orange.shade500],
+                        ).createShader(bounds),
+                        child: const Icon(Icons.restaurant_menu, color: Colors.white, size: 32),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          'Plan meals that everyone will love',
-                          style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w500),
+                        child: ShaderMask(
+                          shaderCallback: (bounds) => LinearGradient(
+                            colors: [Colors.green.shade600, Colors.orange.shade500],
+                          ).createShader(bounds),
+                          child: const Text(
+                            'Plan meals that everyone will love',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                     ],
