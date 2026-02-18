@@ -151,15 +151,7 @@ class _StonesTabState extends State<StonesTab> {
                     if (loadingProgress == null) return child;
                     return Center(child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes! : null, color: Colors.white, strokeWidth: 2));
                   },
-                  errorBuilder: (context, error, stackTrace) {
-                    String fallbackUrl = _getFallbackImageUrl(stone.stoneName);
-                    return Image.network(
-                      fallbackUrl,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))),
-                    );
-                  },
+                  errorBuilder: (context, error, stackTrace) => Center(child: Icon(Icons.landscape, size: 50, color: Colors.white.withValues(alpha: 0.8))),
                 ),
               ),
             ),
@@ -208,23 +200,7 @@ class _StonesTabState extends State<StonesTab> {
     );
   }
 
-  String _getFallbackImageUrl(String stoneName) {
-    final name = stoneName.toLowerCase();
-    final Map<String, String> specificFallbacks = {
-      'gahnospinel': 'https://www.gemsociety.org/wp-content/uploads/2013/09/blue-spinel-300x300.jpg',
-      'spinel': 'https://www.gemsociety.org/wp-content/uploads/2013/09/Spinel1-Sri-Lanka-300x300.png',
-      'tugtupite': 'https://www.gemsociety.org/wp-content/uploads/2013/12/6845451035_268f7c39f0_z-300x300.jpg',
-      'turquoise': 'https://www.gemsociety.org/wp-content/uploads/2016/05/Turquoise-in-silver-jewelry-Arizona-and-New-Mexico-300x300.jpg',
-    };
-    
-    for (var key in specificFallbacks.keys) {
-      if (name.contains(key)) {
-        return specificFallbacks[key]!;
-      }
-    }
-    
-    return 'https://via.placeholder.com/400x300/8B4513/FFFFFF?text=${Uri.encodeComponent(stoneName)}';
-  }
+
 
   @override
   void dispose() {
