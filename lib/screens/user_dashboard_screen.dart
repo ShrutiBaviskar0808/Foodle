@@ -270,7 +270,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                               color: Colors.white,
                               size: 28,
                             ),
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
                           ),
