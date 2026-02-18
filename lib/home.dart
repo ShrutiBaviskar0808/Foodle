@@ -146,73 +146,79 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(color: Color(0xFFFE8D00)),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8),
-                  Text('Every Plate, Perfectly Planned', style: TextStyle(color: Colors.white, fontSize: 14)),
-                ],
+        backgroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        child: Container(
+          color: Colors.white,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: const BoxDecoration(color: Color(0xFFFE8D00)),
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text('Foodle', style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    Text('Every Plate, Perfectly Planned', style: TextStyle(color: Colors.white, fontSize: 14)),
+                  ],
+                ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home, color: Color(0xFFFE8D00)),
-              title: const Text('Home'),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person, color: Color(0xFFFE8D00)),
-              title: const Text('My Profile'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.family_restroom, color: Color(0xFFFE8D00)),
-              title: const Text('Family'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.place, color: Color(0xFFFE8D00)),
-              title: const Text('Favorite Places'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.people, color: Color(0xFFFE8D00)),
-              title: const Text('Friends'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen()));
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Logout'),
-              onTap: () async {
-                if (!mounted) return;
-                final navigator = Navigator.of(context);
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.clear();
-                navigator.pushReplacementNamed('/login');
-              },
-            ),
-          ],
+              ListTile(
+                leading: const Icon(Icons.home, color: Color(0xFFFE8D00)),
+                title: const Text('Home'),
+                onTap: () => Navigator.pop(context),
+              ),
+              ListTile(
+                leading: const Icon(Icons.person, color: Color(0xFFFE8D00)),
+                title: const Text('My Profile'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const UserDashboardScreen()));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.family_restroom, color: Color(0xFFFE8D00)),
+                title: const Text('Family'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FamilyScreen()));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.place, color: Color(0xFFFE8D00)),
+                title: const Text('Favorite Places'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FavoritePlacesScreen()));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.people, color: Color(0xFFFE8D00)),
+                title: const Text('Friends'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const FriendsScreen()));
+                },
+              ),
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.red),
+                title: const Text('Logout'),
+                onTap: () async {
+                  if (!mounted) return;
+                  final navigator = Navigator.of(context);
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.clear();
+                  navigator.pushReplacementNamed('/login');
+                },
+              ),
+            ],
+          ),
         ),
       ),
+
       body: Column(
         children: [
           Container(
