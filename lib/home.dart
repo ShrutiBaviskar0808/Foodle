@@ -332,8 +332,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     _loadData();
                                   }
                                 },
-                                label: const Text('Add', style: TextStyle(color: Colors.orange)),
                                 icon: const Icon(Icons.add, color: Colors.orange, size: 20),
+                                label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                                iconAlignment: IconAlignment.end,
                               ),
                             ],
                           ),
@@ -356,35 +357,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('My Favorite Places', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
-                              TextButton.icon(
-                                onPressed: () async {
-                                  await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
-                                  _loadData();
-                                },
-                                label: const Text('Add', style: TextStyle(color: Colors.orange)),
-                                icon: const Icon(Icons.add, color: Colors.orange, size: 20),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 15),
-                          SizedBox(
-                            height: 120,
-                            child: places.isEmpty
-                                ? const Center(child: Text('No favorite places added yet', style: TextStyle(color: Colors.grey)))
-                                : ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: places.length,
-                                    itemBuilder: (context, index) {
-                                      final colors = [Colors.green, Colors.blue, Colors.orange, Colors.brown, Colors.purple];
-                                      return _buildRestaurant(places[index]['food_name'] ?? '', colors[index % colors.length]);
-                                    },
-                                  ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
                               const Text('My Friends', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
                               TextButton.icon(
                                 onPressed: () async {
@@ -393,8 +365,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     _loadData();
                                   }
                                 },
-                                label: const Text('Add', style: TextStyle(color: Colors.orange)),
                                 icon: const Icon(Icons.add, color: Colors.orange, size: 20),
+                                label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                                iconAlignment: IconAlignment.end,
                               ),
                             ],
                           ),
@@ -410,6 +383,34 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                         onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserProfileDashboard(memberData: friend))),
                                         child: _buildFriend(friend['display_name'] ?? '', friend['photo_path']),
                                       ),
+                                    )).toList(),
+                                  ),
+                                ),
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('My Favorite Places', style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold)),
+                              TextButton.icon(
+                                onPressed: () async {
+                                  await Navigator.push(context, MaterialPageRoute(builder: (context) => const AddPlaceScreen()));
+                                  _loadData();
+                                },
+                                icon: const Icon(Icons.add, color: Colors.orange, size: 20),
+                                label: const Text('Add', style: TextStyle(color: Colors.orange)),
+                                iconAlignment: IconAlignment.end,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 15),
+                          places.isEmpty
+                              ? const Center(child: Text('No favorite places added yet', style: TextStyle(color: Colors.grey)))
+                              : SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: places.asMap().entries.map((entry) => Padding(
+                                      padding: const EdgeInsets.only(right: 15),
+                                      child: _buildPlace(entry.value['food_name'] ?? '', entry.key),
                                     )).toList(),
                                   ),
                                 ),
@@ -448,19 +449,22 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _buildRestaurant(String name, Color color) {
-    return Container(
-      width: 100,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.restaurant, color: color, size: 20),
-          const SizedBox(height: 8),
-          Text(name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: color), textAlign: TextAlign.center),
-        ],
-      ),
+  Widget _buildPlace(String name, int index) {
+    final colors = [Colors.green, Colors.blue, Colors.orange, Colors.brown, Colors.purple];
+    final color = colors[index % colors.length];
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 30,
+          backgroundColor: color.withValues(alpha: 0.2),
+          child: Icon(Icons.restaurant, color: color, size: 28),
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 60,
+          child: Text(name, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+        ),
+      ],
     );
   }
 

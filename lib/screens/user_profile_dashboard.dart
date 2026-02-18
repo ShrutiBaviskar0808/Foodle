@@ -206,11 +206,11 @@ class _UserProfileDashboardState extends State<UserProfileDashboard> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            expandedHeight: 350,
+            expandedHeight: 200,
             pinned: true,
             backgroundColor: const Color(0xFFFF9800),
             leading: IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white, size: 22),
+              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 22),
               onPressed: () => Navigator.pop(context),
             ),
             title: const Text(
