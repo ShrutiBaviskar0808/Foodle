@@ -39,7 +39,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
     _tabController.addListener(() {
       setState(() {});
     });
@@ -205,7 +205,7 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.close, color: Colors.orange, size: 32),
+            icon: const Icon(Icons.arrow_back, color: Colors.orange, size: 32),
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text('Favorite Food', style: TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold)),
@@ -216,14 +216,14 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
             indicatorColor: Colors.orange,
             indicatorWeight: 3,
             tabs: const [
-              Tab(text: 'Favorite Food'),
               Tab(text: 'Custom Food'),
+              Tab(text: 'Favorite Food'),
             ],
           ),
         ),
         body: Column(
           children: [
-            if (_tabController.index == 0)
+            if (_tabController.index == 1)
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -257,12 +257,12 @@ class _SelectFoodsScreenState extends State<SelectFoodsScreen> with SingleTicker
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildFavoriteFoodTab(),
                   _buildCustomFoodTab(),
+                  _buildFavoriteFoodTab(),
                 ],
               ),
             ),
-            if (selectedFoods.isNotEmpty && _tabController.index == 0)
+            if (selectedFoods.isNotEmpty && _tabController.index == 1)
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
