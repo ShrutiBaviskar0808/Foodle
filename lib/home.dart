@@ -149,9 +149,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFFE8D00), Color(0xFFFE8D00)],
-                ),
+                color: Color(0xFFFE8D00),
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
