@@ -238,7 +238,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
           Stack(
             children: [
               Container(
-                height: 280,
+                height: 220,
                 decoration: const BoxDecoration(color: Color(0xFFFE8D00)),
               ),
               Container(
@@ -266,7 +266,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                         children: [
                           IconButton(
                             icon: const Icon(
-                              Icons.menu,
+                              Icons.arrow_back,
                               color: Colors.white,
                               size: 28,
                             ),
@@ -299,7 +299,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 70),
+                    const SizedBox(height: 50),
                     CircleAvatar(
                       radius: size.width * 0.13,
                       backgroundColor: Colors.white,
@@ -353,25 +353,26 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Personal Information',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
                       Card(
                         elevation: 2,
                         child: Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Personal Information',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
                               _buildInfoRow(Icons.person, 'Name', userName),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
                               _buildInfoRow(Icons.email, 'Email', userEmail),
-                              if (userId != null) const SizedBox(height: 6),
+                              if (userId != null) const SizedBox(height: 12),
                               if (userId != null)
                                 _buildInfoRow(
                                   Icons.badge,
@@ -382,7 +383,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -679,7 +680,7 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, color: Colors.orange, size: 18),
+        Icon(icon, color: Colors.orange, size: 20),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -687,13 +688,13 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
             children: [
               Text(
                 label,
-                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),

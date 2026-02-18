@@ -477,68 +477,6 @@ class _AddMemberScreenState extends State<AddMemberScreen> {
                 }),
               ],
             ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Favorite Foods', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-                TextButton.icon(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Add Favorite Food'),
-                        content: TextField(
-                          controller: _favoriteFoodsController,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter food name',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              if (_favoriteFoodsController.text.isNotEmpty) {
-                                setState(() {
-                                  _favoriteFoods.add(_favoriteFoodsController.text);
-                                  _favoriteFoodsController.clear();
-                                });
-                                Navigator.pop(context);
-                              }
-                            },
-                            child: const Text('Add'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _favoriteFoods.map((food) {
-                return Chip(
-                  label: Text(food),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () {
-                    setState(() {
-                      _favoriteFoods.remove(food);
-                    });
-                  },
-                  backgroundColor: Colors.green.withValues(alpha: 0.3),
-                );
-              }).toList(),
-            ),
             const SizedBox(height: 30),
             SizedBox(
               height: 50,
