@@ -290,14 +290,6 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: size.height * 0.005),
-                    Text(
-                      userEmail,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: size.width * 0.035,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -323,36 +315,32 @@ class _UserDashboardScreenState extends State<UserDashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      const Text(
-                        'Personal Information',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                      const Text('Name', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        readOnly: true,
+                        controller: TextEditingController(text: userName),
+                        decoration: InputDecoration(
+                          hintText: 'Your name',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          filled: true,
+                          fillColor: Colors.grey[100],
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Card(
-                        elevation: 2,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildInfoRow(Icons.person, 'Name', userName),
-                              const SizedBox(height: 12),
-                              _buildInfoRow(Icons.email, 'Email', userEmail),
-                              if (userId != null) const SizedBox(height: 12),
-                              if (userId != null)
-                                _buildInfoRow(
-                                  Icons.badge,
-                                  'User ID',
-                                  userId.toString(),
-                                ),
-                            ],
-                          ),
+                      const SizedBox(height: 12),
+                      const Text('Email', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        readOnly: true,
+                        controller: TextEditingController(text: userEmail),
+                        decoration: InputDecoration(
+                          hintText: 'Your email',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                          filled: true,
+                          fillColor: Colors.grey[100],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
                       const Text('Phone Number', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
                       TextFormField(
